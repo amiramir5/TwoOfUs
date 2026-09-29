@@ -589,7 +589,7 @@
     const SUPABASE_KEY = "sb_publishable_b8-BEd1e8CWNkVdVvU4c-Q_Ir-isgoz";
     const ROOM_CODE = "amir-armita-us";
     const ANNIVERSARY_DATE = "2024-10-06";
-    const STATE_VERSION = 14;
+    const STATE_VERSION = 15;
     const TMDB_API_KEY = "29fb5c7e087065a22b71f28c6b1db7e8";
 
     function getOpenRouterKey() {
@@ -602,7 +602,6 @@
     let supabaseClient = null;
     try { supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY); } catch (e) {}
 
-    /* Aliases for popular anime/movies */
     const ALIAS_MAP = {
       'موشوکو تنسی': 'Mushoku Tensei','موشوکو': 'Mushoku Tensei','تناسخ یک بیکار': 'Mushoku Tensei',
       'اتک آن تایتان': 'Attack on Titan','حمله به تایتان': 'Attack on Titan','شینگکی نو کیوجین': 'Attack on Titan',
@@ -619,18 +618,18 @@
       'آکیرا': 'Akira','گوست این د شل': 'Ghost in the Shell','اینجل بیتس': 'Angel Beats',
       'کِلاناد': 'Clannad','یور لی': 'Your Lie in April','بوکو نو هیرو': 'My Hero Academia',
       'هامنو': 'Hyouka','گینتاما': 'Gintama','موبین سایکو': 'Mob Psycho','وانپیس فیلم': 'One Piece Film',
-      'توی استوری': 'Toy Story','فروزن': 'Frozen','شهر اشغالی': 'Zootopia','کوکو': 'Coco',
-      'روح': 'Soul','لوکا': 'Luca','تنها در خانه': 'Home Alone','هری پاتر': 'Harry Potter',
-      'ارباب حلقه ها': 'Lord of the Rings','ماتریکس': 'The Matrix','اینتراستلار': 'Interstellar',
-      'شوالیه تاریکی': 'The Dark Knight','پارازیت': 'Parasite','جوکر': 'Joker','تلقین': 'Inception',
-      'گلدن بورن': 'Golden Boy','چرنوبیل': 'Chernobyl','برکینگ بد': 'Breaking Bad','فرندز': 'Friends',
-      'گیم آو ترونز': 'Game of Thrones','شرلوک': 'Sherlock','منچستر بای د سی': 'Manchester by the Sea',
-      'کازابلانکا': 'Casablanca','پدرخوانده': 'The Godfather','شهر خدا': 'City of God',
-      'الدن رینگ': 'Elden Ring','لست آو آس': 'The Last of Us','رد دد ریدمپشن': 'Red Dead Redemption',
-      'جی تی ای': 'Grand Theft Auto','فورتنایت': 'Fortnite','ماینکرفت': 'Minecraft',
-      'طلسم شدگان': 'Spirited Away','شهر اشباح': 'Spirited Away','همسایه من توتورو': 'My Neighbor Totoro',
-      'پرنسس مونونوکه': 'Princess Mononoke','قلعه متحرک هاول': 'Howls Moving Castle',
-      'پونیو': 'Ponyo','باد برمی‌خیزد': 'The Wind Rises','شهر گمشده': 'The Lost City'
+      'فریرن': 'Frieren','فریرن و سفرش': 'Frieren','توی استوری': 'Toy Story','فروزن': 'Frozen',
+      'شهر اشغالی': 'Zootopia','کوکو': 'Coco','روح': 'Soul','لوکا': 'Luca','تنها در خانه': 'Home Alone',
+      'هری پاتر': 'Harry Potter','ارباب حلقه ها': 'Lord of the Rings','ماتریکس': 'The Matrix',
+      'اینتراستلار': 'Interstellar','شوالیه تاریکی': 'The Dark Knight','پارازیت': 'Parasite',
+      'جوکر': 'Joker','تلقین': 'Inception','گلدن بورن': 'Golden Boy','چرنوبیل': 'Chernobyl',
+      'برکینگ بد': 'Breaking Bad','فرندز': 'Friends','گیم آو ترونز': 'Game of Thrones','شرلوک': 'Sherlock',
+      'منچستر بای د سی': 'Manchester by the Sea','کازابلانکا': 'Casablanca','پدرخوانده': 'The Godfather',
+      'شهر خدا': 'City of God','الدن رینگ': 'Elden Ring','لست آو آس': 'The Last of Us',
+      'رد دد ریدمپشن': 'Red Dead Redemption','جی تی ای': 'Grand Theft Auto','فورتنایت': 'Fortnite',
+      'ماینکرفت': 'Minecraft','طلسم شدگان': 'Spirited Away','شهر اشباح': 'Spirited Away',
+      'همسایه من توتورو': 'My Neighbor Totoro','پرنسس مونونوکه': 'Princess Mononoke',
+      'قلعه متحرک هاول': 'Howls Moving Castle','پونیو': 'Ponyo','باد برمی‌خیزد': 'The Wind Rises'
     };
 
     function normalizeAlias(str) {
@@ -1613,7 +1612,7 @@
     }
 
     /* ============================================================
-       SEARCH APIs + ترجمه هوشمند (Alias → OpenRouter → Google)
+       SEARCH APIs + ترجمه هوشمند
        ============================================================ */
     let _translationCache = {};
 
@@ -1663,68 +1662,120 @@
       return gResult || text;
     }
 
+    async function tmdbFetch(path, params = '') {
+      const url = `https://api.themoviedb.org/3${path}?api_key=${TMDB_API_KEY}${params}`;
+      const res = await fetch(url);
+      if (!res.ok) throw new Error(`TMDB ${res.status}`);
+      return res.json();
+    }
+
     async function searchTMDB(query, type) {
       if (!query) return [];
       try {
-        const urlFa = `https://api.themoviedb.org/3/search/${type}?api_key=${TMDB_API_KEY}&query=${encodeURIComponent(query)}&language=fa-IR&include_adult=false`;
-        const resFa = await fetch(urlFa);
-        const dataFa = await resFa.json();
-        let results = dataFa.results || [];
+        let data = await tmdbFetch(`/search/${type}`, `&query=${encodeURIComponent(query)}&language=fa-IR&include_adult=false`);
+        let results = data.results || [];
         if (results.length === 0) {
           const enQ = await smartTranslateFaToEn(query);
-          const urlEn = `https://api.themoviedb.org/3/search/${type}?api_key=${TMDB_API_KEY}&query=${encodeURIComponent(enQ)}&language=fa-IR&include_adult=false`;
-          const resEn = await fetch(urlEn);
-          const dataEn = await resEn.json();
-          results = dataEn.results || [];
+          if (enQ && enQ !== query) {
+            data = await tmdbFetch(`/search/${type}`, `&query=${encodeURIComponent(enQ)}&language=fa-IR&include_adult=false`);
+            results = data.results || [];
+          }
         }
-        return results.slice(0, 8).map(r => ({
+        return results.slice(0, 10).map(r => ({
           id: r.id,
           title: r.title || r.name || '',
           originalTitle: r.original_title || r.original_name || '',
           year: (r.release_date || r.first_air_date || '').slice(0, 4),
           poster: r.poster_path ? `https://image.tmdb.org/t/p/w342${r.poster_path}` : '',
-          overview: (r.overview || '').slice(0, 220)
+          overview: (r.overview || '').slice(0, 240),
+          _source: 'tmdb',
+          _tmdbType: type
         }));
-      } catch (e) { return []; }
+      } catch (e) { console.warn('TMDB', e); return []; }
+    }
+
+    async function jikanFetch(url, retries = 2) {
+      for (let i = 0; i <= retries; i++) {
+        try {
+          const res = await fetch(url);
+          if (res.status === 429) {
+            await new Promise(r => setTimeout(r, 1200 + i * 800));
+            continue;
+          }
+          if (!res.ok) throw new Error(`Jikan ${res.status}`);
+          return await res.json();
+        } catch (e) {
+          if (i === retries) throw e;
+          await new Promise(r => setTimeout(r, 800));
+        }
+      }
+      throw new Error('Jikan failed');
+    }
+
+    function mapJikanResult(a) {
+      return {
+        id: a.mal_id,
+        title: a.title_english || a.title || a.title_japanese || '',
+        originalTitle: a.title_japanese || a.title || '',
+        year: (a.year || (a.aired?.prop?.from?.year) || '').toString(),
+        poster: a.images?.jpg?.image_url || a.images?.webp?.image_url || '',
+        overview: (a.synopsis || '').slice(0, 240),
+        episodes: Number(a.episodes) || 0,
+        _source: 'jikan'
+      };
     }
 
     async function searchJikan(query) {
       if (!query) return [];
       try {
-        let url = `https://api.jikan.moe/v4/anime?q=${encodeURIComponent(query)}&limit=8`;
-        let res = await fetch(url);
-        let data = await res.json();
-        let list = data.data || [];
+        const data = await jikanFetch(`https://api.jikan.moe/v4/anime?q=${encodeURIComponent(query)}&limit=10`);
+        const list = data.data || [];
         if (list.length === 0) {
           const enQ = await smartTranslateFaToEn(query);
-          url = `https://api.jikan.moe/v4/anime?q=${encodeURIComponent(enQ)}&limit=8`;
-          res = await fetch(url);
-          data = await res.json();
-          list = data.data || [];
+          if (enQ && enQ !== query) {
+            const data2 = await jikanFetch(`https://api.jikan.moe/v4/anime?q=${encodeURIComponent(enQ)}&limit=10`);
+            return (data2.data || []).map(a => mapJikanResult(a));
+          }
         }
-        return list.map(a => ({
-          id: a.mal_id,
-          title: a.title_japanese || a.title || '',
-          originalTitle: a.title || '',
-          year: (a.year || (a.aired?.prop?.from?.year) || '').toString(),
-          poster: a.images?.jpg?.image_url || '',
-          overview: (a.synopsis || '').slice(0, 220),
-          episodes: a.episodes || 0
-        }));
-      } catch (e) { return []; }
+        return list.map(a => mapJikanResult(a));
+      } catch (e) { console.warn('Jikan', e); return []; }
+    }
+
+    async function searchAnime(query) {
+      if (!query) return [];
+      const [jikanRes, tmdbRes] = await Promise.allSettled([
+        searchJikan(query),
+        searchTMDB(query, 'tv')
+      ]);
+      const jikanList = jikanRes.status === 'fulfilled' ? jikanRes.value : [];
+      const tmdbList = tmdbRes.status === 'fulfilled' ? tmdbRes.value : [];
+
+      const seen = new Set();
+      const merged = [];
+      jikanList.forEach(it => {
+        const k = (it.title || '').toLowerCase().trim();
+        if (k && !seen.has(k)) { seen.add(k); merged.push(it); }
+      });
+      tmdbList.forEach(it => {
+        const k = (it.title || '').toLowerCase().trim();
+        if (k && !seen.has(k)) { seen.add(k); merged.push(it); }
+      });
+      return merged.slice(0, 12);
     }
 
     async function searchCheapShark(query) {
       if (!query) return [];
       try {
-        let url = `https://www.cheapshark.com/api/1.0/games?title=${encodeURIComponent(query)}&limit=8`;
+        let url = `https://www.cheapshark.com/api/1.0/games?title=${encodeURIComponent(query)}&limit=10`;
         let res = await fetch(url);
         let data = await res.json();
         if (!Array.isArray(data) || data.length === 0) {
           const enQ = await smartTranslateFaToEn(query);
-          url = `https://www.cheapshark.com/api/1.0/games?title=${encodeURIComponent(enQ)}&limit=8`;
-          res = await fetch(url);
-          data = await res.json();
+          if (enQ && enQ !== query) {
+            url = `https://www.cheapshark.com/api/1.0/games?title=${encodeURIComponent(enQ)}&limit=10`;
+            res = await fetch(url);
+            data = await res.json();
+          }
         }
         if (!Array.isArray(data)) return [];
         const seen = new Set();
@@ -1732,15 +1783,54 @@
           if (seen.has(g.external)) return false;
           seen.add(g.external);
           return true;
-        }).map(g => ({
+        }).slice(0, 12).map(g => ({
           id: g.gameID,
           title: g.external || '',
           originalTitle: g.external || '',
           year: '',
           poster: g.thumb || '',
-          overview: ''
+          overview: '',
+          _source: 'cheapshark'
         }));
       } catch (e) { return []; }
+    }
+
+    async function fetchMediaDetails(item) {
+      if (!item) return null;
+      if (item._source === 'jikan' && item.id) {
+        try {
+          const data = await jikanFetch(`https://api.jikan.moe/v4/anime/${item.id}/full`);
+          const a = data.data || {};
+          return {
+            totalSeasons: 1,
+            episodesPerSeason: Number(a.episodes) || 0,
+            overview: (a.synopsis || item.overview || '').slice(0, 240),
+            poster: a.images?.jpg?.large_image_url || a.images?.jpg?.image_url || item.poster
+          };
+        } catch (e) { return null; }
+      }
+      if (item._source === 'tmdb' && item.id) {
+        const t = item._tmdbType || 'tv';
+        try {
+          const data = await tmdbFetch(`/${t}/${item.id}`, `&language=fa-IR`);
+          if (t === 'tv') {
+            const totalSeasons = Number(data.number_of_seasons) || 1;
+            const totalEps = Number(data.number_of_episodes) || 0;
+            const episodesPerSeason = (totalEps > 0 && totalSeasons > 0) ? Math.round(totalEps / totalSeasons) : 0;
+            return {
+              totalSeasons,
+              episodesPerSeason,
+              overview: (data.overview || item.overview || '').slice(0, 240),
+              poster: data.poster_path ? `https://image.tmdb.org/t/p/w342${data.poster_path}` : item.poster
+            };
+          }
+          return {
+            overview: (data.overview || item.overview || '').slice(0, 240),
+            poster: data.poster_path ? `https://image.tmdb.org/t/p/w342${data.poster_path}` : item.poster
+          };
+        } catch (e) { return null; }
+      }
+      return null;
     }
 
     /* ============================================================
@@ -2086,7 +2176,7 @@
 
     /* ==================== END OF PART 2 ==================== */
         /* ============================================================
-       WHEEL — بهینه‌شده با Offscreen Canvas (بدون لگ)
+       WHEEL
        ============================================================ */
     let currentWheelAngle = 0;
     let isWheelSpinning = false;
@@ -2705,7 +2795,7 @@
         <form onsubmit="handleSaveWatchlist(event)" class="space-y-4">
           <div>
             <label class="block text-xs font-semibold text-slate-700 mb-1.5">نام اثر</label>
-            <input id="inputWatchTitle" type="text" required placeholder="مثلاً: Interstellar یا موشوکو تنسی" class="w-full px-4 py-3 rounded-2xl border border-slate-200 focus:outline-none focus:border-purple-500 text-sm">
+            <input id="inputWatchTitle" type="text" required placeholder="مثلاً: Frieren یا موشوکو تنسی" class="w-full px-4 py-3 rounded-2xl border border-slate-200 focus:outline-none focus:border-purple-500 text-sm">
           </div>
           <div>
             <label class="block text-xs font-semibold text-slate-700 mb-1.5">نوع</label>
@@ -2783,7 +2873,7 @@
       let items = [];
       if (type === 'movie') items = await searchTMDB(title, 'movie');
       else if (type === 'series') items = await searchTMDB(title, 'tv');
-      else if (type === 'anime') items = await searchJikan(title);
+      else if (type === 'anime') items = await searchAnime(title);
       else if (type === 'animation') items = await searchTMDB(title, 'movie');
 
       if (btn) btn.disabled = false;
@@ -2804,7 +2894,7 @@
       window._watchSearchItems = items;
     }
 
-    function selectWatchResult(i) {
+    async function selectWatchResult(i) {
       const items = window._watchSearchItems || [];
       const it = items[i];
       if (!it) return;
@@ -2813,15 +2903,38 @@
       document.getElementById('inputWatchPoster').value = it.poster;
       const overviewEl = document.getElementById('inputWatchOverview');
       if (overviewEl && it.overview) overviewEl.value = it.overview;
-      if (it.episodes && it.episodes > 0) {
-        const epsInput = document.getElementById('inputWatchEpsPerSeason');
-        if (epsInput && !epsInput.value) epsInput.value = it.episodes;
-      }
+
       document.querySelectorAll('#watchSearchResults .search-result-item').forEach((el, idx) => {
         el.style.borderColor = idx === i ? '#f43f6e' : '#e2e8f0';
         el.style.background = idx === i ? '#fff5f7' : '#fff';
       });
       playTone(600, 'sine', 0.08);
+
+      const type = document.getElementById('selectWatchType').value;
+      if (type !== 'series' && type !== 'anime') return;
+      const totalSeasonsEl = document.getElementById('inputWatchTotalSeasons');
+      const epsPerSeasonEl = document.getElementById('inputWatchEpsPerSeason');
+      if (!totalSeasonsEl || !epsPerSeasonEl) return;
+
+      if (it._source === 'jikan' && it.episodes > 0) {
+        totalSeasonsEl.value = 1;
+        epsPerSeasonEl.value = it.episodes;
+      }
+
+      const results = document.getElementById('watchSearchResults');
+      const loadingEl = document.createElement('div');
+      loadingEl.className = 'text-center py-2 text-[10px] text-slate-400';
+      loadingEl.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> دریافت جزئیات فصل‌ها...';
+      results.appendChild(loadingEl);
+
+      const details = await fetchMediaDetails(it);
+      loadingEl.remove();
+      if (!details) return;
+      if (details.totalSeasons) totalSeasonsEl.value = details.totalSeasons;
+      if (details.episodesPerSeason) epsPerSeasonEl.value = details.episodesPerSeason;
+      if (details.overview && overviewEl) overviewEl.value = details.overview;
+      if (details.poster) document.getElementById('inputWatchPoster').value = details.poster;
+      playTone(700, 'sine', 0.1);
     }
 
     function handleSaveWatchlist(e) {
@@ -2858,7 +2971,7 @@
     }
 
     /* ============================================================
-       WATCHLIST EDIT — با تغییر نوع + جستجوی دوباره
+       WATCHLIST EDIT
        ============================================================ */
     let _watchEditSelection = null;
 
@@ -2957,7 +3070,7 @@
       let items = [];
       if (type === 'movie' || type === 'animation') items = await searchTMDB(title, 'movie');
       else if (type === 'series') items = await searchTMDB(title, 'tv');
-      else if (type === 'anime') items = await searchJikan(title);
+      else if (type === 'anime') items = await searchAnime(title);
       if (btn) btn.disabled = false;
       if (!items.length) {
         results.innerHTML = `<p class="text-xs text-slate-400 text-center py-2">چیزی پیدا نشد</p>`;
@@ -2974,7 +3087,7 @@
       window._editWatchSearchItems = items;
     }
 
-    function selectEditWatchResult(i) {
+    async function selectEditWatchResult(i) {
       const items = window._editWatchSearchItems || [];
       const it = items[i];
       if (!it) return;
@@ -2983,11 +3096,38 @@
       document.getElementById('editWatchPoster').value = it.poster;
       const ov = document.getElementById('editWatchOverview');
       if (ov && it.overview) ov.value = it.overview;
+
       document.querySelectorAll('#editWatchSearchResults .search-result-item').forEach((el, idx) => {
         el.style.borderColor = idx === i ? '#f43f6e' : '#e2e8f0';
         el.style.background = idx === i ? '#fff5f7' : '#fff';
       });
       playTone(600, 'sine', 0.08);
+
+      const type = document.getElementById('editWatchType').value;
+      if (type !== 'series' && type !== 'anime') return;
+      const totalSeasonsEl = document.getElementById('editWatchTotalSeasons');
+      const epsPerSeasonEl = document.getElementById('editWatchEpsPerSeason');
+      if (!totalSeasonsEl || !epsPerSeasonEl) return;
+
+      if (it._source === 'jikan' && it.episodes > 0) {
+        totalSeasonsEl.value = 1;
+        epsPerSeasonEl.value = it.episodes;
+      }
+
+      const results = document.getElementById('editWatchSearchResults');
+      const loadingEl = document.createElement('div');
+      loadingEl.className = 'text-center py-2 text-[10px] text-slate-400';
+      loadingEl.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> دریافت جزئیات فصل‌ها...';
+      results.appendChild(loadingEl);
+
+      const details = await fetchMediaDetails(it);
+      loadingEl.remove();
+      if (!details) return;
+      if (details.totalSeasons) totalSeasonsEl.value = details.totalSeasons;
+      if (details.episodesPerSeason) epsPerSeasonEl.value = details.episodesPerSeason;
+      if (details.overview && ov) ov.value = details.overview;
+      if (details.poster) document.getElementById('editWatchPoster').value = details.poster;
+      playTone(700, 'sine', 0.1);
     }
 
     function handleSaveWatchEdit(e, id) {
@@ -3363,7 +3503,7 @@
     }
 
     /* ============================================================
-       DIARY POST MODAL — با آپلود عکس
+       DIARY POST MODAL
        ============================================================ */
     function openDiaryPostModal(editId) {
       const post = editId ? (appState.diary || []).find(d => d.id === editId) : null;
@@ -3461,8 +3601,6 @@
 
       openModalWithContent('تنظیمات', `
         <div class="space-y-4 text-xs">
-
-          <!-- OpenRouter API Key -->
           <div class="p-3 bg-purple-50/60 border border-purple-200 rounded-2xl space-y-2">
             <p class="font-bold text-purple-900 flex items-center gap-1.5">
               <i class="fa-solid fa-key text-purple-500"></i>
@@ -3473,8 +3611,6 @@
             <input id="inputOpenRouterModel" type="text" value="${escapeHtml(currentModel)}" placeholder="meta-llama/llama-3.3-70b-instruct:free" class="w-full px-3 py-2 rounded-xl bg-white border border-purple-200 text-[11px]" dir="ltr">
             <button onclick="saveOpenRouterKey()" class="w-full py-2 rounded-xl bg-purple-500 text-white font-bold text-[11px]">ذخیره کلید و مدل</button>
           </div>
-
-          <!-- مناسبت‌های شخصی -->
           <div class="pt-3 border-t border-slate-100">
             <p class="font-bold text-slate-700 mb-2">مناسبت‌های شخصی سالانه</p>
             <div id="personalDatesList" class="space-y-1.5 mb-2"></div>
@@ -3482,8 +3618,6 @@
               <i class="fa-solid fa-plus"></i> افزودن مناسبت
             </button>
           </div>
-
-          <!-- پشتیبان‌گیری -->
           <div class="pt-3 border-t border-slate-100 space-y-2">
             <button onclick="downloadBackupJson()" class="w-full py-2.5 rounded-2xl bg-slate-800 text-white font-bold flex items-center justify-center gap-2">
               <i class="fa-solid fa-download"></i> دانلود پشتیبان
@@ -3493,7 +3627,6 @@
               <input type="file" accept=".json" onchange="restoreBackupJson(event)" class="hidden" />
             </label>
           </div>
-
         </div>`);
       setTimeout(renderPersonalDatesSettings, 80);
     }
