@@ -1722,7 +1722,7 @@
         let data = await res.json();
         if (!Array.isArray(data) || data.length === 0) {
           const enQ = await smartTranslateFaToEn(query);
-          url = `https://www.cheapshark.com/api/1.0/games?title=${encodeURIComponent(enq)}&limit=8`;
+          url = `https://www.cheapshark.com/api/1.0/games?title=${encodeURIComponent(enQ)}&limit=8`;
           res = await fetch(url);
           data = await res.json();
         }
