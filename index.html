@@ -192,8 +192,6 @@
       transition: opacity 0.32s ease, transform 0.42s cubic-bezier(0.34, 1.35, 0.5, 1);
       display: inline-block;
     }
-
-    /* تب فعال: فقط حباب — بدون لیبل، بدون خط */
     .nav-item.active { color: #f43f6e; }
     .nav-item.active .nav-icon { opacity: 0; transform: translateY(-46px) scale(0.5); }
     .nav-item.active .nav-label { opacity: 0; transform: translateY(6px); pointer-events: none; }
@@ -203,25 +201,22 @@
       .nav-item .nav-label { font-size: 11px; }
     }
 
-    /* ================= CALENDAR ================= */
-    .cal-day {
-      position: relative;
-      overflow: hidden;
-      isolation: isolate;
-      transition: all 0.2s;
+    /* ================= PAGE TRANSITIONS ================= */
+    .tab-section { animation: tabFadeIn 0.28s ease-out; }
+    @keyframes tabFadeIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
     }
+
+    /* ================= CALENDAR ================= */
+    .cal-day { position: relative; overflow: hidden; isolation: isolate; transition: all 0.2s; }
     .cal-day-bg {
-      position: absolute;
-      inset: 0;
-      background-position: center;
-      background-repeat: no-repeat;
-      z-index: 0;
-      pointer-events: none;
+      position: absolute; inset: 0;
+      background-position: center; background-repeat: no-repeat;
+      z-index: 0; pointer-events: none;
     }
     .cal-day-num {
-      position: relative;
-      z-index: 2;
-      font-weight: 900;
+      position: relative; z-index: 2; font-weight: 900;
       text-shadow: 0 1px 3px rgba(255, 255, 255, 0.9), 0 0 8px rgba(255, 255, 255, 0.6);
     }
     .cal-day.sel { background: #f43f6e !important; }
@@ -234,52 +229,177 @@
     .cal-day-personal { background: linear-gradient(135deg, #fecdd7 0%, #fb7193 60%, #f43f6e 100%); }
     .cal-day-today { outline: 2px solid #f43f6e; outline-offset: 1px; }
 
-    /* ================= MEDIA (poster) ================= */
+    /* ================= MEDIA ================= */
     .media-poster {
-      width: 82px;
-      height: 118px;
-      object-fit: cover;
-      border-radius: 12px;
-      flex-shrink: 0;
-      background: #f3f4f6;
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+      width: 82px; height: 118px;
+      object-fit: cover; border-radius: 12px; flex-shrink: 0;
+      background: #f3f4f6; box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
     }
     .media-poster-empty {
-      width: 82px;
-      height: 118px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      border-radius: 12px;
-      flex-shrink: 0;
+      width: 82px; height: 118px;
+      display: flex; align-items: center; justify-content: center;
+      border-radius: 12px; flex-shrink: 0;
       background: linear-gradient(135deg, #fff5f7, #fecdd7);
     }
     .media-overview {
-      font-size: 10px;
-      line-height: 1.45;
-      color: #64748b;
-      display: -webkit-box;
-      -webkit-line-clamp: 3;
-      -webkit-box-orient: vertical;
-      overflow: hidden;
-      text-align: justify;
+      font-size: 10px; line-height: 1.45; color: #64748b;
+      display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical;
+      overflow: hidden; text-align: justify;
     }
-
     .search-result-item {
-      display: flex;
-      gap: 10px;
-      padding: 8px;
-      border-radius: 14px;
-      border: 1px solid #e2e8f0;
-      cursor: pointer;
-      transition: all 0.2s;
-      background: #fff;
-      align-items: center;
+      display: flex; gap: 10px; padding: 8px; border-radius: 14px;
+      border: 1px solid #e2e8f0; cursor: pointer; transition: all 0.2s;
+      background: #fff; align-items: center;
     }
     .search-result-item:hover { border-color: #f43f6e; background: #fff5f7; }
+
+    /* ================= SKELETON ================= */
+    .skeleton {
+      background: linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 50%, #f1f5f9 75%);
+      background-size: 200% 100%;
+      animation: skeletonShimmer 1.5s infinite;
+      border-radius: 12px;
+    }
+    @keyframes skeletonShimmer {
+      0% { background-position: 200% 0; }
+      100% { background-position: -200% 0; }
+    }
+
+    /* ================= PERSONA MODAL ================= */
+    .persona-modal-overlay {
+      position: fixed; inset: 0; z-index: 100;
+      background: linear-gradient(135deg, #fef2f5 0%, #fff5f7 100%);
+      display: flex; align-items: center; justify-content: center;
+      padding: 1rem;
+      animation: personaFadeIn 0.5s ease-out;
+    }
+    @keyframes personaFadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    .persona-card {
+      width: 100%; max-width: 420px;
+      background: #fff; border-radius: 32px;
+      padding: 2rem 1.5rem;
+      box-shadow: 0 30px 60px -20px rgba(244, 63, 110, 0.25), 0 0 0 1px rgba(244, 63, 110, 0.08);
+      text-align: center;
+      animation: personaPop 0.55s cubic-bezier(0.34, 1.35, 0.5, 1);
+    }
+    @keyframes personaPop {
+      from { opacity: 0; transform: scale(0.85) translateY(20px); }
+      to { opacity: 1; transform: scale(1) translateY(0); }
+    }
+    .persona-avatar-btn {
+      position: relative;
+      padding: 1.25rem 1rem;
+      border-radius: 24px;
+      border: 2.5px solid transparent;
+      background: #fff5f7;
+      transition: all 0.25s ease;
+      cursor: pointer;
+      display: flex; flex-direction: column; align-items: center; gap: 0.5rem;
+      -webkit-tap-highlight-color: transparent;
+      font-family: inherit;
+      outline: none;
+    }
+    .persona-avatar-btn:hover {
+      border-color: #fda4b8;
+      background: #ffe4e9;
+      transform: translateY(-2px);
+    }
+    .persona-avatar-btn:active { transform: scale(0.95); }
+
+    /* ================= DIARY ================= */
+    .diary-post {
+      background: #fff;
+      border-radius: 20px;
+      padding: 12px;
+      border: 1px solid #fce7f3;
+      box-shadow: 0 4px 12px rgba(244, 63, 110, 0.04);
+      margin-bottom: 8px;
+    }
+    .diary-post.editing { border-color: #f43f6e; box-shadow: 0 0 0 3px rgba(244, 63, 110, 0.15); }
+    .diary-img {
+      width: 100%; max-height: 240px; object-fit: cover;
+      border-radius: 12px; margin-top: 8px;
+    }
+
+    /* ================= MOOD HISTORY ================= */
+    .mood-history-cell {
+      aspect-ratio: 1;
+      border-radius: 12px;
+      display: flex; align-items: center; justify-content: center;
+      background: #fff5f7;
+      border: 1px solid #fce7f3;
+      position: relative;
+      overflow: hidden;
+    }
+    .mood-history-cell img { width: 70%; height: 70%; object-fit: contain; }
+
+    /* ================= IN-APP NOTIFICATION ================= */
+    #inAppBanner {
+      position: fixed;
+      top: calc(var(--sat) + 5rem);
+      left: 50%;
+      transform: translateX(-50%) translateY(-120%);
+      width: calc(100% - 2rem);
+      max-width: 480px;
+      z-index: 45;
+      background: linear-gradient(135deg, #fff 0%, #fff5f7 100%);
+      border-radius: 20px;
+      padding: 12px 16px;
+      box-shadow: 0 16px 32px -10px rgba(244, 63, 110, 0.28), 0 0 0 1px rgba(244, 63, 110, 0.15);
+      transition: transform 0.45s cubic-bezier(0.34, 1.35, 0.5, 1);
+      pointer-events: auto;
+      display: flex; align-items: center; gap: 12px;
+    }
+    #inAppBanner.show { transform: translateX(-50%) translateY(0); }
   </style>
 </head>
 <body class="text-slate-800 min-h-screen font-sans antialiased">
+
+  <!-- ================= PERSONA MODAL (اول از همه) ================= -->
+  <div id="personaModal" class="persona-modal-overlay">
+    <div class="persona-card">
+      <div class="w-16 h-16 mx-auto mb-3 rounded-3xl bg-gradient-to-tr from-rose-100 to-pink-50 flex items-center justify-center shadow-md border border-rose-100">
+        <img src="https://cdn.jsdelivr.net/gh/microsoft/fluentui-emoji@main/assets/Red%20heart/3D/red_heart_3d.png" class="w-10 h-10 object-contain" alt="" />
+      </div>
+      <h2 class="font-black text-xl text-slate-900 tracking-tight mb-1">TwoOfUs</h2>
+      <p class="text-xs text-slate-500 font-semibold mb-6">الان تو کی هستی؟</p>
+
+      <div class="grid grid-cols-2 gap-3">
+        <button onclick="pickPersonaStart('p1')" class="persona-avatar-btn">
+          <div class="w-20 h-20 rounded-full bg-white border border-rose-100 flex items-center justify-center overflow-hidden shadow-sm">
+            <img src="https://cdn.jsdelivr.net/gh/microsoft/fluentui-emoji@main/assets/Technologist/Light/3D/technologist_3d_light.png" class="w-full h-full object-contain p-2" alt="" />
+          </div>
+          <span class="text-xs font-black text-slate-800">امیرمحمد</span>
+        </button>
+
+        <button onclick="pickPersonaStart('p2')" class="persona-avatar-btn">
+          <div class="w-20 h-20 rounded-full bg-white border border-rose-100 flex items-center justify-center overflow-hidden shadow-sm">
+            <img src="https://cdn.jsdelivr.net/gh/microsoft/fluentui-emoji@main/assets/Woman%20technologist/Light/3D/woman_technologist_3d_light.png" class="w-full h-full object-contain p-2" alt="" />
+          </div>
+          <span class="text-xs font-black text-slate-800">آرمیتا</span>
+        </button>
+      </div>
+
+      <p class="text-[10px] text-slate-400 mt-5 leading-relaxed">هر بار که اپ رو باز می‌کنی این سؤال پرسیده می‌شه</p>
+    </div>
+  </div>
+
+  <!-- ================= بنر In-App Notification ================= -->
+  <div id="inAppBanner">
+    <div class="w-10 h-10 rounded-2xl bg-rose-50 flex items-center justify-center flex-shrink-0">
+      <img id="inAppBannerIcon" src="https://cdn.jsdelivr.net/gh/microsoft/fluentui-emoji@main/assets/Red%20heart/3D/red_heart_3d.png" class="w-6 h-6 object-contain" alt="" />
+    </div>
+    <div class="flex-1 min-w-0">
+      <p id="inAppBannerTitle" class="text-xs font-black text-slate-800 truncate">یادآور</p>
+      <p id="inAppBannerText" class="text-[11px] text-slate-500 truncate">متن یادآور</p>
+    </div>
+    <button onclick="hideInAppBanner()" class="w-7 h-7 rounded-lg text-slate-300 hover:text-rose-500 flex items-center justify-center flex-shrink-0">
+      <i class="fa-solid fa-xmark text-xs"></i>
+    </button>
+  </div>
 
   <div id="bgParticles"></div>
   <div id="kissFloatingContainer" class="fixed inset-0 pointer-events-none z-50 overflow-hidden"></div>
@@ -329,7 +449,7 @@
 
   <main class="max-w-4xl mx-auto pt-4 sm:pt-5 space-y-5 sm:space-y-6">
 
-    <section id="tabContent-tasks" class="space-y-5">
+    <section id="tabContent-tasks" class="tab-section space-y-5">
       <div class="relative overflow-hidden squircle-card clay-surface shadow-lg p-5 sm:p-6 border border-white">
         <div class="absolute -right-16 -top-16 w-64 h-64 bg-rose-200/35 rounded-full blur-3xl pointer-events-none"></div>
         <div class="absolute -left-16 -bottom-16 w-64 h-64 bg-pink-200/35 rounded-full blur-3xl pointer-events-none"></div>
@@ -382,6 +502,13 @@
             <button onclick="openMoodModal('p2')" class="text-[11px] text-rose-500 font-bold px-2 py-1 rounded-lg hover:bg-rose-50 transition flex-shrink-0">تغییر</button>
           </div>
         </div>
+
+        <div class="mt-3 pt-3 border-t border-rose-100/60 flex justify-center">
+          <button onclick="openMoodHistoryModal()" class="text-[11px] font-bold text-rose-500 hover:text-rose-600 flex items-center gap-1.5 px-3 py-1.5 rounded-xl hover:bg-rose-50 transition">
+            <i class="fa-solid fa-chart-simple text-[10px]"></i>
+            <span>تاریخچه حال و هوا</span>
+          </button>
+        </div>
       </div>
 
       <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
@@ -428,7 +555,7 @@
       </div>
     </section>
 
-    <section id="tabContent-budget" class="space-y-5 hidden">
+    <section id="tabContent-budget" class="tab-section space-y-5 hidden">
       <div class="squircle-card clay-surface p-4 sm:p-6 shadow-lg space-y-5">
         <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
           <div class="flex items-center gap-3">
@@ -477,7 +604,7 @@
       </div>
     </section>
 
-    <section id="tabContent-calendar" class="space-y-5 hidden">
+    <section id="tabContent-calendar" class="tab-section space-y-5 hidden">
       <div class="squircle-card clay-surface p-4 sm:p-6 shadow-lg space-y-5">
         <div class="flex items-center justify-between gap-2">
           <div class="flex items-center gap-3 min-w-0">
@@ -525,7 +652,7 @@
       </div>
     </section>
 
-    <section id="tabContent-watchlist" class="space-y-5 hidden">
+    <section id="tabContent-watchlist" class="tab-section space-y-5 hidden">
       <div class="squircle-card clay-surface p-4 sm:p-6 shadow-lg space-y-5">
         <div class="flex items-center justify-between">
           <div class="flex items-center gap-3">
@@ -556,7 +683,7 @@
       </div>
     </section>
 
-    <section id="tabContent-games" class="space-y-5 hidden">
+    <section id="tabContent-games" class="tab-section space-y-5 hidden">
       <div class="squircle-card clay-surface p-4 sm:p-6 shadow-lg space-y-5">
         <div class="flex items-center justify-between">
           <div class="flex items-center gap-3">
@@ -582,7 +709,7 @@
       </div>
     </section>
 
-    <section id="tabContent-fun" class="space-y-5 hidden">
+    <section id="tabContent-fun" class="tab-section space-y-5 hidden">
       <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
         <div class="squircle-card clay-surface p-4 sm:p-6 shadow-lg space-y-4 text-center">
           <div class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-rose-300 to-pink-500 p-2 flex items-center justify-center mx-auto shadow-lg">
@@ -643,7 +770,7 @@
       </div>
     </section>
 
-    <section id="tabContent-notes" class="space-y-5 hidden">
+    <section id="tabContent-notes" class="tab-section space-y-5 hidden">
       <div class="squircle-card clay-surface p-4 sm:p-6 shadow-lg space-y-5">
         <div class="flex items-center justify-between">
           <div class="flex items-center gap-3">
@@ -651,15 +778,37 @@
               <img src="https://cdn.jsdelivr.net/gh/microsoft/fluentui-emoji@main/assets/Love%20letter/3D/love_letter_3d.png" class="w-full h-full object-contain" alt="" />
             </div>
             <div>
-              <h3 class="font-bold text-slate-900 text-base">دیوار نامه‌ها</h3>
-              <p class="text-xs text-slate-400">یادداشت‌های ماندگار</p>
+              <h3 class="font-bold text-slate-900 text-base">خاطرات</h3>
+              <p class="text-xs text-slate-400">نامه‌ها و دفتر خاطرات دونفره</p>
             </div>
           </div>
           <button onclick="openNoteModal()" class="px-3.5 py-2.5 rounded-2xl bg-rose-500 text-white text-xs font-bold flex items-center gap-1.5 shadow-md flex-shrink-0">
             <i class="fa-solid fa-pen-fancy"></i> نامه
           </button>
         </div>
-        <div id="notesContainer" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3"></div>
+
+        <!-- دفتر خاطرات روزانه -->
+        <div class="pt-3 border-t border-slate-100 space-y-3">
+          <div class="flex items-center justify-between">
+            <h4 class="text-sm font-black text-slate-800 flex items-center gap-2">
+              <img src="https://cdn.jsdelivr.net/gh/microsoft/fluentui-emoji@main/assets/Bookmark%20tabs/3D/bookmark_tabs_3d.png" class="w-5 h-5" alt="" />
+              <span>دفتر خاطرات امروز</span>
+            </h4>
+            <button onclick="openDiaryPostModal()" class="text-[11px] font-bold text-rose-500 hover:text-rose-600 flex items-center gap-1">
+              <i class="fa-solid fa-plus text-[10px]"></i> خاطره جدید
+            </button>
+          </div>
+          <div id="diaryContainer" class="space-y-2"></div>
+        </div>
+
+        <!-- دیوار نامه‌ها -->
+        <div class="pt-3 border-t border-slate-100 space-y-3">
+          <h4 class="text-sm font-black text-slate-800 flex items-center gap-2">
+            <img src="https://cdn.jsdelivr.net/gh/microsoft/fluentui-emoji@main/assets/Love%20letter/3D/love_letter_3d.png" class="w-5 h-5" alt="" />
+            <span>دیوار نامه‌ها</span>
+          </h4>
+          <div id="notesContainer" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3"></div>
+        </div>
       </div>
     </section>
 
@@ -697,7 +846,7 @@
         </button>
         <button class="nav-item" data-tab="notes" onclick="switchTab('notes')">
           <img class="nav-icon" src="https://cdn.jsdelivr.net/gh/microsoft/fluentui-emoji@main/assets/Love%20letter/3D/love_letter_3d.png" alt="" />
-          <span class="nav-label">نامه</span>
+          <span class="nav-label">خاطرات</span>
         </button>
       </div>
     </div>
@@ -718,14 +867,17 @@
     const SUPABASE_KEY = "sb_publishable_b8-BEd1e8CWNkVdVvU4c-Q_Ir-isgoz";
     const ROOM_CODE = "amir-armita-us";
     const ANNIVERSARY_DATE = "2024-10-06";
-    const STATE_VERSION = 11;
+    const STATE_VERSION = 12;
 
     const TMDB_API_KEY = "29fb5c7e087065a22b71f28c6b1db7e8";
+
+    /* ⚠️ این کلید رو بعداً جایگزین کن */
+    const OPENROUTER_TRANSLATE_KEY = "PASTE_YOUR_OPENROUTER_KEY_HERE";
 
     let supabaseClient = null;
     try { supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY); } catch (e) {}
 
-    /* ===== آیکون‌های تقویم — عکس‌های خودت (در پوشه icons/) ===== */
+    /* ===== آیکون‌های تقویم — عکس‌های خودت ===== */
     const ICONS_CAL = {
       birthday: 'icons/birthday.png',
       anniversary: 'icons/anniversary.png',
@@ -734,8 +886,6 @@
       work: 'icons/work.png',
       rest: 'icons/rest.png'
     };
-
-    /* Fallback — اگه عکس محلی لود نشد */
     const ICONS_CAL_FALLBACK = {
       birthday: 'https://cdn.jsdelivr.net/gh/microsoft/fluentui-emoji@main/assets/Birthday%20cake/3D/birthday_cake_3d.png',
       anniversary: 'https://cdn.jsdelivr.net/gh/microsoft/fluentui-emoji@main/assets/Red%20heart/3D/red_heart_3d.png',
@@ -744,9 +894,6 @@
       work: 'https://cdn.jsdelivr.net/gh/microsoft/fluentui-emoji@main/assets/Laptop/3D/laptop_3d.png',
       rest: 'https://cdn.jsdelivr.net/gh/microsoft/fluentui-emoji@main/assets/Crescent%20moon/3D/crescent_moon_3d.png'
     };
-
-    /* تنظیم دقیق بزرگ‌نمایی آیکون روی سلول تقویم
-       — اگه مربع داخلی با مربع سلول چفت نبود، این اعداد رو کم/زیاد کن */
     const CAL_ICON_STYLE = {
       birthday:    { zoom: 122 },
       anniversary: { zoom: 118 },
@@ -756,7 +903,6 @@
       rest:        { zoom: 118 }
     };
 
-    /* Fallback handler — اگه عکس محلی لود نشد به CDN می‌ره */
     window.addEventListener('error', function (e) {
       const t = e.target;
       if (t && t.tagName === 'IMG' && t.dataset.calIcon && !t.dataset.fbDone) {
@@ -800,7 +946,11 @@
       play: BASE_ICON + 'Play%20button/3D/play_button_3d.png',
       eyes: BASE_ICON + 'Eyes/3D/eyes_3d.png',
       alarm: BASE_ICON + 'Alarm%20clock/3D/alarm_clock_3d.png',
-      gift: BASE_ICON + 'Wrapped%20gift/3D/wrapped_gift_3d.png'
+      gift: BASE_ICON + 'Wrapped%20gift/3D/wrapped_gift_3d.png',
+      bookmark: BASE_ICON + 'Bookmark%20tabs/3D/bookmark_tabs_3d.png',
+      camera: BASE_ICON + 'Camera/3D/camera_3d.png',
+      crayon: BASE_ICON + 'Crayon/3D/crayon_3d.png',
+      thought: BASE_ICON + 'Thought%20balloon/3D/thought_balloon_3d.png'
     };
 
     /* ===== صدا ===== */
@@ -845,6 +995,16 @@
       setTimeout(() => playTone(783.99, 'sine', 0.25), 200);
     }
 
+    /* ===== اعداد فارسی — همه‌جا استفاده کن! ===== */
+    function toFa(input) {
+      if (input === null || input === undefined) return '';
+      return String(input).replace(/\d/g, d => '۰۱۲۳۴۵۶۷۸۹'[parseInt(d, 10)]);
+    }
+    function toFaNum(num) {
+      if (num === null || num === undefined || isNaN(num)) return '۰';
+      return Number(num).toLocaleString('fa-IR');
+    }
+
     /* ===== تعطیلات رسمی ===== */
     const EMBEDDED_HOLIDAYS = {
       "01-01": "نوروز (تعطیل رسمی)",
@@ -859,14 +1019,12 @@
       "12-29": "ملی شدن صنعت نفت (تعطیل رسمی)"
     };
 
-    /* ===== مناسبت‌های کادویی ===== */
     const GIFT_EVENTS = {
       "11-25": { title: 'ولنتاین', icon: 'anniversary' },
       "11-29": { title: 'سپندارمذگان', icon: 'anniversary' },
       "09-30": { title: 'شب یلدا', icon: 'celebration' }
     };
 
-    /* ===== مناسبت‌های شخصی ===== */
     const DEFAULT_PERSONAL_DATES = [
       { id: 'pd-birth-amir',   title: 'تولد امیرمحمد', md: '10-24', year: 1385, icon: 'birthday' },
       { id: 'pd-birth-armita', title: 'تولد آرمیتا',   md: '06-14', year: 1386, icon: 'birthday' },
@@ -914,6 +1072,11 @@
       const mins = String(now.getMinutes()).padStart(2, '0');
       return { jy, jm, jd, dateStr: `${jd} ${JALALI_MONTHS[jm - 1]} ${jy}`, timeStr: `${hours}:${mins}`, fullTimestamp: `${jd} ${JALALI_MONTHS[jm - 1]} - ساعت ${hours}:${mins}` };
     }
+    function getTodayKey() {
+      const now = new Date();
+      const [jy, jm, jd] = gregorianToJalali(now.getFullYear(), now.getMonth() + 1, now.getDate());
+      return `${jy}-${String(jm).padStart(2, '0')}-${String(jd).padStart(2, '0')}`;
+    }
     function standardizeJalaliDateKey(str) {
       if (!str) return '';
       const s = String(str).replace(/[۰-۹]/g, c => String(c.charCodeAt(0) - 1776));
@@ -956,11 +1119,13 @@
       { id: 'ps5', name: 'PS5' }, { id: 'ps4', name: 'PS4' },
       { id: 'xbox', name: 'Xbox' }, { id: 'pc', name: 'PC' },
       { id: 'mobile', name: 'موبایل' }, { id: 'switch', name: 'Nintendo' },
+      { id: 'board', name: 'بردگیم' },
       { id: 'other', name: 'سایر' }
     ];
+    const MOOD_KEYS = ['love', 'smile', 'sleepy', 'pleading', 'coffee', 'pizza'];
 
     /* ===== State ===== */
-    let currentPersona = localStorage.getItem('twoOfUs_persona') || 'p1';
+    let currentPersona = 'p1';
     let currentTab = 'tasks';
     let currentChoreFilter = 'all';
     let currentWatchFilter = 'all';
@@ -969,25 +1134,49 @@
     let calYear = 1405;
     let calMonth = 7;
     let selectedCalDay = null;
+    let editingDiaryId = null;
 
     const DEFAULT_DATE_IDEAS = [
-      "قدم زدن در بلوار ارم همدان","بازدید از آرامگاه بوعلی‌سینا","کافه‌گردی در خیابان بوعلی",
-      "پارک مردم همدان و بستنی","گنبد علویان و عکس یادگاری","تپه هگمتانه و موزه",
-      "کوهنوردی سبک در الوند","سفر یک روزه به غار علیصدر","آبشار گنج‌نامه و پیک‌نیک",
-      "خرید از بازار سنتی همدان","شام در رستوران سنتی","تماشای فیلم در سینما",
-      "کوه و کمپ یک روزه","بازدید از موزه تاریخ طبیعی","قدم زدن در خیابان بوعلی",
-      "صبحانه سنتی در کافه‌ها","خرید شیرینی معروف همدان","رفتن به پارک ارم",
-      "پختن قورمه سبزی با هم","پختن آش رشته دونفره","چای و نبات در کافه سنتی",
-      "تماشای سریال ایرانی با هم","قدم زدن زیر باران","خرید گل و چیدن در گلدان",
-      "تماشای غروب از پشت‌بام","نوشتن نامه عاشقانه","ساختن آلبوم عکس مشترک",
-      "پیاده‌روی و صبحانه","بازی منچ یا شطرنج","پختن پیتزای خونگی",
-      "تماشای ستاره‌ها از پشت‌بام","خواندن کتاب با صدای بلند","آشپزی غذای جدید",
-      "رفتن به کتاب‌فروشی","بازی ویدیویی دو نفره","پلی‌لیست مشترک موسیقی",
-      "یاد گرفتن مهارت جدید","بازی بدمینتون در پارک","نوشتن خاطرات مشترک",
-      "دیدن طلوع خورشید","خرید میوه و آشپزی","صبحانه مفصل تعطیل",
-      "دیدن آلبوم قدیمی","پختن کیک","تماشای کنسرت آنلاین",
-      "کلاس آموزشی مشترک","بازی با کارت‌های حافظه","قدم زدن در محله‌های قدیمی",
-      "سفر یک روزه به روستاها","بازدید از دریاچه سد اکباتان"
+      "پختن یه غذای جدید که هیچ‌وقت نخوردیم",
+      "رفتن به یه کافه دنج که تاحالا نرفتیم",
+      "یه روز کامل بدون موبایل، فقط ما دوتا",
+      "عکاسی از همدیگه با لباس مورد علاقه",
+      "بازی بردگیم (منچ، شطرنج، تخت نرد)",
+      "تماشای طلوع از یه جای بلند",
+      "شب‌پیمایی توی شهر",
+      "کیک‌پزی دونفره",
+      "یه دورهمی بردگیم با هم",
+      "آشپزی یه دسر خونگی",
+      "نوشتن نامه برای هم و خوندن با صدای بلند",
+      "ساخت پلی‌لیست مشترک",
+      "پیک‌نیک تو پارک نزدیک",
+      "قدم زدن دست تو دست",
+      "دیدن یه فیلم کلاسیک",
+      "خرید گل و چیدن در گلدان",
+      "بازی مافیا دونفره",
+      "بازی حقیقت یا جرات",
+      "ساخت آلبوم عکس مشترک",
+      "کافه‌گردی تو خیابون اصلی شهر",
+      "تماشای غروب پشت‌بام",
+      "خرید از بازار محلی",
+      "رفتن به کتاب‌فروشی و انتخاب کتاب برای هم",
+      "پختن پیتزای خونگی",
+      "یه شام رسمی در خانه",
+      "یه بازی کارتی دونفره",
+      "پختن آش یا سوپ خونگی",
+      "رفتن به یه رستوران که هیچ‌وقت نرفتیم",
+      "ساخت یه آهنگ یا شعر مشترک",
+      "تمرین رقص تو خونه",
+      "پیاده‌روی صبحگاهی و صبحانه بیرون",
+      "خرید میوه و آبمیوه تازه",
+      "تماشای یه مستند جالب",
+      "رفتن به بازار سنتی",
+      "بازی اسم فامیل",
+      "ساختن کاردستی با هم",
+      "ورزش صبحگاهی با هم",
+      "تزئین اتاق برای مناسبت",
+      "ساخت کپسول زمان",
+      "رفتن به شهربازی یا پارک بازی"
     ];
 
     let appState = {
@@ -1002,8 +1191,10 @@
       bucketList: [],
       dateIdeas: [...DEFAULT_DATE_IDEAS],
       notes: [],
+      diary: [],
       personalDates: [...DEFAULT_PERSONAL_DATES],
-      customDays: {},   /* { "1405-07-20": { icon, bgKey, bgColor } } */
+      customDays: {},
+      moodHistory: {},
       moods: {
         p1: { key: 'smile', text: 'عالی و پرانرژی' },
         p2: { key: 'love', text: 'خوشحال و شاد' }
@@ -1011,1112 +1202,1383 @@
     };
 
     /* ==================== END OF PART 1 ==================== */
+        /* ============================================================
+       LIFECYCLE
+       ============================================================ */
+    document.addEventListener("DOMContentLoaded", () => {
+      updateHeaderClock();
+      setInterval(updateHeaderClock, 1000);
+      initBgParticles();
+      loadLocalState();
+      initSupabaseSync();
+      showInAppBannerForUpcomingEvent();
+
+      const now = new Date();
+      const [jy, jm, jd] = gregorianToJalali(now.getFullYear(), now.getMonth() + 1, now.getDate());
+      calYear = jy; calMonth = jm; selectedCalDay = jd;
+
+      renderChoreFilters();
+      renderWatchStatusFilters();
+      renderWatchTypeFilters();
+      renderGameStatusFilters();
+      renderAll();
+      initRouletteCanvas();
+
+      requestAnimationFrame(() => positionNavBubble('tasks', false));
+      window.addEventListener('resize', () => positionNavBubble(currentTab, false));
+      window.addEventListener('load', () => positionNavBubble(currentTab, false));
+    });
+
     /* ============================================================
-   LIFECYCLE
-   ============================================================ */
-document.addEventListener("DOMContentLoaded", () => {
-  setPersona(currentPersona);
-  updateAnniversaryDays();
-  updateHeaderClock();
-  setInterval(updateHeaderClock, 1000);
-  initBgParticles();
-  loadLocalState();
-  initSupabaseSync();
+       PERSONA MODAL
+       ============================================================ */
+    function pickPersonaStart(p) {
+      setPersona(p);
+      const modal = document.getElementById('personaModal');
+      modal.style.transition = 'opacity 0.4s ease, transform 0.4s ease';
+      modal.style.opacity = '0';
+      modal.style.transform = 'scale(1.05)';
+      setTimeout(() => { modal.style.display = 'none'; }, 400);
+      playTone(600, 'sine', 0.12);
+      setTimeout(() => playTone(800, 'sine', 0.15), 120);
+    }
 
-  const now = new Date();
-  const [jy, jm, jd] = gregorianToJalali(now.getFullYear(), now.getMonth() + 1, now.getDate());
-  calYear = jy; calMonth = jm; selectedCalDay = jd;
-
-  renderChoreFilters();
-  renderWatchStatusFilters();
-  renderWatchTypeFilters();
-  renderGameStatusFilters();
-  renderAll();
-  initRouletteCanvas();
-
-  requestAnimationFrame(() => positionNavBubble('tasks', false));
-  window.addEventListener('resize', () => positionNavBubble(currentTab, false));
-  window.addEventListener('load', () => positionNavBubble(currentTab, false));
-});
-
-function initBgParticles() {
-  const box = document.getElementById('bgParticles');
-  if (!box || box.dataset.init) return;
-  box.dataset.init = '1';
-  for (let i = 0; i < 22; i++) {
-    const p = document.createElement('div');
-    p.className = 'bg-particle';
-    const size = 6 + Math.random() * 14;
-    p.style.width = size + 'px';
-    p.style.height = size + 'px';
-    p.style.left = (Math.random() * 100) + '%';
-    p.style.bottom = '-30px';
-    p.style.animationDuration = (14 + Math.random() * 16) + 's';
-    p.style.animationDelay = (Math.random() * 14) + 's';
-    box.appendChild(p);
-  }
-}
-
-function updateHeaderClock() {
-  const now = new Date();
-  const [jy, jm, jd] = gregorianToJalali(now.getFullYear(), now.getMonth() + 1, now.getDate());
-  const hh = String(now.getHours()).padStart(2, '0');
-  const mm = String(now.getMinutes()).padStart(2, '0');
-  const ss = String(now.getSeconds()).padStart(2, '0');
-  const dateEl = document.getElementById('headerJalaliDate');
-  const timeEl = document.getElementById('headerLiveTime');
-  if (dateEl) dateEl.innerText = `${jd} ${JALALI_MONTHS[jm - 1]}`;
-  if (timeEl) timeEl.innerText = `${hh}:${mm}:${ss}`;
-}
-
-function setPersona(p) {
-  currentPersona = p;
-  localStorage.setItem('twoOfUs_persona', p);
-  const amirBtn = document.getElementById('personaAmir');
-  const armitaBtn = document.getElementById('personaArmita');
-  const activeCls = "px-2 sm:px-3 py-1 rounded-lg sm:rounded-xl text-[10px] sm:text-xs font-bold transition flex items-center gap-1 bg-rose-500 text-white shadow-sm";
-  const idleCls = "px-2 sm:px-3 py-1 rounded-lg sm:rounded-xl text-[10px] sm:text-xs font-bold transition flex items-center gap-1 text-slate-500 hover:text-slate-800";
-  if (!amirBtn || !armitaBtn) return;
-  if (p === 'p1') { amirBtn.className = activeCls; armitaBtn.className = idleCls; }
-  else { armitaBtn.className = activeCls; amirBtn.className = idleCls; }
-}
-
-function updateAnniversaryDays() {
-  const start = new Date(ANNIVERSARY_DATE);
-  const now = new Date();
-  const diffDays = Math.ceil(Math.abs(now - start) / 86400000);
-  const el = document.getElementById('daysCount');
-  if (el) el.innerText = diffDays.toLocaleString('fa-IR');
-}
-
-/* ============================================================
-   TAB SWITCHING
-   ============================================================ */
-function switchTab(tabId) {
-  currentTab = tabId;
-  ['tasks', 'budget', 'calendar', 'watchlist', 'games', 'fun', 'notes'].forEach(t => {
-    const sec = document.getElementById(`tabContent-${t}`);
-    if (sec) sec.classList.toggle('hidden', t !== tabId);
-  });
-  document.querySelectorAll('.nav-item').forEach(b => {
-    b.classList.toggle('active', b.dataset.tab === tabId);
-  });
-  positionNavBubble(tabId, true);
-  playTone(520, 'sine', 0.04, 0.06);
-
-  if (tabId === 'calendar') renderCalendar();
-  if (tabId === 'budget') renderBudgetChart();
-  if (tabId === 'watchlist') renderWatchlist();
-  if (tabId === 'games') renderGameList();
-  if (tabId === 'fun') requestAnimationFrame(() => { if (!isWheelSpinning) drawWheel(currentWheelAngle); });
-}
-
-function positionNavBubble(tabId, animate) {
-  const items = document.querySelectorAll('.nav-item');
-  const target = Array.from(items).find(i => i.dataset.tab === tabId);
-  if (!target) return;
-  const bubble = document.getElementById('navBubble');
-  const bubbleIcon = document.getElementById('navBubbleIcon');
-  const navBar = document.getElementById('navBar');
-  if (!bubble || !navBar || !bubbleIcon) return;
-
-  const barRect = navBar.getBoundingClientRect();
-  const itemRect = target.getBoundingClientRect();
-  const centerX = itemRect.left - barRect.left + itemRect.width / 2;
-  const bubbleW = parseFloat(getComputedStyle(bubble).width);
-  const tx = centerX - bubbleW / 2;
-
-  if (!animate) {
-    bubble.style.transition = 'none';
-    bubble.style.transform = `translateX(${tx}px)`;
-    requestAnimationFrame(() => { bubble.style.transition = ''; });
-  } else {
-    bubble.style.transform = `translateX(${tx}px)`;
-  }
-
-  const iconSrc = target.querySelector('.nav-icon')?.src || '';
-  if (iconSrc && bubbleIcon.dataset.currentSrc !== iconSrc) {
-    bubble.classList.add('bubble-swap');
-    setTimeout(() => {
-      bubbleIcon.src = iconSrc;
-      bubbleIcon.dataset.currentSrc = iconSrc;
-      bubble.classList.remove('bubble-swap');
-    }, animate ? 160 : 0);
-  }
-}
-
-/* ============================================================
-   STATE PERSIST
-   ============================================================ */
-function loadLocalState() {
-  const local = localStorage.getItem(`twoOfUs_state_${ROOM_CODE}`);
-  if (local) {
-    try {
-      const parsed = JSON.parse(local);
-      appState = { ...appState, ...parsed };
-      if (!Array.isArray(appState.dateIdeas) || appState.dateIdeas.length < 10 ||
-          (parsed.stateVersion || 0) < STATE_VERSION) {
-        appState.dateIdeas = [...DEFAULT_DATE_IDEAS];
+    function setPersona(p) {
+      currentPersona = p;
+      localStorage.setItem('twoOfUs_persona', p);
+      const amirBtn = document.getElementById('personaAmir');
+      const armitaBtn = document.getElementById('personaArmita');
+      const activeCls = "px-2 sm:px-3 py-1 rounded-lg sm:rounded-xl text-[10px] sm:text-xs font-bold transition flex items-center gap-1 bg-rose-500 text-white shadow-sm";
+      const idleCls = "px-2 sm:px-3 py-1 rounded-lg sm:rounded-xl text-[10px] sm:text-xs font-bold transition flex items-center gap-1 text-slate-500 hover:text-slate-800";
+      if (!amirBtn || !armitaBtn) return;
+      if (p === 'p1') { amirBtn.className = activeCls; armitaBtn.className = idleCls; }
+      else { armitaBtn.className = activeCls; amirBtn.className = idleCls; }
+      // آپدیت رنگ بنر در صورت تغییر شخص
+      const banner = document.getElementById('inAppBanner');
+      if (banner) {
+        banner.style.background = p === 'p1'
+          ? 'linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%)'
+          : 'linear-gradient(135deg, #fff 0%, #fff5f7 100%)';
       }
-      if (Array.isArray(appState.watchList)) {
-        appState.watchList = appState.watchList.map(w => {
-          if (!w) return null;
-          const st = (w.status === 'watching' || w.status === 'watched' || w.status === 'queued') ? w.status : 'queued';
-          return {
-            ...w, status: st,
-            currentEpisode: Number(w.currentEpisode) || 0,
-            totalEpisodes: Number(w.totalEpisodes) || 0,
-            lastWatched: w.lastWatched || null,
-            posterUrl: w.posterUrl || '',
-            originalTitle: w.originalTitle || '',
-            overview: w.overview || ''
-          };
-        }).filter(Boolean);
+    }
+
+    function initBgParticles() {
+      const box = document.getElementById('bgParticles');
+      if (!box || box.dataset.init) return;
+      box.dataset.init = '1';
+      for (let i = 0; i < 18; i++) {
+        const p = document.createElement('div');
+        p.className = 'bg-particle';
+        const size = 5 + Math.random() * 12;
+        p.style.width = size + 'px';
+        p.style.height = size + 'px';
+        p.style.left = (Math.random() * 100) + '%';
+        p.style.bottom = '-30px';
+        p.style.animationDuration = (16 + Math.random() * 14) + 's';
+        p.style.animationDelay = (Math.random() * 16) + 's';
+        box.appendChild(p);
       }
-      if (Array.isArray(appState.gameList)) {
-        appState.gameList = appState.gameList.map(g => {
-          if (!g) return null;
-          const st = (g.status === 'playing' || g.status === 'played' || g.status === 'queued') ? g.status : 'queued';
-          return {
-            ...g, status: st,
-            hours: Number(g.hours) || 0,
-            posterUrl: g.posterUrl || '',
-            platform: g.platform || 'pc',
-            overview: g.overview || ''
-          };
-        }).filter(Boolean);
+    }
+
+    function updateHeaderClock() {
+      const now = new Date();
+      const [jy, jm, jd] = gregorianToJalali(now.getFullYear(), now.getMonth() + 1, now.getDate());
+      const hh = String(now.getHours()).padStart(2, '0');
+      const mm = String(now.getMinutes()).padStart(2, '0');
+      const ss = String(now.getSeconds()).padStart(2, '0');
+      const dateEl = document.getElementById('headerJalaliDate');
+      const timeEl = document.getElementById('headerLiveTime');
+      if (dateEl) dateEl.innerText = `${toFa(jd)} ${JALALI_MONTHS[jm - 1]}`;
+      if (timeEl) timeEl.innerText = toFa(`${hh}:${mm}:${ss}`);
+    }
+
+    function updateAnniversaryDays() {
+      const start = new Date(ANNIVERSARY_DATE);
+      const now = new Date();
+      const diffDays = Math.ceil(Math.abs(now - start) / 86400000);
+      const el = document.getElementById('daysCount');
+      if (el) el.innerText = toFaNum(diffDays);
+    }
+
+    /* ============================================================
+       IN-APP BANNER
+       ============================================================ */
+    function showInAppBanner(title, text, iconKey = 'heart') {
+      const banner = document.getElementById('inAppBanner');
+      const iconEl = document.getElementById('inAppBannerIcon');
+      const titleEl = document.getElementById('inAppBannerTitle');
+      const textEl = document.getElementById('inAppBannerText');
+      if (!banner || !iconEl || !titleEl || !textEl) return;
+      iconEl.src = ICONS_3D[iconKey] || ICONS_3D.heart;
+      titleEl.innerText = title;
+      textEl.innerText = text;
+      banner.classList.add('show');
+      setTimeout(hideInAppBanner, 8000);
+    }
+
+    function hideInAppBanner() {
+      const banner = document.getElementById('inAppBanner');
+      if (banner) banner.classList.remove('show');
+    }
+
+    function showInAppBannerForUpcomingEvent() {
+      const now = getNowJalaliString();
+      const todayKey = `${now.jy}-${String(now.jm).padStart(2, '0')}-${String(now.jd).padStart(2, '0')}`;
+      const tomorrow = new Date(); tomorrow.setDate(tomorrow.getDate() + 1);
+      const [ty, tm, td] = gregorianToJalali(tomorrow.getFullYear(), tomorrow.getMonth() + 1, tomorrow.getDate());
+      const tomorrowKey = `${ty}-${String(tm).padStart(2, '0')}-${String(td).padStart(2, '0')}`;
+
+      for (const p of (appState.personalDates || [])) {
+        const thisYearKey = `${now.jy}-${p.md}`;
+        if (thisYearKey === todayKey) {
+          showInAppBanner('امروز!', `${p.title} مبارک`, p.icon || 'birthday');
+          return;
+        }
+        if (thisYearKey === tomorrowKey) {
+          showInAppBanner('یادآور فردا', `${p.title} فردا`, p.icon || 'birthday');
+          return;
+        }
       }
-      if (!Array.isArray(appState.personalDates) || appState.personalDates.length === 0) {
-        appState.personalDates = [...DEFAULT_PERSONAL_DATES];
+      // چک کردن مناسبت‌های کادویی
+      for (const [md, info] of Object.entries(GIFT_EVENTS)) {
+        const thisYearKey = `${now.jy}-${md}`;
+        if (thisYearKey === todayKey) {
+          showInAppBanner('امروز!', `${info.title} مبارک`, info.icon);
+          return;
+        }
       }
-      if (!appState.customDays || typeof appState.customDays !== 'object') {
-        appState.customDays = {};
+    }
+
+    /* ============================================================
+       TAB SWITCHING
+       ============================================================ */
+    function switchTab(tabId) {
+      currentTab = tabId;
+      ['tasks', 'budget', 'calendar', 'watchlist', 'games', 'fun', 'notes'].forEach(t => {
+        const sec = document.getElementById(`tabContent-${t}`);
+        if (sec) sec.classList.toggle('hidden', t !== tabId);
+      });
+      document.querySelectorAll('.nav-item').forEach(b => {
+        b.classList.toggle('active', b.dataset.tab === tabId);
+      });
+      positionNavBubble(tabId, true);
+      playTone(520, 'sine', 0.04, 0.06);
+
+      if (tabId === 'calendar') renderCalendar();
+      if (tabId === 'budget') renderBudgetChart();
+      if (tabId === 'watchlist') renderWatchlist();
+      if (tabId === 'games') renderGameList();
+      if (tabId === 'notes') renderDiary();
+      if (tabId === 'fun') requestAnimationFrame(() => { if (!isWheelSpinning) drawWheel(currentWheelAngle); });
+    }
+
+    function positionNavBubble(tabId, animate) {
+      const items = document.querySelectorAll('.nav-item');
+      const target = Array.from(items).find(i => i.dataset.tab === tabId);
+      if (!target) return;
+      const bubble = document.getElementById('navBubble');
+      const bubbleIcon = document.getElementById('navBubbleIcon');
+      const navBar = document.getElementById('navBar');
+      if (!bubble || !navBar || !bubbleIcon) return;
+
+      const barRect = navBar.getBoundingClientRect();
+      const itemRect = target.getBoundingClientRect();
+      const centerX = itemRect.left - barRect.left + itemRect.width / 2;
+      const bubbleW = parseFloat(getComputedStyle(bubble).width);
+      const tx = centerX - bubbleW / 2;
+
+      if (!animate) {
+        bubble.style.transition = 'none';
+        bubble.style.transform = `translateX(${tx}px)`;
+        requestAnimationFrame(() => { bubble.style.transition = ''; });
+      } else {
+        bubble.style.transform = `translateX(${tx}px)`;
       }
+
+      const iconSrc = target.querySelector('.nav-icon')?.src || '';
+      if (iconSrc && bubbleIcon.dataset.currentSrc !== iconSrc) {
+        bubble.classList.add('bubble-swap');
+        setTimeout(() => {
+          bubbleIcon.src = iconSrc;
+          bubbleIcon.dataset.currentSrc = iconSrc;
+          bubble.classList.remove('bubble-swap');
+        }, animate ? 160 : 0);
+      }
+    }
+
+    /* ============================================================
+       STATE PERSIST
+       ============================================================ */
+    function loadLocalState() {
+      const local = localStorage.getItem(`twoOfUs_state_${ROOM_CODE}`);
+      if (local) {
+        try {
+          const parsed = JSON.parse(local);
+          appState = { ...appState, ...parsed };
+          if (!Array.isArray(appState.dateIdeas) || appState.dateIdeas.length < 10 ||
+              (parsed.stateVersion || 0) < STATE_VERSION) {
+            appState.dateIdeas = [...DEFAULT_DATE_IDEAS];
+          }
+          if (Array.isArray(appState.watchList)) {
+            appState.watchList = appState.watchList.map(w => {
+              if (!w) return null;
+              const st = (w.status === 'watching' || w.status === 'watched' || w.status === 'queued') ? w.status : 'queued';
+              return {
+                ...w, status: st,
+                currentEpisode: Number(w.currentEpisode) || 0,
+                totalEpisodes: Number(w.totalEpisodes) || 0,
+                lastWatched: w.lastWatched || null,
+                posterUrl: w.posterUrl || '',
+                originalTitle: w.originalTitle || '',
+                overview: w.overview || ''
+              };
+            }).filter(Boolean);
+          }
+          if (Array.isArray(appState.gameList)) {
+            appState.gameList = appState.gameList.map(g => {
+              if (!g) return null;
+              const st = (g.status === 'playing' || g.status === 'played' || g.status === 'queued') ? g.status : 'queued';
+              return {
+                ...g, status: st,
+                hours: Number(g.hours) || 0,
+                posterUrl: g.posterUrl || '',
+                platform: g.platform || 'pc',
+                overview: g.overview || ''
+              };
+            }).filter(Boolean);
+          }
+          if (!Array.isArray(appState.personalDates) || appState.personalDates.length === 0) {
+            appState.personalDates = [...DEFAULT_PERSONAL_DATES];
+          }
+          if (!appState.customDays || typeof appState.customDays !== 'object') {
+            appState.customDays = {};
+          }
+          if (!appState.moodHistory || typeof appState.moodHistory !== 'object') {
+            appState.moodHistory = {};
+          }
+          if (!Array.isArray(appState.diary)) {
+            appState.diary = [];
+          }
+          appState.stateVersion = STATE_VERSION;
+        } catch (e) {}
+      }
+    }
+
+    function saveState(broadcast = true) {
       appState.stateVersion = STATE_VERSION;
-    } catch (e) {}
-  }
-}
+      localStorage.setItem(`twoOfUs_state_${ROOM_CODE}`, JSON.stringify(appState));
+      renderAll();
+      if (supabaseClient && broadcast) {
+        supabaseClient.from('couple_rooms').upsert({
+          room_code: ROOM_CODE, state: appState, updated_at: new Date().toISOString()
+        }, { onConflict: 'room_code' }).then(({ error }) => { if (error) console.error(error); });
+      }
+    }
 
-function saveState(broadcast = true) {
-  appState.stateVersion = STATE_VERSION;
-  localStorage.setItem(`twoOfUs_state_${ROOM_CODE}`, JSON.stringify(appState));
-  renderAll();
-  if (supabaseClient && broadcast) {
-    supabaseClient.from('couple_rooms').upsert({
-      room_code: ROOM_CODE, state: appState, updated_at: new Date().toISOString()
-    }, { onConflict: 'room_code' }).then(({ error }) => { if (error) console.error(error); });
-  }
-}
-
-async function initSupabaseSync() {
-  if (!supabaseClient) return;
-  const { data } = await supabaseClient.from('couple_rooms').select('state').eq('room_code', ROOM_CODE).maybeSingle();
-  if (data && data.state) {
-    appState = { ...appState, ...data.state };
-    if (!Array.isArray(appState.dateIdeas) || appState.dateIdeas.length < 10 ||
-        (data.state.stateVersion || 0) < STATE_VERSION) {
-      appState.dateIdeas = [...DEFAULT_DATE_IDEAS];
-    }
-    if (!Array.isArray(appState.personalDates) || appState.personalDates.length === 0) {
-      appState.personalDates = [...DEFAULT_PERSONAL_DATES];
-    }
-    if (!appState.customDays || typeof appState.customDays !== 'object') {
-      appState.customDays = {};
-    }
-    appState.stateVersion = STATE_VERSION;
-    localStorage.setItem(`twoOfUs_state_${ROOM_CODE}`, JSON.stringify(appState));
-    renderAll();
-  }
-  supabaseClient.channel(`room_${ROOM_CODE}`)
-    .on('postgres_changes', { event: '*', schema: 'public', table: 'couple_rooms', filter: `room_code=eq.${ROOM_CODE}` }, payload => {
-      if (payload.new && payload.new.state) {
-        appState = { ...appState, ...payload.new.state };
+    async function initSupabaseSync() {
+      if (!supabaseClient) return;
+      const { data } = await supabaseClient.from('couple_rooms').select('state').eq('room_code', ROOM_CODE).maybeSingle();
+      if (data && data.state) {
+        appState = { ...appState, ...data.state };
+        if (!Array.isArray(appState.dateIdeas) || appState.dateIdeas.length < 10 ||
+            (data.state.stateVersion || 0) < STATE_VERSION) {
+          appState.dateIdeas = [...DEFAULT_DATE_IDEAS];
+        }
+        if (!Array.isArray(appState.personalDates) || appState.personalDates.length === 0) {
+          appState.personalDates = [...DEFAULT_PERSONAL_DATES];
+        }
+        if (!appState.customDays || typeof appState.customDays !== 'object') {
+          appState.customDays = {};
+        }
+        if (!appState.moodHistory || typeof appState.moodHistory !== 'object') {
+          appState.moodHistory = {};
+        }
+        if (!Array.isArray(appState.diary)) {
+          appState.diary = [];
+        }
+        appState.stateVersion = STATE_VERSION;
         localStorage.setItem(`twoOfUs_state_${ROOM_CODE}`, JSON.stringify(appState));
         renderAll();
       }
-    })
-    .on('broadcast', { event: 'love_kiss' }, payload => { showKissCelebration(payload.payload.senderName); })
-    .subscribe();
-}
-
-/* ============================================================
-   RENDER MASTER
-   ============================================================ */
-function renderAll() {
-  renderMoods();
-  renderGroceries();
-  renderChores();
-  renderBudgetChart();
-  renderCalendar();
-  renderWatchlist();
-  renderGameList();
-  renderBucketList();
-  renderDateIdeasDrawer();
-  renderNotes();
-  updateUpcomingEventTeaser();
-}
-
-function renderMoods() {
-  if (!appState.moods) return;
-  const p1Key = appState.moods.p1?.key || 'smile';
-  const p2Key = appState.moods.p2?.key || 'love';
-  const i1 = document.getElementById('p1MoodIcon'), i2 = document.getElementById('p2MoodIcon');
-  const t1 = document.getElementById('p1MoodText'), t2 = document.getElementById('p2MoodText');
-  if (i1) i1.src = ICONS_3D[p1Key] || ICONS_3D.smile;
-  if (t1) t1.innerText = appState.moods.p1?.text || 'عالی';
-  if (i2) i2.src = ICONS_3D[p2Key] || ICONS_3D.love;
-  if (t2) t2.innerText = appState.moods.p2?.text || 'شاد';
-}
-
-/* ---------- GROCERIES ---------- */
-function renderGroceries() {
-  const c = document.getElementById('groceryList');
-  if (!c) return;
-  const list = appState.groceries || [];
-  const badge = document.getElementById('groceryCountBadge');
-  if (badge) badge.innerText = `${list.length.toLocaleString('fa-IR')} قلم کالا`;
-  if (list.length === 0) {
-    c.innerHTML = `<div class="text-center py-8 text-slate-400 text-xs">
-      <img src="${ICONS_3D.cart}" class="w-10 h-10 mx-auto mb-2 opacity-40" alt="" />
-      <p>سبد خرید خالیه</p></div>`;
-    return;
-  }
-  c.innerHTML = list.map(item => `
-    <div class="flex items-center justify-between p-3 rounded-2xl ${item.done ? 'bg-slate-50/70 border border-slate-200/50' : 'bg-white border border-rose-100/80 shadow-sm'}">
-      <div class="flex items-center gap-2.5 min-w-0 flex-1">
-        <button onclick="toggleGrocery('${item.id}')" class="w-6 h-6 rounded-lg border-2 ${item.done ? 'bg-rose-500 border-rose-500 text-white' : 'border-slate-300'} flex items-center justify-center text-[10px] flex-shrink-0">
-          ${item.done ? '<i class="fa-solid fa-check"></i>' : ''}
-        </button>
-        <div class="min-w-0 flex-1">
-          <p class="text-xs font-bold ${item.done ? 'line-through text-slate-400' : 'text-slate-800'} break-words">${escapeHtml(item.name)}</p>
-          <div class="flex items-center gap-1.5 mt-0.5 flex-wrap">
-            <span class="text-[10px] text-slate-400 flex items-center gap-1"><i class="fa-regular fa-clock text-[9px]"></i> ${item.timeBadge || ''}</span>
-            <img src="${item.addedBy === 'p1' ? ICONS_3D.manTech : ICONS_3D.womanTech}" class="w-3.5 h-3.5" alt="" />
-          </div>
-        </div>
-      </div>
-      <button onclick="deleteGrocery('${item.id}')" class="w-7 h-7 rounded-xl text-slate-300 hover:text-rose-500 hover:bg-rose-50 flex items-center justify-center flex-shrink-0">
-        <i class="fa-solid fa-trash-can text-[10px]"></i>
-      </button>
-    </div>`).join('');
-}
-
-function clearCompletedGroceries() {
-  appState.groceries = (appState.groceries || []).filter(g => !g.done);
-  saveState(); playTone(450);
-}
-
-/* ---------- CHORES ---------- */
-function renderChoreFilters() {
-  const box = document.getElementById('choreFilters');
-  if (!box) return;
-  const opts = [
-    { id: 'all', label: 'همه' },
-    { id: 'both', label: 'دونفره', icon: ICONS_3D.handshake },
-    { id: 'p1', label: 'امیرمحمد', icon: ICONS_3D.manTech },
-    { id: 'p2', label: 'آرمیتا', icon: ICONS_3D.womanTech }
-  ];
-  box.innerHTML = opts.map(o => `
-    <button onclick="filterChores('${o.id}')" id="choreFilter-${o.id}" class="shrink-0 px-2.5 py-1 rounded-xl ${currentChoreFilter === o.id ? 'bg-indigo-500 text-white' : 'bg-white text-slate-600 border border-slate-200'} font-bold flex items-center gap-1 whitespace-nowrap transition">
-      ${o.icon ? `<img src="${o.icon}" class="w-3.5 h-3.5" alt="" />` : ''}
-      <span>${o.label}</span>
-    </button>`).join('');
-}
-
-function renderChores() {
-  const c = document.getElementById('choreList');
-  if (!c) return;
-  let list = appState.chores || [];
-  if (currentChoreFilter !== 'all') list = list.filter(x => x.assignee === currentChoreFilter);
-  if (list.length === 0) {
-    c.innerHTML = `<div class="text-center py-8 text-slate-400 text-xs">
-      <img src="${ICONS_3D.broom}" class="w-10 h-10 mx-auto mb-2 opacity-40" alt="" />
-      <p>همه کارها انجام شده</p></div>`;
-    return;
-  }
-  c.innerHTML = list.map(x => `
-    <div class="flex items-center justify-between p-3 rounded-2xl ${x.done ? 'bg-slate-50/70 border border-slate-200/50' : 'bg-white border border-indigo-100/80 shadow-sm'}">
-      <div class="flex items-center gap-2.5 min-w-0 flex-1">
-        <button onclick="toggleChore('${x.id}')" class="w-6 h-6 rounded-lg border-2 ${x.done ? 'bg-indigo-500 border-indigo-500 text-white' : 'border-slate-300'} flex items-center justify-center text-[10px] flex-shrink-0">
-          ${x.done ? '<i class="fa-solid fa-check"></i>' : ''}
-        </button>
-        <div class="min-w-0 flex-1">
-          <p class="text-xs font-bold ${x.done ? 'line-through text-slate-400' : 'text-slate-800'} break-words">${escapeHtml(x.title)}</p>
-          <div class="flex items-center gap-1.5 mt-0.5 flex-wrap">
-            <span class="text-[10px] text-slate-400">${x.timeBadge || ''}</span>
-            <img src="${x.assignee === 'p1' ? ICONS_3D.manTech : x.assignee === 'p2' ? ICONS_3D.womanTech : ICONS_3D.handshake}" class="w-3.5 h-3.5" alt="" />
-          </div>
-        </div>
-      </div>
-      <button onclick="deleteChore('${x.id}')" class="w-7 h-7 rounded-xl text-slate-300 hover:text-rose-500 hover:bg-rose-50 flex items-center justify-center flex-shrink-0">
-        <i class="fa-solid fa-trash-can text-[10px]"></i>
-      </button>
-    </div>`).join('');
-}
-
-function filterChores(id) {
-  currentChoreFilter = id;
-  renderChoreFilters();
-  renderChores();
-}
-
-/* ---------- BUDGET ---------- */
-function renderBudgetChart() {
-  const expenses = appState.expenses || [];
-  const total = expenses.reduce((s, x) => s + (Number(x.amount) || 0), 0);
-  const amtEl = document.getElementById('chartTotalAmount');
-  const cntEl = document.getElementById('expenseCountText');
-  if (amtEl) amtEl.innerText = total.toLocaleString('fa-IR');
-  if (cntEl) cntEl.innerText = `${expenses.length.toLocaleString('fa-IR')} فقره`;
-
-  const limit = Number(appState.monthlyBudgetLimit) || 0;
-  const ind = document.getElementById('budgetLimitIndicator');
-  if (ind) {
-    if (limit > 0) {
-      const rem = limit - total;
-      const pct = Math.min(100, Math.round((total / limit) * 100));
-      ind.innerHTML = `
-        <div class="flex items-center justify-between text-[11px] mb-1">
-          <span>سقف: <strong>${limit.toLocaleString('fa-IR')}</strong></span>
-          <span class="${rem >= 0 ? 'text-emerald-600' : 'text-rose-600'} font-bold">${rem >= 0 ? `${rem.toLocaleString('fa-IR')} باقی` : `${Math.abs(rem).toLocaleString('fa-IR')} فراتر`}</span>
-        </div>
-        <div class="w-full h-2 rounded-full bg-slate-100 overflow-hidden">
-          <div class="h-full rounded-full ${pct > 90 ? 'bg-rose-500' : pct > 70 ? 'bg-amber-400' : 'bg-emerald-500'}" style="width: ${pct}%"></div>
-        </div>`;
-    } else {
-      ind.innerHTML = `<button onclick="openSetMonthlyBudgetModal()" class="text-rose-500 font-bold underline text-xs">تعیین سقف بودجه</button>`;
+      supabaseClient.channel(`room_${ROOM_CODE}`)
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'couple_rooms', filter: `room_code=eq.${ROOM_CODE}` }, payload => {
+          if (payload.new && payload.new.state) {
+            appState = { ...appState, ...payload.new.state };
+            localStorage.setItem(`twoOfUs_state_${ROOM_CODE}`, JSON.stringify(appState));
+            renderAll();
+          }
+        })
+        .on('broadcast', { event: 'love_kiss' }, payload => { showKissCelebration(payload.payload.senderName); })
+        .subscribe();
     }
-  }
 
-  const catTotals = {};
-  BUDGET_CATEGORIES.forEach(c => catTotals[c.id] = 0);
-  expenses.forEach(e => { const c = e.category || 'other'; catTotals[c] = (catTotals[c] || 0) + (Number(e.amount) || 0); });
+    /* ============================================================
+       RENDER MASTER
+       ============================================================ */
+    function renderAll() {
+      renderMoods();
+      renderGroceries();
+      renderChores();
+      renderBudgetChart();
+      renderCalendar();
+      renderWatchlist();
+      renderGameList();
+      renderBucketList();
+      renderDateIdeasDrawer();
+      renderNotes();
+      renderDiary();
+      renderMoodHistory();
+      updateUpcomingEventTeaser();
+      updateAnniversaryDays();
+    }
 
-  const svg = document.getElementById('budgetDonutSvg');
-  if (svg) {
-    const circ = 2 * Math.PI * 38;
-    let offset = 0;
-    let html = `<circle cx="50" cy="50" r="38" stroke="#f1f5f9" stroke-width="11" fill="transparent"/>`;
-    BUDGET_CATEGORIES.forEach(cat => {
-      const v = catTotals[cat.id];
-      if (v > 0 && total > 0) {
-        const dash = (v / total) * circ;
-        html += `<circle cx="50" cy="50" r="38" stroke="${cat.color}" stroke-width="11" fill="transparent" stroke-dasharray="${dash} ${circ}" stroke-dashoffset="${-offset}" stroke-linecap="round"/>`;
-        offset += dash;
+    function renderMoods() {
+      if (!appState.moods) return;
+      const p1Key = appState.moods.p1?.key || 'smile';
+      const p2Key = appState.moods.p2?.key || 'love';
+      const i1 = document.getElementById('p1MoodIcon'), i2 = document.getElementById('p2MoodIcon');
+      const t1 = document.getElementById('p1MoodText'), t2 = document.getElementById('p2MoodText');
+      if (i1) i1.src = ICONS_3D[p1Key] || ICONS_3D.smile;
+      if (t1) t1.innerText = appState.moods.p1?.text || 'عالی';
+      if (i2) i2.src = ICONS_3D[p2Key] || ICONS_3D.love;
+      if (t2) t2.innerText = appState.moods.p2?.text || 'شاد';
+    }
+
+    /* ---------- MOOD HISTORY ---------- */
+    function openMoodHistoryModal() {
+      const now = getNowJalaliString();
+      const days = [];
+      for (let i = 29; i >= 0; i--) {
+        const d = new Date(); d.setDate(d.getDate() - i);
+        const [jy, jm, jd] = gregorianToJalali(d.getFullYear(), d.getMonth() + 1, d.getDate());
+        days.push({ key: `${jy}-${String(jm).padStart(2, '0')}-${String(jd).padStart(2, '0')}`, jy, jm, jd });
       }
-    });
-    svg.innerHTML = html;
-  }
+      const history = appState.moodHistory || {};
 
-  const catBox = document.getElementById('categoryBreakdownContainer');
-  if (catBox) {
-    catBox.innerHTML = BUDGET_CATEGORIES.map(cat => {
-      const v = catTotals[cat.id] || 0;
-      const pct = total > 0 ? Math.round((v / total) * 100) : 0;
-      return `<div class="space-y-1">
-        <div class="flex items-center justify-between text-xs">
-          <div class="flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-full" style="background:${cat.color}"></span><span class="font-bold text-slate-700">${cat.name}</span></div>
-          <div class="flex items-center gap-2 text-slate-500"><span class="font-extrabold text-slate-800">${v.toLocaleString('fa-IR')}</span><span class="text-[10px] w-8 text-left font-semibold">${pct}%</span></div>
+      openModalWithContent('تاریخچه حال و هوا — ۳۰ روز اخیر', `
+        <div class="grid grid-cols-7 gap-1.5 mb-4">
+          <div class="text-[10px] font-bold text-slate-400 text-center">ش</div>
+          <div class="text-[10px] font-bold text-slate-400 text-center">ی</div>
+          <div class="text-[10px] font-bold text-slate-400 text-center">د</div>
+          <div class="text-[10px] font-bold text-slate-400 text-center">س</div>
+          <div class="text-[10px] font-bold text-slate-400 text-center">چ</div>
+          <div class="text-[10px] font-bold text-slate-400 text-center">پ</div>
+          <div class="text-[10px] font-bold text-slate-400 text-center">ج</div>
+          ${days.map(d => {
+            const m1 = history[`${d.key}_p1`];
+            const m2 = history[`${d.key}_p2`];
+            const hasBoth = m1 && m2;
+            return `<div class="mood-history-cell" title="${toFa(d.jd)} ${JALALI_MONTHS[d.jm - 1]}">
+              <div class="absolute top-0.5 right-0.5 w-3 h-3 rounded-full overflow-hidden">
+                ${m1 ? `<img src="${ICONS_3D[m1.key] || ICONS_3D.smile}" class="w-full h-full object-contain" />` : `<div class="w-full h-full bg-slate-100"></div>`}
+              </div>
+              <div class="absolute top-0.5 left-0.5 w-3 h-3 rounded-full overflow-hidden">
+                ${m2 ? `<img src="${ICONS_3D[m2.key] || ICONS_3D.smile}" class="w-full h-full object-contain" />` : `<div class="w-full h-full bg-slate-100"></div>`}
+              </div>
+              <span class="text-[9px] font-bold text-slate-500 mt-2">${toFa(d.jd)}</span>
+            </div>`;
+          }).join('')}
         </div>
-        <div class="w-full h-2 rounded-full bg-slate-100 overflow-hidden"><div class="h-full rounded-full" style="width:${pct}%;background:${cat.color}"></div></div>
-      </div>`;
-    }).join('');
-  }
-
-  const lc = document.getElementById('expenseList');
-  if (!lc) return;
-  if (expenses.length === 0) {
-    lc.innerHTML = `<div class="text-center py-6 text-slate-400 text-xs">هنوز خرجی ثبت نشده</div>`;
-    return;
-  }
-  lc.innerHTML = [...expenses].reverse().map(e => {
-    const ci = BUDGET_CATEGORIES.find(c => c.id === e.category) || BUDGET_CATEGORIES[5];
-    return `<div class="flex items-center justify-between p-3 rounded-2xl bg-white border border-slate-100 shadow-sm gap-2">
-      <div class="flex items-center gap-2.5 min-w-0 flex-1">
-        <div class="w-9 h-9 rounded-xl flex items-center justify-center text-xs font-bold flex-shrink-0" style="background:${ci.color}15;color:${ci.color}"><i class="fa-solid ${ci.icon}"></i></div>
-        <div class="min-w-0">
-          <p class="text-xs font-bold text-slate-800 break-words">${escapeHtml(e.title)}</p>
-          <div class="flex items-center gap-1.5 text-[10px] text-slate-400 mt-0.5 flex-wrap">
-            <span>${e.dateStr || ''}</span>
-            <img src="${e.registeredBy === 'p1' ? ICONS_3D.manTech : ICONS_3D.womanTech}" class="w-3 h-3" alt="" />
-          </div>
+        <div class="flex items-center justify-center gap-4 text-[10px] text-slate-500">
+          <span class="flex items-center gap-1"><span class="w-3 h-3 rounded-full bg-blue-100 border border-blue-300"></span> امیرمحمد</span>
+          <span class="flex items-center gap-1"><span class="w-3 h-3 rounded-full bg-rose-100 border border-rose-300"></span> آرمیتا</span>
         </div>
-      </div>
-      <div class="flex items-center gap-2 flex-shrink-0">
-        <span class="font-display font-extrabold text-sm text-slate-800">${Number(e.amount).toLocaleString('fa-IR')}</span>
-        <button onclick="deleteExpense('${e.id}')" class="text-slate-300 hover:text-rose-500 p-1"><i class="fa-solid fa-trash-can text-xs"></i></button>
-      </div>
-    </div>`;
-  }).join('');
-}
+      `);
+    }
 
-/* ---------- CALENDAR ---------- */
-function getDayCategory(md) {
-  const personal = (appState.personalDates || []).find(p => p.md === md);
-  if (personal) return { type: 'personal', data: personal };
-  if (GIFT_EVENTS[md]) return { type: 'gift', data: GIFT_EVENTS[md] };
-  if (EMBEDDED_HOLIDAYS[md]) return { type: 'holiday', data: { title: EMBEDDED_HOLIDAYS[md] } };
-  return { type: 'normal', data: null };
-}
+    function renderMoodHistory() {
+      // این تابع فقط برای رندر است — modal خودش رندر می‌شود
+    }
 
-function renderCalendarLegend() {
-  const box = document.getElementById('calendarLegend');
-  if (!box) return;
-  const items = [
-    { key: 'birthday',    icon: ICONS_CAL.birthday,    label: 'تولد' },
-    { key: 'anniversary', icon: ICONS_CAL.anniversary, label: 'سالگرد' },
-    { key: 'celebration', icon: ICONS_CAL.celebration, label: 'جشن' },
-    { key: 'travel',      icon: ICONS_CAL.travel,      label: 'سفر' },
-    { key: 'work',        icon: ICONS_CAL.work,        label: 'کار' },
-    { key: 'rest',        icon: ICONS_CAL.rest,        label: 'استراحت' }
-  ];
-  box.innerHTML = `<span class="font-bold text-slate-400">راهنما:</span>` +
-    items.map(i => `
-      <span class="flex items-center gap-1 px-1.5 py-0.5 rounded-lg bg-rose-50/60 border border-rose-100/60">
-        <img src="${i.icon}" data-cal-icon="${i.key}" class="w-3.5 h-3.5 rounded" alt="" />
-        <span>${i.label}</span>
-      </span>`).join('');
-}
-
-function renderCalendar() {
-  const titleEl = document.getElementById('calendarMonthTitle');
-  if (titleEl) titleEl.innerText = `${JALALI_MONTHS[calMonth - 1]} ${calYear}`;
-
-  renderCalendarLegend();
-
-  const grid = document.getElementById('calendarGrid');
-  if (!grid) return;
-  grid.innerHTML = '';
-  const dim = (calMonth <= 6) ? 31 : (calMonth <= 11) ? 30 : 29;
-  const [gy, gm, gd] = jalaliToGregorian(calYear, calMonth, 1);
-  const startDOW = (new Date(gy, gm - 1, gd).getDay() + 1) % 7;
-
-  const now = new Date();
-  const [tjy, tjm, tjd] = gregorianToJalali(now.getFullYear(), now.getMonth() + 1, now.getDate());
-  const isCurrentMonth = (tjy === calYear && tjm === calMonth);
-
-  for (let i = 0; i < startDOW; i++) grid.innerHTML += `<div class="aspect-square"></div>`;
-
-  for (let day = 1; day <= dim; day++) {
-    const mp = String(calMonth).padStart(2, '0');
-    const dp = String(day).padStart(2, '0');
-    const md = `${mp}-${dp}`;
-    const fullKey = `${calYear}-${mp}-${dp}`;
-    const cat = getDayCategory(md);
-    const isSel = (selectedCalDay === day);
-    const isToday = isCurrentMonth && (day === tjd);
-
-    /* اگه کاربر دستی برای این روز آیکون ست کرده */
-    const custom = (appState.customDays || {})[fullKey];
-    const iconKey = custom?.icon || (cat.type === 'personal' ? cat.data.icon : (cat.type === 'gift' ? 'celebration' : null));
-    const hasIcon = !!iconKey;
-    const iconStyle = CAL_ICON_STYLE[iconKey] || { zoom: 120 };
-
-    let cellBgCls = 'cal-day-normal';
-    if (cat.type === 'personal') cellBgCls = 'cal-day-personal';
-    else if (cat.type === 'gift') cellBgCls = 'cal-day-gift';
-    else if (cat.type === 'holiday') cellBgCls = 'cal-day-holiday';
-    if (custom?.bgColor) cellBgCls = '';
-
-    const numColor = (cat.type === 'personal' && !custom?.bgColor) ? '#fff' : '#1e293b';
-
-    const inlineBg = custom?.bgColor ? `background:${custom.bgColor};` : '';
-
-    const iconEl = hasIcon
-      ? `<div class="cal-day-bg" style="background-image:url('${ICONS_CAL[iconKey]}');background-size:${iconStyle.zoom}%;"></div>`
-      : '';
-
-    grid.innerHTML += `
-      <button onclick="selectCalendarDay(${day})" class="cal-day aspect-square rounded-2xl flex items-center justify-center relative transition-all ${cellBgCls} ${isSel ? 'sel' : ''} ${isToday && !isSel ? 'cal-day-today' : ''}" style="${inlineBg}">
-        ${iconEl}
-        <span class="cal-day-num text-xs sm:text-sm" style="color:${isSel ? '#fff' : numColor}">${day}</span>
-      </button>`;
-  }
-  renderSelectedDayDetails();
-}
-
-function selectCalendarDay(day) { selectedCalDay = day; playTone(500, 'sine', 0.05); renderCalendar(); }
-
-function renderSelectedDayDetails() {
-  if (!selectedCalDay) return;
-  const mp = String(calMonth).padStart(2, '0');
-  const dp = String(selectedCalDay).padStart(2, '0');
-  const full = `${calYear}/${mp}/${dp}`;
-  const fullKey = `${calYear}-${mp}-${dp}`;
-  const md = `${mp}-${dp}`;
-  const cat = getDayCategory(md);
-  const custom = (appState.customDays || {})[fullKey];
-
-  const labelEl = document.getElementById('selectedDayLabel');
-  if (labelEl) labelEl.innerText = `${selectedCalDay} ${JALALI_MONTHS[calMonth - 1]}`;
-  const box = document.getElementById('selectedDayEventsList');
-  if (!box) return;
-  let html = '';
-
-  if (cat.type === 'holiday') {
-    html += `<div class="p-3 rounded-2xl bg-rose-100/70 text-rose-700 font-bold flex items-center gap-2.5 text-xs">
-      <img src="${ICONS_CAL.celebration}" data-cal-icon="celebration" class="w-5 h-5 rounded" alt="" />
-      <span>${cat.data.title}</span>
-    </div>`;
-  } else if (cat.type === 'gift') {
-    html += `<div class="p-3 rounded-2xl bg-gradient-to-l from-rose-50 to-pink-100 text-rose-700 font-bold flex items-center gap-2.5 text-xs border border-rose-200">
-      <img src="${ICONS_CAL.anniversary}" data-cal-icon="anniversary" class="w-5 h-5 rounded" alt="" />
-      <span>${cat.data.title} — روز کادو!</span>
-    </div>`;
-  } else if (cat.type === 'personal') {
-    html += `<div class="p-3 rounded-2xl bg-gradient-to-l from-rose-100 to-pink-200 text-rose-800 font-bold flex items-center gap-2.5 text-xs border border-rose-300">
-      <img src="${ICONS_CAL[cat.data.icon] || ICONS_CAL.anniversary}" data-cal-icon="${cat.data.icon || 'anniversary'}" class="w-5 h-5 rounded" alt="" />
-      <span>${cat.data.title} (شروع از سال ${cat.data.year})</span>
-    </div>`;
-  }
-
-  if (custom?.icon) {
-    html += `<div class="p-2.5 rounded-xl bg-amber-50 border border-amber-200 text-amber-700 text-[11px] font-bold flex items-center justify-between gap-2">
-      <span class="flex items-center gap-1.5"><i class="fa-solid fa-thumbtack text-[10px]"></i> آیکون دستی ست شده</span>
-      <button onclick="clearCustomDay('${fullKey}')" class="text-rose-500 text-[10px]">حذف</button>
-    </div>`;
-  }
-
-  const dEvs = (appState.coupleEvents || []).filter(e => e.jalaliDate === full);
-  dEvs.forEach(ev => {
-    const co = EVENT_CATEGORIES.find(c => c.id === ev.category) || EVENT_CATEGORIES[0];
-    html += `<div class="p-3 rounded-2xl bg-white border border-slate-200/80 flex items-center justify-between shadow-sm gap-2">
-      <div class="flex items-center gap-2.5 min-w-0">
-        <span class="w-2.5 h-2.5 rounded-full ${co.dot} flex-shrink-0"></span>
-        <div class="min-w-0">
-          <p class="font-bold text-slate-800 text-xs break-words">${escapeHtml(ev.title)}</p>
-          <p class="text-[10px] text-slate-400">${ev.time ? `ساعت ${ev.time} • ` : ''}${co.name}</p>
-        </div>
-      </div>
-      <button onclick="deleteCoupleEvent('${ev.id}')" class="text-slate-300 hover:text-rose-500 p-1 flex-shrink-0"><i class="fa-solid fa-trash-can text-xs"></i></button>
-    </div>`;
-  });
-
-  if (cat.type === 'normal' && dEvs.length === 0 && !custom?.icon) {
-    html += `<p class="text-slate-400 text-[11px] py-1">روز عادی — با دکمه «ست کردن» می‌تونی آیکون دلخواه بذاری</p>`;
-  }
-
-  box.innerHTML = html;
-}
-
-function changeMonth(dir) {
-  calMonth += dir;
-  if (calMonth > 12) { calMonth = 1; calYear++; } else if (calMonth < 1) { calMonth = 12; calYear--; }
-  selectedCalDay = 1; playTone(400); renderCalendar();
-}
-function goToCurrentMonth() {
-  const now = new Date();
-  const [jy, jm, jd] = gregorianToJalali(now.getFullYear(), now.getMonth() + 1, now.getDate());
-  calYear = jy; calMonth = jm; selectedCalDay = jd; playTone(480); renderCalendar();
-}
-
-/* ====== ست کردن دستی روز ====== */
-function openDayCustomizeModal() {
-  if (!selectedCalDay) return;
-  const mp = String(calMonth).padStart(2, '0');
-  const dp = String(selectedCalDay).padStart(2, '0');
-  const fullKey = `${calYear}-${mp}-${dp}`;
-  const cur = (appState.customDays || {})[fullKey] || {};
-
-  const icons = [
-    { key: '', label: 'بدون آیکون' },
-    { key: 'birthday', label: 'تولد' },
-    { key: 'anniversary', label: 'سالگرد' },
-    { key: 'celebration', label: 'جشن' },
-    { key: 'travel', label: 'سفر' },
-    { key: 'work', label: 'کار' },
-    { key: 'rest', label: 'استراحت' }
-  ];
-
-  const bgColors = [
-    { key: '', label: 'پیش‌فرض', color: '' },
-    { key: 'pink', label: 'صورتی', color: 'linear-gradient(135deg,#fecdd7 0%,#fb7193 60%,#f43f6e 100%)' },
-    { key: 'softpink', label: 'صورتی ملایم', color: 'linear-gradient(180deg,#fff5f7 0%,#ffd8e0 100%)' },
-    { key: 'cream', label: 'کرم', color: 'linear-gradient(180deg,#fff 0%,#ffe4e9 100%)' },
-    { key: 'lavender', label: 'بنفش', color: 'linear-gradient(135deg,#e9d5ff 0%,#c4b5fd 100%)' },
-    { key: 'sky', label: 'آبی', color: 'linear-gradient(135deg,#bae6fd 0%,#7dd3fc 100%)' }
-  ];
-
-  openModalWithContent(`ست کردن روز ${selectedCalDay} ${JALALI_MONTHS[calMonth - 1]}`, `
-    <form onsubmit="handleSaveCustomDay(event, '${fullKey}')" class="space-y-4">
-      <div>
-        <label class="block text-xs font-semibold text-slate-700 mb-2">آیکون</label>
-        <div id="cdIconPicker" class="grid grid-cols-4 gap-2">
-          ${icons.map(i => `
-            <button type="button" data-icon="${i.key}" onclick="pickCdIcon('${i.key}')" class="cd-icon-btn p-2 rounded-2xl border-2 ${(cur.icon || '') === i.key ? 'border-rose-400 bg-rose-50' : 'border-slate-200 bg-white'} flex flex-col items-center gap-1">
-              ${i.key ? `<img src="${ICONS_CAL[i.key]}" data-cal-icon="${i.key}" class="w-7 h-7 rounded" alt="" onerror="this.style.display='none'" />` : `<i class="fa-solid fa-ban text-slate-300 text-lg"></i>`}
-              <span class="text-[9px] font-bold text-slate-600">${i.label}</span>
-            </button>`).join('')}
-        </div>
-      </div>
-      <div>
-        <label class="block text-xs font-semibold text-slate-700 mb-2">پس‌زمینه</label>
-        <div id="cdBgPicker" class="grid grid-cols-3 gap-2">
-          ${bgColors.map(b => `
-            <button type="button" data-bg="${b.key}" onclick="pickCdBg('${b.key}')" class="cd-bg-btn p-2 rounded-xl border-2 ${(cur.bgKey || '') === b.key ? 'border-rose-400' : 'border-slate-200'} flex items-center justify-center gap-1" style="${b.color ? 'background:' + b.color : 'background:#fff'}">
-              <span class="text-[10px] font-bold text-slate-700">${b.label}</span>
-            </button>`).join('')}
-        </div>
-      </div>
-      <div class="flex gap-2 pt-2">
-        <button type="submit" class="flex-1 py-3.5 rounded-2xl bg-rose-500 text-white font-bold text-xs active:scale-95 transition">ذخیره</button>
-        ${cur.icon || cur.bgKey ? `<button type="button" onclick="clearCustomDay('${fullKey}')" class="px-4 py-3.5 rounded-2xl bg-rose-100 text-rose-600 font-bold text-xs">حذف</button>` : ''}
-      </div>
-    </form>`);
-  window._cdIcon = cur.icon || '';
-  window._cdBg = cur.bgKey || '';
-}
-
-function pickCdIcon(k) {
-  window._cdIcon = k;
-  document.querySelectorAll('#cdIconPicker .cd-icon-btn').forEach(b => {
-    b.className = b.dataset.icon === k
-      ? 'cd-icon-btn p-2 rounded-2xl border-2 border-rose-400 bg-rose-50 flex flex-col items-center gap-1'
-      : 'cd-icon-btn p-2 rounded-2xl border-2 border-slate-200 bg-white flex flex-col items-center gap-1';
-  });
-}
-
-function pickCdBg(k) {
-  window._cdBg = k;
-  document.querySelectorAll('#cdBgPicker .cd-bg-btn').forEach(b => {
-    b.className = b.dataset.bg === k
-      ? 'cd-bg-btn p-2 rounded-xl border-2 border-rose-400 flex items-center justify-center gap-1'
-      : 'cd-bg-btn p-2 rounded-xl border-2 border-slate-200 flex items-center justify-center gap-1';
-  });
-}
-
-function handleSaveCustomDay(e, key) {
-  e.preventDefault();
-  const bgMap = {
-    '': '',
-    'pink': 'linear-gradient(135deg,#fecdd7 0%,#fb7193 60%,#f43f6e 100%)',
-    'softpink': 'linear-gradient(180deg,#fff5f7 0%,#ffd8e0 100%)',
-    'cream': 'linear-gradient(180deg,#fff 0%,#ffe4e9 100%)',
-    'lavender': 'linear-gradient(135deg,#e9d5ff 0%,#c4b5fd 100%)',
-    'sky': 'linear-gradient(135deg,#bae6fd 0%,#7dd3fc 100%)'
-  };
-  if (!appState.customDays) appState.customDays = {};
-  const icon = window._cdIcon || '';
-  const bgKey = window._cdBg || '';
-  if (!icon && !bgKey) {
-    delete appState.customDays[key];
-  } else {
-    appState.customDays[key] = { icon, bgKey, bgColor: bgMap[bgKey] || '' };
-  }
-  saveState();
-  closeModal();
-  playTone(600, 'sine', 0.1);
-}
-
-function clearCustomDay(key) {
-  if (appState.customDays) delete appState.customDays[key];
-  saveState();
-  closeModal();
-  playTone(450, 'sine', 0.1);
-}
-
-function updateUpcomingEventTeaser() {
-  const t = document.getElementById('nextEventTeaser');
-  if (!t) return;
-  const now = getNowJalaliString();
-  const todayKey = `${now.jy}-${String(now.jm).padStart(2, '0')}-${String(now.jd).padStart(2, '0')}`;
-
-  const candidates = [];
-  (appState.coupleEvents || []).forEach(ev => {
-    const k = standardizeJalaliDateKey(ev.jalaliDate);
-    if (k && k >= todayKey) candidates.push({ title: ev.title, dateKey: k, kind: 'event' });
-  });
-  (appState.personalDates || []).forEach(p => {
-    [now.jy, now.jy + 1].forEach(y => {
-      const k = `${y}-${p.md}`;
-      if (k >= todayKey) candidates.push({ title: p.title, dateKey: k, kind: 'personal', icon: p.icon });
-    });
-  });
-  Object.entries(GIFT_EVENTS).forEach(([md, info]) => {
-    [now.jy, now.jy + 1].forEach(y => {
-      const k = `${y}-${md}`;
-      if (k >= todayKey) candidates.push({ title: info.title, dateKey: k, kind: 'gift', icon: info.icon });
-    });
-  });
-
-  if (candidates.length === 0) {
-    t.innerHTML = `<i class="fa-regular fa-calendar-check text-rose-400"></i> <span>قرار نزدیکی ثبت نشده</span>`;
-    return;
-  }
-  candidates.sort((a, b) => a.dateKey.localeCompare(b.dateKey));
-  const next = candidates[0];
-
-  const tomorrow = new Date(); tomorrow.setDate(tomorrow.getDate() + 1);
-  const [ty, tm, td] = gregorianToJalali(tomorrow.getFullYear(), tomorrow.getMonth() + 1, tomorrow.getDate());
-  const tomorrowKey = `${ty}-${String(tm).padStart(2, '0')}-${String(td).padStart(2, '0')}`;
-
-  let label;
-  if (next.dateKey === todayKey) label = 'امروز';
-  else if (next.dateKey === tomorrowKey) label = 'فردا';
-  else {
-    const [, mm, dd] = next.dateKey.split('-');
-    label = `${parseInt(dd)} ${JALALI_MONTHS[parseInt(mm) - 1]}`;
-  }
-
-  const icon = (next.icon && ICONS_CAL[next.icon])
-    ? `<img src="${ICONS_CAL[next.icon]}" data-cal-icon="${next.icon}" class="w-4 h-4 inline-block rounded" alt="" />`
-    : `<img src="${ICONS_3D.heart}" class="w-3.5 h-3.5 inline-block" alt="" />`;
-
-  t.innerHTML = `${icon} <span>بعدی: <strong>${escapeHtml(next.title)}</strong> <span class="text-slate-400">(${label})</span></span>`;
-}
-
-/* ---------- WATCHLIST ---------- */
-function renderWatchStatusFilters() {
-  const box = document.getElementById('watchStatusFilters');
-  if (!box) return;
-  const opts = [
-    { id: 'all', label: 'همه', icon: ICONS_3D.eyes },
-    ...WATCH_STATUSES.map(s => ({ id: s.id, label: s.name, icon: ICONS_3D[s.icon] }))
-  ];
-  box.innerHTML = opts.map(o => `
-    <button onclick="filterWatchStatus('${o.id}')" class="shrink-0 px-3 py-1.5 rounded-xl text-[11px] font-bold flex items-center gap-1.5 whitespace-nowrap transition ${currentWatchStatusFilter === o.id ? 'bg-rose-600 text-white shadow-sm' : 'bg-white text-slate-600 border border-slate-200'}">
-      ${o.icon ? `<img src="${o.icon}" class="w-4 h-4 flex-shrink-0" alt="" onerror="this.style.display='none'" />` : ''}
-      <span>${o.label}</span>
-    </button>`).join('');
-}
-
-function renderWatchTypeFilters() {
-  const box = document.getElementById('watchTypeFilters');
-  if (!box) return;
-  const opts = [
-    { id: 'all', label: 'همه', icon: null },
-    ...WATCH_TYPES.map(t => ({ id: t.id, label: t.name, icon: ICONS_3D[t.icon] }))
-  ];
-  box.innerHTML = opts.map(o => `
-    <button onclick="filterWatchType('${o.id}')" class="shrink-0 px-3 py-1.5 rounded-xl text-[11px] font-bold flex items-center gap-1.5 whitespace-nowrap transition ${currentWatchFilter === o.id ? 'bg-purple-600 text-white shadow-sm' : 'bg-white text-slate-600 border border-slate-200'}">
-      ${o.icon ? `<img src="${o.icon}" class="w-4 h-4 flex-shrink-0" alt="" onerror="this.style.display='none'" />` : ''}
-      <span>${o.label}</span>
-    </button>`).join('');
-}
-
-function renderWatchlist() {
-  const c = document.getElementById('watchlistContainer');
-  if (!c) return;
-  let list = appState.watchList || [];
-  if (currentWatchFilter !== 'all') list = list.filter(x => x.type === currentWatchFilter);
-  if (currentWatchStatusFilter !== 'all') list = list.filter(x => x.status === currentWatchStatusFilter);
-
-  if (list.length === 0) {
-    c.innerHTML = `<div class="col-span-full text-center py-8 text-slate-400 text-xs">
-      <img src="${ICONS_3D.clapper}" class="w-10 h-10 mx-auto mb-2 opacity-40" alt="" />
-      <p>موردی با این فیلترها پیدا نشد</p></div>`;
-    return;
-  }
-
-  const typeIcons = { movie: ICONS_3D.clapper, series: ICONS_3D.tv, anime: ICONS_3D.blossom };
-  const typeLabels = { movie: 'فیلم', series: 'سریال', anime: 'انیمه' };
-
-  c.innerHTML = list.map(item => {
-    const statusObj = WATCH_STATUSES.find(s => s.id === item.status) || WATCH_STATUSES[0];
-    const cur = Number(item.currentEpisode) || 0;
-    const total = Number(item.totalEpisodes) || 0;
-    const pct = total > 0 ? Math.min(100, Math.round((cur / total) * 100)) : 0;
-    const isSerial = (item.type === 'series' || item.type === 'anime');
-    const showProgress = isSerial && total > 0;
-
-    const poster = item.posterUrl
-      ? `<img src="${item.posterUrl}" class="media-poster" alt="" onerror="this.style.display='none'" />`
-      : `<div class="media-poster-empty"><img src="${typeIcons[item.type]}" class="w-9 h-9" alt="" /></div>`;
-
-    return `
-      <div class="flex flex-col p-3 rounded-2xl bg-white border border-slate-200/70 shadow-sm gap-2">
-        <div class="flex items-start gap-3">
-          ${poster}
-          <div class="min-w-0 flex-1">
-            <p class="text-sm font-bold ${item.status === 'watched' ? 'line-through text-slate-400' : 'text-slate-800'} break-words leading-tight">${escapeHtml(item.title)}</p>
-            ${item.originalTitle && item.originalTitle !== item.title ? `<p class="text-[9px] text-slate-400 mt-0.5" dir="ltr">${escapeHtml(item.originalTitle)}</p>` : ''}
-            <div class="flex items-center gap-1.5 mt-1.5 text-[10px] text-slate-500 flex-wrap">
-              <span class="text-purple-600 font-semibold flex items-center gap-0.5">
-                <img src="${typeIcons[item.type]}" class="w-3 h-3" alt="" /> ${typeLabels[item.type] || ''}
-              </span>
-              <span>•</span>
-              <span class="font-bold" style="color:${statusObj.color}">${statusObj.name}</span>
-              ${item.rating ? `<span class="flex items-center gap-0.5">• <img src="${ICONS_3D.star}" class="w-3 h-3" alt="" /> ${item.rating}/5</span>` : ''}
-            </div>
-            ${item.overview ? `<p class="media-overview mt-1.5">${escapeHtml(item.overview)}</p>` : ''}
-            <div class="flex items-center gap-1 mt-2">
-              <button onclick="cycleWatchStatus('${item.id}')" class="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0" style="background:${statusObj.color}22;">
-                <img src="${ICONS_3D[statusObj.icon]}" class="w-4 h-4" alt="" />
-              </button>
-              <button onclick="openWatchEditModal('${item.id}')" class="w-7 h-7 rounded-lg text-slate-400 hover:text-purple-600 hover:bg-purple-50 flex items-center justify-center">
-                <i class="fa-solid fa-pen text-[10px]"></i>
-              </button>
-              <button onclick="deleteWatchItem('${item.id}')" class="w-7 h-7 rounded-lg text-slate-300 hover:text-rose-500 hover:bg-rose-50 flex items-center justify-center">
-                <i class="fa-solid fa-trash-can text-[10px]"></i>
-              </button>
+    /* ---------- GROCERIES ---------- */
+    function renderGroceries() {
+      const c = document.getElementById('groceryList');
+      if (!c) return;
+      const list = appState.groceries || [];
+      const badge = document.getElementById('groceryCountBadge');
+      if (badge) badge.innerText = `${toFaNum(list.length)} قلم کالا`;
+      if (list.length === 0) {
+        c.innerHTML = `<div class="text-center py-8 text-slate-400 text-xs">
+          <img src="${ICONS_3D.cart}" class="w-10 h-10 mx-auto mb-2 opacity-40" alt="" />
+          <p>سبد خرید خالیه</p></div>`;
+        return;
+      }
+      c.innerHTML = list.map(item => `
+        <div class="flex items-center justify-between p-3 rounded-2xl ${item.done ? 'bg-slate-50/70 border border-slate-200/50' : 'bg-white border border-rose-100/80 shadow-sm'}">
+          <div class="flex items-center gap-2.5 min-w-0 flex-1">
+            <button onclick="toggleGrocery('${item.id}')" class="w-6 h-6 rounded-lg border-2 ${item.done ? 'bg-rose-500 border-rose-500 text-white' : 'border-slate-300'} flex items-center justify-center text-[10px] flex-shrink-0">
+              ${item.done ? '<i class="fa-solid fa-check"></i>' : ''}
+            </button>
+            <div class="min-w-0 flex-1">
+              <p class="text-xs font-bold ${item.done ? 'line-through text-slate-400' : 'text-slate-800'} break-words">${escapeHtml(item.name)}</p>
+              <div class="flex items-center gap-1.5 mt-0.5 flex-wrap">
+                <span class="text-[10px] text-slate-400 flex items-center gap-1"><i class="fa-regular fa-clock text-[9px]"></i> ${item.timeBadge || ''}</span>
+                <img src="${item.addedBy === 'p1' ? ICONS_3D.manTech : ICONS_3D.womanTech}" class="w-3.5 h-3.5" alt="" />
+              </div>
             </div>
           </div>
-        </div>
+          <button onclick="deleteGrocery('${item.id}')" class="w-7 h-7 rounded-xl text-slate-300 hover:text-rose-500 hover:bg-rose-50 flex items-center justify-center flex-shrink-0">
+            <i class="fa-solid fa-trash-can text-[10px]"></i>
+          </button>
+        </div>`).join('');
+    }
 
-        ${showProgress ? `
-          <div class="space-y-1.5 pt-1.5 border-t border-slate-100">
-            <div class="flex items-center justify-between text-[10px] font-bold">
-              <span class="text-slate-500">پیشرفت</span>
-              <span class="text-purple-600">${cur.toLocaleString('fa-IR')} از ${total.toLocaleString('fa-IR')} (${pct.toLocaleString('fa-IR')}٪)</span>
+    function clearCompletedGroceries() {
+      appState.groceries = (appState.groceries || []).filter(g => !g.done);
+      saveState(); playTone(450);
+    }
+
+    /* ---------- CHORES ---------- */
+    function renderChoreFilters() {
+      const box = document.getElementById('choreFilters');
+      if (!box) return;
+      const opts = [
+        { id: 'all', label: 'همه' },
+        { id: 'both', label: 'دونفره', icon: ICONS_3D.handshake },
+        { id: 'p1', label: 'امیرمحمد', icon: ICONS_3D.manTech },
+        { id: 'p2', label: 'آرمیتا', icon: ICONS_3D.womanTech }
+      ];
+      box.innerHTML = opts.map(o => `
+        <button onclick="filterChores('${o.id}')" id="choreFilter-${o.id}" class="shrink-0 px-2.5 py-1 rounded-xl ${currentChoreFilter === o.id ? 'bg-indigo-500 text-white' : 'bg-white text-slate-600 border border-slate-200'} font-bold flex items-center gap-1 whitespace-nowrap transition">
+          ${o.icon ? `<img src="${o.icon}" class="w-3.5 h-3.5" alt="" />` : ''}
+          <span>${o.label}</span>
+        </button>`).join('');
+    }
+
+    function renderChores() {
+      const c = document.getElementById('choreList');
+      if (!c) return;
+      let list = appState.chores || [];
+      if (currentChoreFilter !== 'all') list = list.filter(x => x.assignee === currentChoreFilter);
+      if (list.length === 0) {
+        c.innerHTML = `<div class="text-center py-8 text-slate-400 text-xs">
+          <img src="${ICONS_3D.broom}" class="w-10 h-10 mx-auto mb-2 opacity-40" alt="" />
+          <p>همه کارها انجام شده</p></div>`;
+        return;
+      }
+      c.innerHTML = list.map(x => `
+        <div class="flex items-center justify-between p-3 rounded-2xl ${x.done ? 'bg-slate-50/70 border border-slate-200/50' : 'bg-white border border-indigo-100/80 shadow-sm'}">
+          <div class="flex items-center gap-2.5 min-w-0 flex-1">
+            <button onclick="toggleChore('${x.id}')" class="w-6 h-6 rounded-lg border-2 ${x.done ? 'bg-indigo-500 border-indigo-500 text-white' : 'border-slate-300'} flex items-center justify-center text-[10px] flex-shrink-0">
+              ${x.done ? '<i class="fa-solid fa-check"></i>' : ''}
+            </button>
+            <div class="min-w-0 flex-1">
+              <p class="text-xs font-bold ${x.done ? 'line-through text-slate-400' : 'text-slate-800'} break-words">${escapeHtml(x.title)}</p>
+              <div class="flex items-center gap-1.5 mt-0.5 flex-wrap">
+                <span class="text-[10px] text-slate-400">${x.timeBadge || ''}</span>
+                <img src="${x.assignee === 'p1' ? ICONS_3D.manTech : x.assignee === 'p2' ? ICONS_3D.womanTech : ICONS_3D.handshake}" class="w-3.5 h-3.5" alt="" />
+              </div>
+            </div>
+          </div>
+          <button onclick="deleteChore('${x.id}')" class="w-7 h-7 rounded-xl text-slate-300 hover:text-rose-500 hover:bg-rose-50 flex items-center justify-center flex-shrink-0">
+            <i class="fa-solid fa-trash-can text-[10px]"></i>
+          </button>
+        </div>`).join('');
+    }
+
+    function filterChores(id) {
+      currentChoreFilter = id;
+      renderChoreFilters();
+      renderChores();
+    }
+
+    /* ---------- BUDGET ---------- */
+    function renderBudgetChart() {
+      const expenses = appState.expenses || [];
+      const total = expenses.reduce((s, x) => s + (Number(x.amount) || 0), 0);
+      const amtEl = document.getElementById('chartTotalAmount');
+      const cntEl = document.getElementById('expenseCountText');
+      if (amtEl) amtEl.innerText = toFaNum(total);
+      if (cntEl) cntEl.innerText = `${toFaNum(expenses.length)} فقره`;
+
+      const limit = Number(appState.monthlyBudgetLimit) || 0;
+      const ind = document.getElementById('budgetLimitIndicator');
+      if (ind) {
+        if (limit > 0) {
+          const rem = limit - total;
+          const pct = Math.min(100, Math.round((total / limit) * 100));
+          ind.innerHTML = `
+            <div class="flex items-center justify-between text-[11px] mb-1">
+              <span>سقف: <strong>${toFaNum(limit)}</strong></span>
+              <span class="${rem >= 0 ? 'text-emerald-600' : 'text-rose-600'} font-bold">${rem >= 0 ? `${toFaNum(rem)} باقی` : `${toFaNum(Math.abs(rem))} فراتر`}</span>
             </div>
             <div class="w-full h-2 rounded-full bg-slate-100 overflow-hidden">
-              <div class="h-full rounded-full bg-gradient-to-r from-purple-400 to-rose-400" style="width:${pct}%"></div>
+              <div class="h-full rounded-full ${pct > 90 ? 'bg-rose-500' : pct > 70 ? 'bg-amber-400' : 'bg-emerald-500'}" style="width: ${pct}%"></div>
+            </div>`;
+        } else {
+          ind.innerHTML = `<button onclick="openSetMonthlyBudgetModal()" class="text-rose-500 font-bold underline text-xs">تعیین سقف بودجه</button>`;
+        }
+      }
+
+      const catTotals = {};
+      BUDGET_CATEGORIES.forEach(c => catTotals[c.id] = 0);
+      expenses.forEach(e => { const c = e.category || 'other'; catTotals[c] = (catTotals[c] || 0) + (Number(e.amount) || 0); });
+
+      const svg = document.getElementById('budgetDonutSvg');
+      if (svg) {
+        const circ = 2 * Math.PI * 38;
+        let offset = 0;
+        let html = `<circle cx="50" cy="50" r="38" stroke="#f1f5f9" stroke-width="11" fill="transparent"/>`;
+        BUDGET_CATEGORIES.forEach(cat => {
+          const v = catTotals[cat.id];
+          if (v > 0 && total > 0) {
+            const dash = (v / total) * circ;
+            html += `<circle cx="50" cy="50" r="38" stroke="${cat.color}" stroke-width="11" fill="transparent" stroke-dasharray="${dash} ${circ}" stroke-dashoffset="${-offset}" stroke-linecap="round"/>`;
+            offset += dash;
+          }
+        });
+        svg.innerHTML = html;
+      }
+
+      const catBox = document.getElementById('categoryBreakdownContainer');
+      if (catBox) {
+        catBox.innerHTML = BUDGET_CATEGORIES.map(cat => {
+          const v = catTotals[cat.id] || 0;
+          const pct = total > 0 ? Math.round((v / total) * 100) : 0;
+          return `<div class="space-y-1">
+            <div class="flex items-center justify-between text-xs">
+              <div class="flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-full" style="background:${cat.color}"></span><span class="font-bold text-slate-700">${cat.name}</span></div>
+              <div class="flex items-center gap-2 text-slate-500"><span class="font-extrabold text-slate-800">${toFaNum(v)}</span><span class="text-[10px] w-8 text-left font-semibold">${toFa(pct)}٪</span></div>
             </div>
-            <div class="flex items-center gap-1.5 pt-1">
-              <button onclick="incrementWatchEpisode('${item.id}')" class="flex-1 py-1.5 rounded-lg bg-purple-100 hover:bg-purple-200 text-purple-700 text-[10px] font-bold flex items-center justify-center gap-1">
-                <i class="fa-solid fa-plus text-[9px]"></i> قسمت بعد
-              </button>
-              ${cur > 0 ? `<button onclick="decrementWatchEpisode('${item.id}')" class="px-2.5 py-1.5 rounded-lg bg-slate-100 text-slate-600 text-[10px] font-bold"><i class="fa-solid fa-minus text-[9px]"></i></button>` : ''}
-            </div>
-          </div>
-        ` : isSerial ? `
-          <div class="pt-1.5 border-t border-slate-100">
-            <button onclick="openWatchEditModal('${item.id}')" class="text-[10px] font-bold text-purple-600 flex items-center gap-1">
-              <i class="fa-solid fa-plus text-[9px]"></i> افزودن تعداد قسمت‌ها
-            </button>
-          </div>
-        ` : ''}
-      </div>`;
-  }).join('');
-}
+            <div class="w-full h-2 rounded-full bg-slate-100 overflow-hidden"><div class="h-full rounded-full" style="width:${pct}%;background:${cat.color}"></div></div>
+          </div>`;
+        }).join('');
+      }
 
-function filterWatchStatus(id) { currentWatchStatusFilter = id; renderWatchStatusFilters(); renderWatchlist(); }
-function filterWatchType(id) { currentWatchFilter = id; renderWatchTypeFilters(); renderWatchlist(); }
-
-/* ---------- GAMES ---------- */
-function renderGameStatusFilters() {
-  const box = document.getElementById('gameStatusFilters');
-  if (!box) return;
-  const opts = [
-    { id: 'all', label: 'همه', icon: ICONS_3D.eyes },
-    ...GAME_STATUSES.map(s => ({ id: s.id, label: s.name, icon: ICONS_3D[s.icon] }))
-  ];
-  box.innerHTML = opts.map(o => `
-    <button onclick="filterGameStatus('${o.id}')" class="shrink-0 px-3 py-1.5 rounded-xl text-[11px] font-bold flex items-center gap-1.5 whitespace-nowrap transition ${currentGameStatusFilter === o.id ? 'bg-indigo-600 text-white shadow-sm' : 'bg-white text-slate-600 border border-slate-200'}">
-      ${o.icon ? `<img src="${o.icon}" class="w-4 h-4 flex-shrink-0" alt="" onerror="this.style.display='none'" />` : ''}
-      <span>${o.label}</span>
-    </button>`).join('');
-}
-
-function renderGameList() {
-  const c = document.getElementById('gameListContainer');
-  if (!c) return;
-  let list = appState.gameList || [];
-  if (currentGameStatusFilter !== 'all') list = list.filter(x => x.status === currentGameStatusFilter);
-
-  if (list.length === 0) {
-    c.innerHTML = `<div class="col-span-full text-center py-8 text-slate-400 text-xs">
-      <img src="${ICONS_3D.videoGame}" class="w-10 h-10 mx-auto mb-2 opacity-40" alt="" />
-      <p>هنوز بازی‌ای اضافه نشده</p></div>`;
-    return;
-  }
-
-  c.innerHTML = list.map(g => {
-    const statusObj = GAME_STATUSES.find(s => s.id === g.status) || GAME_STATUSES[0];
-    const platformName = GAME_PLATFORMS.find(p => p.id === g.platform)?.name || g.platform;
-    const poster = g.posterUrl
-      ? `<img src="${g.posterUrl}" class="media-poster" alt="" onerror="this.style.display='none'" />`
-      : `<div class="media-poster-empty"><img src="${ICONS_3D.videoGame}" class="w-9 h-9" alt="" /></div>`;
-
-    return `
-      <div class="flex flex-col p-3 rounded-2xl bg-white border border-slate-200/70 shadow-sm gap-2">
-        <div class="flex items-start gap-3">
-          ${poster}
-          <div class="min-w-0 flex-1">
-            <p class="text-sm font-bold ${g.status === 'played' ? 'line-through text-slate-400' : 'text-slate-800'} break-words leading-tight">${escapeHtml(g.title)}</p>
-            <div class="flex items-center gap-1.5 mt-1.5 text-[10px] text-slate-500 flex-wrap">
-              <span class="px-1.5 py-0.5 rounded-md bg-indigo-50 text-indigo-600 font-semibold">${platformName}</span>
-              <span class="font-bold" style="color:${statusObj.color}">${statusObj.name}</span>
-              ${g.hours > 0 ? `<span class="flex items-center gap-0.5"><i class="fa-regular fa-clock text-[9px]"></i> ${g.hours}س</span>` : ''}
-              ${g.rating ? `<span class="flex items-center gap-0.5"><img src="${ICONS_3D.star}" class="w-3 h-3" alt="" /> ${g.rating}/5</span>` : ''}
-            </div>
-            <div class="flex items-center gap-1 mt-2">
-              <button onclick="cycleGameStatus('${g.id}')" class="w-7 h-7 rounded-lg flex items-center justify-center" style="background:${statusObj.color}22;">
-                <img src="${ICONS_3D[statusObj.icon]}" class="w-4 h-4" alt="" />
-              </button>
-              <button onclick="openGameEditModal('${g.id}')" class="w-7 h-7 rounded-lg text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 flex items-center justify-center">
-                <i class="fa-solid fa-pen text-[10px]"></i>
-              </button>
-              <button onclick="deleteGame('${g.id}')" class="w-7 h-7 rounded-lg text-slate-300 hover:text-rose-500 hover:bg-rose-50 flex items-center justify-center">
-                <i class="fa-solid fa-trash-can text-[10px]"></i>
-              </button>
+      const lc = document.getElementById('expenseList');
+      if (!lc) return;
+      if (expenses.length === 0) {
+        lc.innerHTML = `<div class="text-center py-6 text-slate-400 text-xs">هنوز خرجی ثبت نشده</div>`;
+        return;
+      }
+      lc.innerHTML = [...expenses].reverse().map(e => {
+        const ci = BUDGET_CATEGORIES.find(c => c.id === e.category) || BUDGET_CATEGORIES[5];
+        return `<div class="flex items-center justify-between p-3 rounded-2xl bg-white border border-slate-100 shadow-sm gap-2">
+          <div class="flex items-center gap-2.5 min-w-0 flex-1">
+            <div class="w-9 h-9 rounded-xl flex items-center justify-center text-xs font-bold flex-shrink-0" style="background:${ci.color}15;color:${ci.color}"><i class="fa-solid ${ci.icon}"></i></div>
+            <div class="min-w-0">
+              <p class="text-xs font-bold text-slate-800 break-words">${escapeHtml(e.title)}</p>
+              <div class="flex items-center gap-1.5 text-[10px] text-slate-400 mt-0.5 flex-wrap">
+                <span>${e.dateStr || ''}</span>
+                <img src="${e.registeredBy === 'p1' ? ICONS_3D.manTech : ICONS_3D.womanTech}" class="w-3 h-3" alt="" />
+              </div>
             </div>
           </div>
-        </div>
-      </div>`;
-  }).join('');
-}
-
-function filterGameStatus(id) { currentGameStatusFilter = id; renderGameStatusFilters(); renderGameList(); }
-
-/* ---------- BUCKET ---------- */
-function renderBucketList() {
-  const c = document.getElementById('bucketList');
-  if (!c) return;
-  const list = appState.bucketList || [];
-  if (list.length === 0) {
-    c.innerHTML = `<p class="text-center py-6 text-slate-400 text-xs">هنوز آرزویی ننوشتیم</p>`;
-    return;
-  }
-  c.innerHTML = list.map(item => `
-    <div class="flex items-center justify-between p-3 rounded-2xl ${item.done ? 'bg-slate-50 border border-slate-200/60' : 'bg-white border border-rose-100'} shadow-sm gap-2">
-      <div class="flex items-center gap-2.5 min-w-0 flex-1">
-        <button onclick="toggleBucket('${item.id}')" class="w-5 h-5 rounded-lg border-2 ${item.done ? 'bg-amber-400 border-amber-400 text-white' : 'border-slate-300'} flex items-center justify-center text-[10px] flex-shrink-0">
-          ${item.done ? '<i class="fa-solid fa-check"></i>' : ''}
-        </button>
-        <span class="text-xs font-bold ${item.done ? 'line-through text-slate-400' : 'text-slate-700'} break-words">${escapeHtml(item.title)}</span>
-      </div>
-      <button onclick="deleteBucket('${item.id}')" class="text-slate-300 hover:text-rose-500 p-1 flex-shrink-0"><i class="fa-solid fa-trash-can text-xs"></i></button>
-    </div>`).join('');
-}
-
-/* ---------- IDEAS ---------- */
-function renderDateIdeasDrawer() {
-  const d = document.getElementById('ideasDrawer');
-  if (!d) return;
-  const list = appState.dateIdeas || [];
-  d.innerHTML = list.map((idea, i) => `
-    <div class="flex items-center justify-between p-2 rounded-xl bg-slate-100 text-[11px] text-slate-700 gap-2">
-      <span class="flex-1 flex items-center gap-2 min-w-0">
-        <span class="w-6 h-6 rounded-md bg-rose-100 text-rose-700 font-bold flex items-center justify-center flex-shrink-0 text-[10px]">${(i + 1).toLocaleString('fa-IR')}</span>
-        <span class="truncate">${escapeHtml(idea)}</span>
-      </span>
-      <button onclick="deleteCustomIdea(${i})" class="text-slate-400 hover:text-rose-500 flex-shrink-0"><i class="fa-solid fa-xmark text-xs"></i></button>
-    </div>`).join('');
-}
-
-function toggleIdeasDrawer() {
-  const d = document.getElementById('ideasDrawer');
-  if (d) d.classList.toggle('hidden');
-}
-
-/* ---------- NOTES ---------- */
-function renderNotes() {
-  const c = document.getElementById('notesContainer');
-  if (!c) return;
-  const notes = appState.notes || [];
-  if (notes.length === 0) {
-    c.innerHTML = `<div class="col-span-full text-center py-8 text-slate-400 text-xs">دیوار نامه‌ها خالیه</div>`;
-    return;
-  }
-  const grad = [
-    'from-pink-50 to-rose-100 border-rose-200',
-    'from-amber-50 to-orange-100 border-amber-200',
-    'from-purple-50 to-fuchsia-100 border-purple-200',
-    'from-teal-50 to-emerald-100 border-teal-200'
-  ];
-  c.innerHTML = [...notes].reverse().map((n, i) => `
-    <div class="p-4 rounded-3xl bg-gradient-to-br ${grad[i % grad.length]} border shadow-sm space-y-2 relative">
-      <p class="text-xs font-semibold text-slate-800 leading-relaxed break-words">${escapeHtml(n.content)}</p>
-      <div class="flex items-center justify-between text-[10px] text-slate-500 pt-2 border-t border-black/5">
-        <img src="${n.author === 'p1' ? ICONS_3D.manTech : ICONS_3D.womanTech}" class="w-4 h-4" alt="" />
-        <span>${n.timeBadge || ''}</span>
-      </div>
-      <button onclick="deleteNote('${n.id}')" class="absolute top-2 left-2 text-slate-400 hover:text-rose-600 p-1"><i class="fa-solid fa-xmark text-xs"></i></button>
-    </div>`).join('');
-}
-
-/* ---------- UTILS ---------- */
-function escapeHtml(str) {
-  if (str === null || str === undefined) return '';
-  return String(str)
-    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;').replace(/'/g, '&#039;');
-}
-
-/* ============================================================
-   SEARCH APIs + ترجمه خودکار فارسی به انگلیسی
-   ============================================================ */
-async function translateFaToEn(text) {
-  try {
-    const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=fa&tl=en&dt=t&q=${encodeURIComponent(text)}`;
-    const res = await fetch(url);
-    const data = await res.json();
-    return data?.[0]?.[0]?.[0] || text;
-  } catch (e) { return text; }
-}
-
-async function searchTMDB(query, type) {
-  if (!query) return [];
-  try {
-    const urlFa = `https://api.themoviedb.org/3/search/${type}?api_key=${TMDB_API_KEY}&query=${encodeURIComponent(query)}&language=fa-IR&include_adult=false`;
-    const resFa = await fetch(urlFa);
-    const dataFa = await resFa.json();
-    let results = dataFa.results || [];
-    if (results.length === 0) {
-      const enQ = await translateFaToEn(query);
-      const urlEn = `https://api.themoviedb.org/3/search/${type}?api_key=${TMDB_API_KEY}&query=${encodeURIComponent(enQ)}&language=fa-IR&include_adult=false`;
-      const resEn = await fetch(urlEn);
-      const dataEn = await resEn.json();
-      results = dataEn.results || [];
+          <div class="flex items-center gap-2 flex-shrink-0">
+            <span class="font-display font-extrabold text-sm text-slate-800">${toFaNum(e.amount)}</span>
+            <button onclick="deleteExpense('${e.id}')" class="text-slate-300 hover:text-rose-500 p-1"><i class="fa-solid fa-trash-can text-xs"></i></button>
+          </div>
+        </div>`;
+      }).join('');
     }
-    return results.slice(0, 8).map(r => ({
-      id: r.id,
-      title: r.title || r.name || '',
-      originalTitle: r.original_title || r.original_name || '',
-      year: (r.release_date || r.first_air_date || '').slice(0, 4),
-      poster: r.poster_path ? `https://image.tmdb.org/t/p/w342${r.poster_path}` : '',
-      overview: (r.overview || '').slice(0, 180)
-    }));
-  } catch (e) { console.warn('TMDB error', e); return []; }
-}
 
-async function searchJikan(query) {
-  if (!query) return [];
-  try {
-    let url = `https://api.jikan.moe/v4/anime?q=${encodeURIComponent(query)}&limit=8`;
-    let res = await fetch(url);
-    let data = await res.json();
-    let list = data.data || [];
-    if (list.length === 0) {
-      const enQ = await translateFaToEn(query);
-      url = `https://api.jikan.moe/v4/anime?q=${encodeURIComponent(enQ)}&limit=8`;
-      res = await fetch(url);
-      data = await res.json();
-      list = data.data || [];
+    /* ---------- CALENDAR ---------- */
+    function getDayCategory(md) {
+      const personal = (appState.personalDates || []).find(p => p.md === md);
+      if (personal) return { type: 'personal', data: personal };
+      if (GIFT_EVENTS[md]) return { type: 'gift', data: GIFT_EVENTS[md] };
+      if (EMBEDDED_HOLIDAYS[md]) return { type: 'holiday', data: { title: EMBEDDED_HOLIDAYS[md] } };
+      return { type: 'normal', data: null };
     }
-    return list.map(a => ({
-      id: a.mal_id,
-      title: a.title_japanese || a.title || '',
-      originalTitle: a.title || '',
-      year: (a.year || (a.aired?.prop?.from?.year) || '').toString(),
-      poster: a.images?.jpg?.image_url || '',
-      overview: (a.synopsis || '').slice(0, 180)
-    }));
-  } catch (e) { console.warn('Jikan error', e); return []; }
-}
 
-async function searchCheapShark(query) {
-  if (!query) return [];
-  try {
-    let url = `https://www.cheapshark.com/api/1.0/games?title=${encodeURIComponent(query)}&limit=8`;
-    let res = await fetch(url);
-    let data = await res.json();
-    if (!Array.isArray(data) || data.length === 0) {
-      const enQ = await translateFaToEn(query);
-      url = `https://www.cheapshark.com/api/1.0/games?title=${encodeURIComponent(enQ)}&limit=8`;
-      res = await fetch(url);
-      data = await res.json();
+    function renderCalendarLegend() {
+      const box = document.getElementById('calendarLegend');
+      if (!box) return;
+      const items = [
+        { key: 'birthday',    icon: ICONS_CAL.birthday,    label: 'تولد' },
+        { key: 'anniversary', icon: ICONS_CAL.anniversary, label: 'سالگرد' },
+        { key: 'celebration', icon: ICONS_CAL.celebration, label: 'جشن' },
+        { key: 'travel',      icon: ICONS_CAL.travel,      label: 'سفر' },
+        { key: 'work',        icon: ICONS_CAL.work,        label: 'کار' },
+        { key: 'rest',        icon: ICONS_CAL.rest,        label: 'استراحت' }
+      ];
+      box.innerHTML = `<span class="font-bold text-slate-400">راهنما:</span>` +
+        items.map(i => `
+          <span class="flex items-center gap-1 px-1.5 py-0.5 rounded-lg bg-rose-50/60 border border-rose-100/60">
+            <img src="${i.icon}" data-cal-icon="${i.key}" class="w-3.5 h-3.5 rounded" alt="" />
+            <span>${i.label}</span>
+          </span>`).join('');
     }
-    if (!Array.isArray(data)) return [];
-    const seen = new Set();
-    return data.filter(g => {
-      if (seen.has(g.external)) return false;
-      seen.add(g.external);
-      return true;
-    }).map(g => ({
-      id: g.gameID,
-      title: g.external || '',
-      originalTitle: g.external || '',
-      year: '',
-      poster: g.thumb || '',
-      overview: ''
-    }));
-  } catch (e) { console.warn('CheapShark error', e); return []; }
-}
 
-/* ==================== END OF PART 2 ==================== */
+    function renderCalendar() {
+      const titleEl = document.getElementById('calendarMonthTitle');
+      if (titleEl) titleEl.innerText = `${JALALI_MONTHS[calMonth - 1]} ${toFa(calYear)}`;
+
+      renderCalendarLegend();
+
+      const grid = document.getElementById('calendarGrid');
+      if (!grid) return;
+      grid.innerHTML = '';
+      const dim = (calMonth <= 6) ? 31 : (calMonth <= 11) ? 30 : 29;
+      const [gy, gm, gd] = jalaliToGregorian(calYear, calMonth, 1);
+      const startDOW = (new Date(gy, gm - 1, gd).getDay() + 1) % 7;
+
+      const now = new Date();
+      const [tjy, tjm, tjd] = gregorianToJalali(now.getFullYear(), now.getMonth() + 1, now.getDate());
+      const isCurrentMonth = (tjy === calYear && tjm === calMonth);
+
+      for (let i = 0; i < startDOW; i++) grid.innerHTML += `<div class="aspect-square"></div>`;
+
+      for (let day = 1; day <= dim; day++) {
+        const mp = String(calMonth).padStart(2, '0');
+        const dp = String(day).padStart(2, '0');
+        const md = `${mp}-${dp}`;
+        const fullKey = `${calYear}-${mp}-${dp}`;
+        const cat = getDayCategory(md);
+        const isSel = (selectedCalDay === day);
+        const isToday = isCurrentMonth && (day === tjd);
+
+        const custom = (appState.customDays || {})[fullKey];
+        const iconKey = custom?.icon || (cat.type === 'personal' ? cat.data.icon : (cat.type === 'gift' ? 'celebration' : null));
+        const hasIcon = !!iconKey;
+        const iconStyle = CAL_ICON_STYLE[iconKey] || { zoom: 120 };
+
+        let cellBgCls = 'cal-day-normal';
+        if (cat.type === 'personal') cellBgCls = 'cal-day-personal';
+        else if (cat.type === 'gift') cellBgCls = 'cal-day-gift';
+        else if (cat.type === 'holiday') cellBgCls = 'cal-day-holiday';
+        if (custom?.bgColor) cellBgCls = '';
+
+        const numColor = (cat.type === 'personal' && !custom?.bgColor) ? '#fff' : '#1e293b';
+        const inlineBg = custom?.bgColor ? `background:${custom.bgColor};` : '';
+        const iconEl = hasIcon
+          ? `<div class="cal-day-bg" style="background-image:url('${ICONS_CAL[iconKey]}');background-size:${iconStyle.zoom}%;"></div>`
+          : '';
+
+        grid.innerHTML += `
+          <button onclick="selectCalendarDay(${day})" class="cal-day aspect-square rounded-2xl flex items-center justify-center relative transition-all ${cellBgCls} ${isSel ? 'sel' : ''} ${isToday && !isSel ? 'cal-day-today' : ''}" style="${inlineBg}">
+            ${iconEl}
+            <span class="cal-day-num text-xs sm:text-sm" style="color:${isSel ? '#fff' : numColor}">${toFa(day)}</span>
+          </button>`;
+      }
+      renderSelectedDayDetails();
+    }
+
+    function selectCalendarDay(day) { selectedCalDay = day; playTone(500, 'sine', 0.05); renderCalendar(); }
+
+    function renderSelectedDayDetails() {
+      if (!selectedCalDay) return;
+      const mp = String(calMonth).padStart(2, '0');
+      const dp = String(selectedCalDay).padStart(2, '0');
+      const full = `${calYear}/${mp}/${dp}`;
+      const fullKey = `${calYear}-${mp}-${dp}`;
+      const md = `${mp}-${dp}`;
+      const cat = getDayCategory(md);
+      const custom = (appState.customDays || {})[fullKey];
+
+      const labelEl = document.getElementById('selectedDayLabel');
+      if (labelEl) labelEl.innerText = `${toFa(selectedCalDay)} ${JALALI_MONTHS[calMonth - 1]}`;
+      const box = document.getElementById('selectedDayEventsList');
+      if (!box) return;
+      let html = '';
+
+      if (cat.type === 'holiday') {
+        html += `<div class="p-3 rounded-2xl bg-rose-100/70 text-rose-700 font-bold flex items-center gap-2.5 text-xs">
+          <img src="${ICONS_CAL.celebration}" data-cal-icon="celebration" class="w-5 h-5 rounded" alt="" />
+          <span>${cat.data.title}</span>
+        </div>`;
+      } else if (cat.type === 'gift') {
+        html += `<div class="p-3 rounded-2xl bg-gradient-to-l from-rose-50 to-pink-100 text-rose-700 font-bold flex items-center gap-2.5 text-xs border border-rose-200">
+          <img src="${ICONS_CAL.anniversary}" data-cal-icon="anniversary" class="w-5 h-5 rounded" alt="" />
+          <span>${cat.data.title} — روز کادو!</span>
+        </div>`;
+      } else if (cat.type === 'personal') {
+        html += `<div class="p-3 rounded-2xl bg-gradient-to-l from-rose-100 to-pink-200 text-rose-800 font-bold flex items-center gap-2.5 text-xs border border-rose-300">
+          <img src="${ICONS_CAL[cat.data.icon] || ICONS_CAL.anniversary}" data-cal-icon="${cat.data.icon || 'anniversary'}" class="w-5 h-5 rounded" alt="" />
+          <span>${cat.data.title} (شروع از سال ${toFa(cat.data.year)})</span>
+        </div>`;
+      }
+
+      if (custom?.icon) {
+        html += `<div class="p-2.5 rounded-xl bg-amber-50 border border-amber-200 text-amber-700 text-[11px] font-bold flex items-center justify-between gap-2">
+          <span class="flex items-center gap-1.5"><i class="fa-solid fa-thumbtack text-[10px]"></i> آیکون دستی ست شده</span>
+          <button onclick="clearCustomDay('${fullKey}')" class="text-rose-500 text-[10px]">حذف</button>
+        </div>`;
+      }
+
+      const dEvs = (appState.coupleEvents || []).filter(e => e.jalaliDate === full);
+      dEvs.forEach(ev => {
+        const co = EVENT_CATEGORIES.find(c => c.id === ev.category) || EVENT_CATEGORIES[0];
+        html += `<div class="p-3 rounded-2xl bg-white border border-slate-200/80 flex items-center justify-between shadow-sm gap-2">
+          <div class="flex items-center gap-2.5 min-w-0">
+            <span class="w-2.5 h-2.5 rounded-full ${co.dot} flex-shrink-0"></span>
+            <div class="min-w-0">
+              <p class="font-bold text-slate-800 text-xs break-words">${escapeHtml(ev.title)}</p>
+              <p class="text-[10px] text-slate-400">${ev.time ? `ساعت ${toFa(ev.time)} • ` : ''}${co.name}</p>
+            </div>
+          </div>
+          <button onclick="deleteCoupleEvent('${ev.id}')" class="text-slate-300 hover:text-rose-500 p-1 flex-shrink-0"><i class="fa-solid fa-trash-can text-xs"></i></button>
+        </div>`;
+      });
+
+      if (cat.type === 'normal' && dEvs.length === 0 && !custom?.icon) {
+        html += `<p class="text-slate-400 text-[11px] py-1">روز عادی — با دکمه «ست کردن» می‌تونی آیکون دلخواه بذاری</p>`;
+      }
+
+      box.innerHTML = html;
+    }
+
+    function changeMonth(dir) {
+      calMonth += dir;
+      if (calMonth > 12) { calMonth = 1; calYear++; } else if (calMonth < 1) { calMonth = 12; calYear--; }
+      selectedCalDay = 1; playTone(400); renderCalendar();
+    }
+    function goToCurrentMonth() {
+      const now = new Date();
+      const [jy, jm, jd] = gregorianToJalali(now.getFullYear(), now.getMonth() + 1, now.getDate());
+      calYear = jy; calMonth = jm; selectedCalDay = jd; playTone(480); renderCalendar();
+    }
+
+    function openDayCustomizeModal() {
+      if (!selectedCalDay) return;
+      const mp = String(calMonth).padStart(2, '0');
+      const dp = String(selectedCalDay).padStart(2, '0');
+      const fullKey = `${calYear}-${mp}-${dp}`;
+      const cur = (appState.customDays || {})[fullKey] || {};
+
+      const icons = [
+        { key: '', label: 'بدون' },
+        { key: 'birthday', label: 'تولد' },
+        { key: 'anniversary', label: 'سالگرد' },
+        { key: 'celebration', label: 'جشن' },
+        { key: 'travel', label: 'سفر' },
+        { key: 'work', label: 'کار' },
+        { key: 'rest', label: 'استراحت' }
+      ];
+
+      const bgColors = [
+        { key: '', label: 'پیش‌فرض', color: '' },
+        { key: 'pink', label: 'صورتی', color: 'linear-gradient(135deg,#fecdd7 0%,#fb7193 60%,#f43f6e 100%)' },
+        { key: 'softpink', label: 'ملایم', color: 'linear-gradient(180deg,#fff5f7 0%,#ffd8e0 100%)' },
+        { key: 'cream', label: 'کرم', color: 'linear-gradient(180deg,#fff 0%,#ffe4e9 100%)' },
+        { key: 'lavender', label: 'بنفش', color: 'linear-gradient(135deg,#e9d5ff 0%,#c4b5fd 100%)' },
+        { key: 'sky', label: 'آبی', color: 'linear-gradient(135deg,#bae6fd 0%,#7dd3fc 100%)' }
+      ];
+
+      openModalWithContent(`ست کردن روز ${toFa(selectedCalDay)} ${JALALI_MONTHS[calMonth - 1]}`, `
+        <form onsubmit="handleSaveCustomDay(event, '${fullKey}')" class="space-y-4">
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-2">آیکون</label>
+            <div id="cdIconPicker" class="grid grid-cols-4 gap-2">
+              ${icons.map(i => `
+                <button type="button" data-icon="${i.key}" onclick="pickCdIcon('${i.key}')" class="cd-icon-btn p-2 rounded-2xl border-2 ${(cur.icon || '') === i.key ? 'border-rose-400 bg-rose-50' : 'border-slate-200 bg-white'} flex flex-col items-center gap-1">
+                  ${i.key ? `<img src="${ICONS_CAL[i.key]}" data-cal-icon="${i.key}" class="w-7 h-7 rounded" alt="" onerror="this.style.display='none'" />` : `<i class="fa-solid fa-ban text-slate-300 text-lg"></i>`}
+                  <span class="text-[9px] font-bold text-slate-600">${i.label}</span>
+                </button>`).join('')}
+            </div>
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-2">پس‌زمینه</label>
+            <div id="cdBgPicker" class="grid grid-cols-3 gap-2">
+              ${bgColors.map(b => `
+                <button type="button" data-bg="${b.key}" onclick="pickCdBg('${b.key}')" class="cd-bg-btn p-2 rounded-xl border-2 ${(cur.bgKey || '') === b.key ? 'border-rose-400' : 'border-slate-200'} flex items-center justify-center gap-1" style="${b.color ? 'background:' + b.color : 'background:#fff'}">
+                  <span class="text-[10px] font-bold text-slate-700">${b.label}</span>
+                </button>`).join('')}
+            </div>
+          </div>
+          <div class="flex gap-2 pt-2">
+            <button type="submit" class="flex-1 py-3.5 rounded-2xl bg-rose-500 text-white font-bold text-xs active:scale-95 transition">ذخیره</button>
+            ${cur.icon || cur.bgKey ? `<button type="button" onclick="clearCustomDay('${fullKey}')" class="px-4 py-3.5 rounded-2xl bg-rose-100 text-rose-600 font-bold text-xs">حذف</button>` : ''}
+          </div>
+        </form>`);
+      window._cdIcon = cur.icon || '';
+      window._cdBg = cur.bgKey || '';
+    }
+
+    function pickCdIcon(k) {
+      window._cdIcon = k;
+      document.querySelectorAll('#cdIconPicker .cd-icon-btn').forEach(b => {
+        b.className = b.dataset.icon === k
+          ? 'cd-icon-btn p-2 rounded-2xl border-2 border-rose-400 bg-rose-50 flex flex-col items-center gap-1'
+          : 'cd-icon-btn p-2 rounded-2xl border-2 border-slate-200 bg-white flex flex-col items-center gap-1';
+      });
+    }
+
+    function pickCdBg(k) {
+      window._cdBg = k;
+      document.querySelectorAll('#cdBgPicker .cd-bg-btn').forEach(b => {
+        b.className = b.dataset.bg === k
+          ? 'cd-bg-btn p-2 rounded-xl border-2 border-rose-400 flex items-center justify-center gap-1'
+          : 'cd-bg-btn p-2 rounded-xl border-2 border-slate-200 flex items-center justify-center gap-1';
+      });
+    }
+
+    function handleSaveCustomDay(e, key) {
+      e.preventDefault();
+      const bgMap = {
+        '': '',
+        'pink': 'linear-gradient(135deg,#fecdd7 0%,#fb7193 60%,#f43f6e 100%)',
+        'softpink': 'linear-gradient(180deg,#fff5f7 0%,#ffd8e0 100%)',
+        'cream': 'linear-gradient(180deg,#fff 0%,#ffe4e9 100%)',
+        'lavender': 'linear-gradient(135deg,#e9d5ff 0%,#c4b5fd 100%)',
+        'sky': 'linear-gradient(135deg,#bae6fd 0%,#7dd3fc 100%)'
+      };
+      if (!appState.customDays) appState.customDays = {};
+      const icon = window._cdIcon || '';
+      const bgKey = window._cdBg || '';
+      if (!icon && !bgKey) {
+        delete appState.customDays[key];
+      } else {
+        appState.customDays[key] = { icon, bgKey, bgColor: bgMap[bgKey] || '' };
+      }
+      saveState();
+      closeModal();
+      playTone(600, 'sine', 0.1);
+    }
+
+    function clearCustomDay(key) {
+      if (appState.customDays) delete appState.customDays[key];
+      saveState();
+      closeModal();
+      playTone(450, 'sine', 0.1);
+    }
+
+    function updateUpcomingEventTeaser() {
+      const t = document.getElementById('nextEventTeaser');
+      if (!t) return;
+      const now = getNowJalaliString();
+      const todayKey = `${now.jy}-${String(now.jm).padStart(2, '0')}-${String(now.jd).padStart(2, '0')}`;
+
+      const candidates = [];
+      (appState.coupleEvents || []).forEach(ev => {
+        const k = standardizeJalaliDateKey(ev.jalaliDate);
+        if (k && k >= todayKey) candidates.push({ title: ev.title, dateKey: k, kind: 'event' });
+      });
+      (appState.personalDates || []).forEach(p => {
+        [now.jy, now.jy + 1].forEach(y => {
+          const k = `${y}-${p.md}`;
+          if (k >= todayKey) candidates.push({ title: p.title, dateKey: k, kind: 'personal', icon: p.icon });
+        });
+      });
+      Object.entries(GIFT_EVENTS).forEach(([md, info]) => {
+        [now.jy, now.jy + 1].forEach(y => {
+          const k = `${y}-${md}`;
+          if (k >= todayKey) candidates.push({ title: info.title, dateKey: k, kind: 'gift', icon: info.icon });
+        });
+      });
+
+      if (candidates.length === 0) {
+        t.innerHTML = `<i class="fa-regular fa-calendar-check text-rose-400"></i> <span>قرار نزدیکی ثبت نشده</span>`;
+        return;
+      }
+      candidates.sort((a, b) => a.dateKey.localeCompare(b.dateKey));
+      const next = candidates[0];
+
+      const tomorrow = new Date(); tomorrow.setDate(tomorrow.getDate() + 1);
+      const [ty, tm, td] = gregorianToJalali(tomorrow.getFullYear(), tomorrow.getMonth() + 1, tomorrow.getDate());
+      const tomorrowKey = `${ty}-${String(tm).padStart(2, '0')}-${String(td).padStart(2, '0')}`;
+
+      let label;
+      if (next.dateKey === todayKey) label = 'امروز';
+      else if (next.dateKey === tomorrowKey) label = 'فردا';
+      else {
+        const [, mm, dd] = next.dateKey.split('-');
+        label = `${toFa(parseInt(dd))} ${JALALI_MONTHS[parseInt(mm) - 1]}`;
+      }
+
+      const icon = (next.icon && ICONS_CAL[next.icon])
+        ? `<img src="${ICONS_CAL[next.icon]}" data-cal-icon="${next.icon}" class="w-4 h-4 inline-block rounded" alt="" />`
+        : `<img src="${ICONS_3D.heart}" class="w-3.5 h-3.5 inline-block" alt="" />`;
+
+      t.innerHTML = `${icon} <span>بعدی: <strong>${escapeHtml(next.title)}</strong> <span class="text-slate-400">(${label})</span></span>`;
+    }
+
     /* ============================================================
+       SEARCH APIs + ترجمه خودکار ترکیبی (گوگل + OpenRouter)
+       ============================================================ */
+    let _translationCache = {};
+
+    async function translateFaToEnWithOpenRouter(text) {
+      if (!text || !OPENROUTER_TRANSLATE_KEY || OPENROUTER_TRANSLATE_KEY.includes('PASTE')) return null;
+      if (_translationCache[text]) return _translationCache[text];
+      try {
+        const res = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${OPENROUTER_TRANSLATE_KEY}`
+          },
+          body: JSON.stringify({
+            model: 'nvidia/nemotron-3-super-120b-a12b:free',
+            messages: [
+              { role: 'system', content: 'You are a translator. Translate the given Persian text to English. Return ONLY the English translation, nothing else. If it is an anime/movie/series name, use the official English title.' },
+              { role: 'user', content: text }
+            ],
+            temperature: 0.1
+          })
+        });
+        if (!res.ok) return null;
+        const data = await res.json();
+        const result = data?.choices?.[0]?.message?.content?.trim() || null;
+        if (result) _translationCache[text] = result;
+        return result;
+      } catch (e) {
+        console.warn('OpenRouter translate error', e);
+        return null;
+      }
+    }
+
+    async function translateFaToEnWithGoogle(text) {
+      try {
+        const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=fa&tl=en&dt=t&q=${encodeURIComponent(text)}`;
+        const res = await fetch(url);
+        const data = await res.json();
+        return data?.[0]?.[0]?.[0] || text;
+      } catch (e) { return text; }
+    }
+
+    async function smartTranslateFaToEn(text) {
+      // ۱. کش
+      if (_translationCache[text]) return _translationCache[text];
+      // ۲. OpenRouter (کیفیت بالاتر)
+      const orResult = await translateFaToEnWithOpenRouter(text);
+      if (orResult) return orResult;
+      // ۳. Google Translate (سریع‌تر، fallback)
+      const gResult = await translateFaToEnWithGoogle(text);
+      if (gResult) _translationCache[text] = gResult;
+      return gResult || text;
+    }
+
+    async function searchTMDB(query, type) {
+      if (!query) return [];
+      try {
+        const urlFa = `https://api.themoviedb.org/3/search/${type}?api_key=${TMDB_API_KEY}&query=${encodeURIComponent(query)}&language=fa-IR&include_adult=false`;
+        const resFa = await fetch(urlFa);
+        const dataFa = await resFa.json();
+        let results = dataFa.results || [];
+        if (results.length === 0) {
+          const enQ = await smartTranslateFaToEn(query);
+          const urlEn = `https://api.themoviedb.org/3/search/${type}?api_key=${TMDB_API_KEY}&query=${encodeURIComponent(enQ)}&language=fa-IR&include_adult=false`;
+          const resEn = await fetch(urlEn);
+          const dataEn = await resEn.json();
+          results = dataEn.results || [];
+        }
+        return results.slice(0, 8).map(r => ({
+          id: r.id,
+          title: r.title || r.name || '',
+          originalTitle: r.original_title || r.original_name || '',
+          year: (r.release_date || r.first_air_date || '').slice(0, 4),
+          poster: r.poster_path ? `https://image.tmdb.org/t/p/w342${r.poster_path}` : '',
+          overview: (r.overview || '').slice(0, 180)
+        }));
+      } catch (e) { console.warn('TMDB error', e); return []; }
+    }
+
+    async function searchJikan(query) {
+      if (!query) return [];
+      try {
+        let url = `https://api.jikan.moe/v4/anime?q=${encodeURIComponent(query)}&limit=8`;
+        let res = await fetch(url);
+        let data = await res.json();
+        let list = data.data || [];
+        if (list.length === 0) {
+          const enQ = await smartTranslateFaToEn(query);
+          url = `https://api.jikan.moe/v4/anime?q=${encodeURIComponent(enQ)}&limit=8`;
+          res = await fetch(url);
+          data = await res.json();
+          list = data.data || [];
+        }
+        return list.map(a => ({
+          id: a.mal_id,
+          title: a.title_japanese || a.title || '',
+          originalTitle: a.title || '',
+          year: (a.year || (a.aired?.prop?.from?.year) || '').toString(),
+          poster: a.images?.jpg?.image_url || '',
+          overview: (a.synopsis || '').slice(0, 180)
+        }));
+      } catch (e) { console.warn('Jikan error', e); return []; }
+    }
+
+    async function searchCheapShark(query) {
+      if (!query) return [];
+      try {
+        let url = `https://www.cheapshark.com/api/1.0/games?title=${encodeURIComponent(query)}&limit=8`;
+        let res = await fetch(url);
+        let data = await res.json();
+        if (!Array.isArray(data) || data.length === 0) {
+          const enQ = await smartTranslateFaToEn(query);
+          url = `https://www.cheapshark.com/api/1.0/games?title=${encodeURIComponent(enQ)}&limit=8`;
+          res = await fetch(url);
+          data = await res.json();
+        }
+        if (!Array.isArray(data)) return [];
+        const seen = new Set();
+        return data.filter(g => {
+          if (seen.has(g.external)) return false;
+          seen.add(g.external);
+          return true;
+        }).map(g => ({
+          id: g.gameID,
+          title: g.external || '',
+          originalTitle: g.external || '',
+          year: '',
+          poster: g.thumb || '',
+          overview: ''
+        }));
+      } catch (e) { console.warn('CheapShark error', e); return []; }
+    }
+
+    /* ---------- WATCHLIST RENDER ---------- */
+    function renderWatchStatusFilters() {
+      const box = document.getElementById('watchStatusFilters');
+      if (!box) return;
+      const opts = [
+        { id: 'all', label: 'همه', icon: ICONS_3D.eyes },
+        ...WATCH_STATUSES.map(s => ({ id: s.id, label: s.name, icon: ICONS_3D[s.icon] }))
+      ];
+      box.innerHTML = opts.map(o => `
+        <button onclick="filterWatchStatus('${o.id}')" class="shrink-0 px-3 py-1.5 rounded-xl text-[11px] font-bold flex items-center gap-1.5 whitespace-nowrap transition ${currentWatchStatusFilter === o.id ? 'bg-rose-600 text-white shadow-sm' : 'bg-white text-slate-600 border border-slate-200'}">
+          ${o.icon ? `<img src="${o.icon}" class="w-4 h-4 flex-shrink-0" alt="" onerror="this.style.display='none'" />` : ''}
+          <span>${o.label}</span>
+        </button>`).join('');
+    }
+
+    function renderWatchTypeFilters() {
+      const box = document.getElementById('watchTypeFilters');
+      if (!box) return;
+      const opts = [
+        { id: 'all', label: 'همه', icon: null },
+        ...WATCH_TYPES.map(t => ({ id: t.id, label: t.name, icon: ICONS_3D[t.icon] }))
+      ];
+      box.innerHTML = opts.map(o => `
+        <button onclick="filterWatchType('${o.id}')" class="shrink-0 px-3 py-1.5 rounded-xl text-[11px] font-bold flex items-center gap-1.5 whitespace-nowrap transition ${currentWatchFilter === o.id ? 'bg-purple-600 text-white shadow-sm' : 'bg-white text-slate-600 border border-slate-200'}">
+          ${o.icon ? `<img src="${o.icon}" class="w-4 h-4 flex-shrink-0" alt="" onerror="this.style.display='none'" />` : ''}
+          <span>${o.label}</span>
+        </button>`).join('');
+    }
+
+    function renderWatchlist() {
+      const c = document.getElementById('watchlistContainer');
+      if (!c) return;
+      let list = appState.watchList || [];
+      if (currentWatchFilter !== 'all') list = list.filter(x => x.type === currentWatchFilter);
+      if (currentWatchStatusFilter !== 'all') list = list.filter(x => x.status === currentWatchStatusFilter);
+
+      if (list.length === 0) {
+        c.innerHTML = `<div class="col-span-full text-center py-8 text-slate-400 text-xs">
+          <img src="${ICONS_3D.clapper}" class="w-10 h-10 mx-auto mb-2 opacity-40" alt="" />
+          <p>موردی با این فیلترها پیدا نشد</p></div>`;
+        return;
+      }
+
+      const typeIcons = { movie: ICONS_3D.clapper, series: ICONS_3D.tv, anime: ICONS_3D.blossom };
+      const typeLabels = { movie: 'فیلم', series: 'سریال', anime: 'انیمه' };
+
+      c.innerHTML = list.map(item => {
+        const statusObj = WATCH_STATUSES.find(s => s.id === item.status) || WATCH_STATUSES[0];
+        const cur = Number(item.currentEpisode) || 0;
+        const total = Number(item.totalEpisodes) || 0;
+        const pct = total > 0 ? Math.min(100, Math.round((cur / total) * 100)) : 0;
+        const isSerial = (item.type === 'series' || item.type === 'anime');
+        const showProgress = isSerial && total > 0;
+
+        const poster = item.posterUrl
+          ? `<img src="${item.posterUrl}" class="media-poster" alt="" onerror="this.style.display='none'" />`
+          : `<div class="media-poster-empty"><img src="${typeIcons[item.type]}" class="w-9 h-9" alt="" /></div>`;
+
+        return `
+          <div class="flex flex-col p-3 rounded-2xl bg-white border border-slate-200/70 shadow-sm gap-2">
+            <div class="flex items-start gap-3">
+              ${poster}
+              <div class="min-w-0 flex-1">
+                <p class="text-sm font-bold ${item.status === 'watched' ? 'line-through text-slate-400' : 'text-slate-800'} break-words leading-tight">${escapeHtml(item.title)}</p>
+                ${item.originalTitle && item.originalTitle !== item.title ? `<p class="text-[9px] text-slate-400 mt-0.5" dir="ltr">${escapeHtml(item.originalTitle)}</p>` : ''}
+                <div class="flex items-center gap-1.5 mt-1.5 text-[10px] text-slate-500 flex-wrap">
+                  <span class="text-purple-600 font-semibold flex items-center gap-0.5">
+                    <img src="${typeIcons[item.type]}" class="w-3 h-3" alt="" /> ${typeLabels[item.type] || ''}
+                  </span>
+                  <span>•</span>
+                  <span class="font-bold" style="color:${statusObj.color}">${statusObj.name}</span>
+                  ${item.rating ? `<span class="flex items-center gap-0.5">• <img src="${ICONS_3D.star}" class="w-3 h-3" alt="" /> ${toFa(item.rating)}/۵</span>` : ''}
+                </div>
+                ${item.overview ? `<p class="media-overview mt-1.5">${escapeHtml(item.overview)}</p>` : ''}
+                <div class="flex items-center gap-1 mt-2">
+                  <button onclick="cycleWatchStatus('${item.id}')" class="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0" style="background:${statusObj.color}22;">
+                    <img src="${ICONS_3D[statusObj.icon]}" class="w-4 h-4" alt="" />
+                  </button>
+                  <button onclick="openWatchEditModal('${item.id}')" class="w-7 h-7 rounded-lg text-slate-400 hover:text-purple-600 hover:bg-purple-50 flex items-center justify-center">
+                    <i class="fa-solid fa-pen text-[10px]"></i>
+                  </button>
+                  <button onclick="deleteWatchItem('${item.id}')" class="w-7 h-7 rounded-lg text-slate-300 hover:text-rose-500 hover:bg-rose-50 flex items-center justify-center">
+                    <i class="fa-solid fa-trash-can text-[10px]"></i>
+                  </button>
+                </div>
+              </div>
+            </div>
+            ${showProgress ? `
+              <div class="space-y-1.5 pt-1.5 border-t border-slate-100">
+                <div class="flex items-center justify-between text-[10px] font-bold">
+                  <span class="text-slate-500">پیشرفت</span>
+                  <span class="text-purple-600">${toFaNum(cur)} از ${toFaNum(total)} (${toFa(pct)}٪)</span>
+                </div>
+                <div class="w-full h-2 rounded-full bg-slate-100 overflow-hidden">
+                  <div class="h-full rounded-full bg-gradient-to-r from-purple-400 to-rose-400" style="width:${pct}%"></div>
+                </div>
+                <div class="flex items-center gap-1.5 pt-1">
+                  <button onclick="incrementWatchEpisode('${item.id}')" class="flex-1 py-1.5 rounded-lg bg-purple-100 hover:bg-purple-200 text-purple-700 text-[10px] font-bold flex items-center justify-center gap-1">
+                    <i class="fa-solid fa-plus text-[9px]"></i> قسمت بعد
+                  </button>
+                  ${cur > 0 ? `<button onclick="decrementWatchEpisode('${item.id}')" class="px-2.5 py-1.5 rounded-lg bg-slate-100 text-slate-600 text-[10px] font-bold"><i class="fa-solid fa-minus text-[9px]"></i></button>` : ''}
+                </div>
+              </div>
+            ` : isSerial ? `
+              <div class="pt-1.5 border-t border-slate-100">
+                <button onclick="openWatchEditModal('${item.id}')" class="text-[10px] font-bold text-purple-600 flex items-center gap-1">
+                  <i class="fa-solid fa-plus text-[9px]"></i> افزودن تعداد قسمت‌ها
+                </button>
+              </div>
+            ` : ''}
+          </div>`;
+      }).join('');
+    }
+
+    function filterWatchStatus(id) { currentWatchStatusFilter = id; renderWatchStatusFilters(); renderWatchlist(); }
+    function filterWatchType(id) { currentWatchFilter = id; renderWatchTypeFilters(); renderWatchlist(); }
+
+    /* ---------- GAMES RENDER ---------- */
+    function renderGameStatusFilters() {
+      const box = document.getElementById('gameStatusFilters');
+      if (!box) return;
+      const opts = [
+        { id: 'all', label: 'همه', icon: ICONS_3D.eyes },
+        ...GAME_STATUSES.map(s => ({ id: s.id, label: s.name, icon: ICONS_3D[s.icon] }))
+      ];
+      box.innerHTML = opts.map(o => `
+        <button onclick="filterGameStatus('${o.id}')" class="shrink-0 px-3 py-1.5 rounded-xl text-[11px] font-bold flex items-center gap-1.5 whitespace-nowrap transition ${currentGameStatusFilter === o.id ? 'bg-indigo-600 text-white shadow-sm' : 'bg-white text-slate-600 border border-slate-200'}">
+          ${o.icon ? `<img src="${o.icon}" class="w-4 h-4 flex-shrink-0" alt="" onerror="this.style.display='none'" />` : ''}
+          <span>${o.label}</span>
+        </button>`).join('');
+    }
+
+    function renderGameList() {
+      const c = document.getElementById('gameListContainer');
+      if (!c) return;
+      let list = appState.gameList || [];
+      if (currentGameStatusFilter !== 'all') list = list.filter(x => x.status === currentGameStatusFilter);
+
+      if (list.length === 0) {
+        c.innerHTML = `<div class="col-span-full text-center py-8 text-slate-400 text-xs">
+          <img src="${ICONS_3D.videoGame}" class="w-10 h-10 mx-auto mb-2 opacity-40" alt="" />
+          <p>هنوز بازی‌ای اضافه نشده</p></div>`;
+        return;
+      }
+
+      c.innerHTML = list.map(g => {
+        const statusObj = GAME_STATUSES.find(s => s.id === g.status) || GAME_STATUSES[0];
+        const platformName = GAME_PLATFORMS.find(p => p.id === g.platform)?.name || g.platform;
+        const poster = g.posterUrl
+          ? `<img src="${g.posterUrl}" class="media-poster" alt="" onerror="this.style.display='none'" />`
+          : `<div class="media-poster-empty"><img src="${ICONS_3D.videoGame}" class="w-9 h-9" alt="" /></div>`;
+
+        return `
+          <div class="flex flex-col p-3 rounded-2xl bg-white border border-slate-200/70 shadow-sm gap-2">
+            <div class="flex items-start gap-3">
+              ${poster}
+              <div class="min-w-0 flex-1">
+                <p class="text-sm font-bold ${g.status === 'played' ? 'line-through text-slate-400' : 'text-slate-800'} break-words leading-tight">${escapeHtml(g.title)}</p>
+                <div class="flex items-center gap-1.5 mt-1.5 text-[10px] text-slate-500 flex-wrap">
+                  <span class="px-1.5 py-0.5 rounded-md bg-indigo-50 text-indigo-600 font-semibold">${platformName}</span>
+                  <span class="font-bold" style="color:${statusObj.color}">${statusObj.name}</span>
+                  ${g.hours > 0 ? `<span class="flex items-center gap-0.5"><i class="fa-regular fa-clock text-[9px]"></i> ${toFa(g.hours)}س</span>` : ''}
+                  ${g.rating ? `<span class="flex items-center gap-0.5"><img src="${ICONS_3D.star}" class="w-3 h-3" alt="" /> ${toFa(g.rating)}/۵</span>` : ''}
+                </div>
+                <div class="flex items-center gap-1 mt-2">
+                  <button onclick="cycleGameStatus('${g.id}')" class="w-7 h-7 rounded-lg flex items-center justify-center" style="background:${statusObj.color}22;">
+                    <img src="${ICONS_3D[statusObj.icon]}" class="w-4 h-4" alt="" />
+                  </button>
+                  <button onclick="openGameEditModal('${g.id}')" class="w-7 h-7 rounded-lg text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 flex items-center justify-center">
+                    <i class="fa-solid fa-pen text-[10px]"></i>
+                  </button>
+                  <button onclick="deleteGame('${g.id}')" class="w-7 h-7 rounded-lg text-slate-300 hover:text-rose-500 hover:bg-rose-50 flex items-center justify-center">
+                    <i class="fa-solid fa-trash-can text-[10px]"></i>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>`;
+      }).join('');
+    }
+
+    function filterGameStatus(id) { currentGameStatusFilter = id; renderGameStatusFilters(); renderGameList(); }
+
+    /* ---------- BUCKET ---------- */
+    function renderBucketList() {
+      const c = document.getElementById('bucketList');
+      if (!c) return;
+      const list = appState.bucketList || [];
+      if (list.length === 0) {
+        c.innerHTML = `<p class="text-center py-6 text-slate-400 text-xs">هنوز آرزویی ننوشتیم</p>`;
+        return;
+      }
+      c.innerHTML = list.map(item => `
+        <div class="flex items-center justify-between p-3 rounded-2xl ${item.done ? 'bg-slate-50 border border-slate-200/60' : 'bg-white border border-rose-100'} shadow-sm gap-2">
+          <div class="flex items-center gap-2.5 min-w-0 flex-1">
+            <button onclick="toggleBucket('${item.id}')" class="w-5 h-5 rounded-lg border-2 ${item.done ? 'bg-amber-400 border-amber-400 text-white' : 'border-slate-300'} flex items-center justify-center text-[10px] flex-shrink-0">
+              ${item.done ? '<i class="fa-solid fa-check"></i>' : ''}
+            </button>
+            <span class="text-xs font-bold ${item.done ? 'line-through text-slate-400' : 'text-slate-700'} break-words">${escapeHtml(item.title)}</span>
+          </div>
+          <button onclick="deleteBucket('${item.id}')" class="text-slate-300 hover:text-rose-500 p-1 flex-shrink-0"><i class="fa-solid fa-trash-can text-xs"></i></button>
+        </div>`).join('');
+    }
+
+    /* ---------- IDEAS ---------- */
+    function renderDateIdeasDrawer() {
+      const d = document.getElementById('ideasDrawer');
+      if (!d) return;
+      const list = appState.dateIdeas || [];
+      d.innerHTML = list.map((idea, i) => `
+        <div class="flex items-center justify-between p-2 rounded-xl bg-slate-100 text-[11px] text-slate-700 gap-2">
+          <span class="flex-1 flex items-center gap-2 min-w-0">
+            <span class="w-6 h-6 rounded-md bg-rose-100 text-rose-700 font-bold flex items-center justify-center flex-shrink-0 text-[10px]">${toFa(i + 1)}</span>
+            <span class="truncate">${escapeHtml(idea)}</span>
+          </span>
+          <button onclick="deleteCustomIdea(${i})" class="text-slate-400 hover:text-rose-500 flex-shrink-0"><i class="fa-solid fa-xmark text-xs"></i></button>
+        </div>`).join('');
+    }
+
+    function toggleIdeasDrawer() {
+      const d = document.getElementById('ideasDrawer');
+      if (d) d.classList.toggle('hidden');
+    }
+
+    /* ---------- NOTES ---------- */
+    function renderNotes() {
+      const c = document.getElementById('notesContainer');
+      if (!c) return;
+      const notes = appState.notes || [];
+      if (notes.length === 0) {
+        c.innerHTML = `<div class="col-span-full text-center py-8 text-slate-400 text-xs">دیوار نامه‌ها خالیه</div>`;
+        return;
+      }
+      const grad = [
+        'from-pink-50 to-rose-100 border-rose-200',
+        'from-amber-50 to-orange-100 border-amber-200',
+        'from-purple-50 to-fuchsia-100 border-purple-200',
+        'from-teal-50 to-emerald-100 border-teal-200'
+      ];
+      c.innerHTML = [...notes].reverse().map((n, i) => `
+        <div class="p-4 rounded-3xl bg-gradient-to-br ${grad[i % grad.length]} border shadow-sm space-y-2 relative">
+          <p class="text-xs font-semibold text-slate-800 leading-relaxed break-words">${escapeHtml(n.content)}</p>
+          <div class="flex items-center justify-between text-[10px] text-slate-500 pt-2 border-t border-black/5">
+            <img src="${n.author === 'p1' ? ICONS_3D.manTech : ICONS_3D.womanTech}" class="w-4 h-4" alt="" />
+            <span>${n.timeBadge || ''}</span>
+          </div>
+          <button onclick="deleteNote('${n.id}')" class="absolute top-2 left-2 text-slate-400 hover:text-rose-600 p-1"><i class="fa-solid fa-xmark text-xs"></i></button>
+        </div>`).join('');
+    }
+
+    /* ---------- DIARY ---------- */
+    function renderDiary() {
+      const c = document.getElementById('diaryContainer');
+      if (!c) return;
+      const diary = appState.diary || [];
+      // گروه‌بندی بر اساس تاریخ
+      const grouped = {};
+      diary.forEach(d => {
+        if (!grouped[d.dateKey]) grouped[d.dateKey] = [];
+        grouped[d.dateKey].push(d);
+      });
+      const sortedDates = Object.keys(grouped).sort((a, b) => b.localeCompare(a));
+
+      if (sortedDates.length === 0) {
+        c.innerHTML = `<p class="text-center py-6 text-slate-400 text-xs">هنوز خاطره‌ای ثبت نشده — اولین خاطره رو بنویس</p>`;
+        return;
+      }
+
+      c.innerHTML = sortedDates.slice(0, 10).map(dateKey => {
+        const posts = grouped[dateKey];
+        const [jy, jm, jd] = dateKey.split('-').map(Number);
+        return `
+          <div class="mb-3">
+            <div class="flex items-center gap-2 mb-2">
+              <span class="text-[11px] font-black text-slate-600">${toFa(jd)} ${JALALI_MONTHS[jm - 1]} ${toFa(jy)}</span>
+              <div class="flex-1 h-px bg-rose-100"></div>
+            </div>
+            ${posts.map(p => `
+              <div class="diary-post ${editingDiaryId === p.id ? 'editing' : ''}">
+                <div class="flex items-center justify-between mb-1.5">
+                  <div class="flex items-center gap-1.5">
+                    <img src="${p.author === 'p1' ? ICONS_3D.manTech : ICONS_3D.womanTech}" class="w-4 h-4" alt="" />
+                    <span class="text-[10px] font-bold ${p.author === 'p1' ? 'text-blue-600' : 'text-rose-600'}">${p.author === 'p1' ? 'امیرمحمد' : 'آرمیتا'}</span>
+                    <span class="text-[9px] text-slate-400">${p.time || ''}</span>
+                  </div>
+                  <div class="flex items-center gap-1">
+                    <button onclick="openDiaryPostModal('${p.id}')" class="text-slate-300 hover:text-rose-500 p-0.5"><i class="fa-solid fa-pen text-[9px]"></i></button>
+                    <button onclick="deleteDiaryPost('${p.id}')" class="text-slate-300 hover:text-rose-500 p-0.5"><i class="fa-solid fa-trash-can text-[9px]"></i></button>
+                  </div>
+                </div>
+                <p class="text-xs text-slate-700 leading-relaxed break-words">${escapeHtml(p.text)}</p>
+                ${p.imageUrl ? `<img src="${p.imageUrl}" class="diary-img" alt="" />` : ''}
+              </div>
+            `).join('')}
+          </div>`;
+      }).join('');
+    }
+
+    function deleteDiaryPost(id) {
+      requestConfirm('حذف خاطره', 'مطمئنی می‌خوای این خاطره رو حذف کنی؟', () => {
+        appState.diary = (appState.diary || []).filter(d => d.id !== id);
+        saveState();
+        renderDiary();
+        playTone(400, 'sine', 0.1);
+      });
+    }
+
+    function handleSaveDiaryPost(e, editId) {
+      e.preventDefault();
+      const text = document.getElementById('diaryText').value.trim();
+      if (!text) return;
+      const now = getNowJalaliString();
+      const todayKey = getTodayKey();
+      const timeStr = `${String(new Date().getHours()).padStart(2, '0')}:${String(new Date().getMinutes()).padStart(2, '0')}`;
+
+      if (editId) {
+        const post = (appState.diary || []).find(d => d.id === editId);
+        if (post) { post.text = text; }
+        editingDiaryId = null;
+      } else {
+        appState.diary.push({
+          id: 'd_' + Date.now(),
+          text,
+          author: currentPersona,
+          dateKey: todayKey,
+          time: toFa(timeStr),
+          imageUrl: '',
+          createdAt: new Date().toISOString()
+        });
+      }
+      saveState();
+      closeModal();
+      renderDiary();
+      playTone(600, 'sine', 0.1);
+    }
+
+    function openDiaryPostModal(editId) {
+      const post = editId ? (appState.diary || []).find(d => d.id === editId) : null;
+      const now = getNowJalaliString();
+      const todayLabel = `${toFa(now.jd)} ${JALALI_MONTHS[now.jm - 1]}`;
+      openModalWithContent(editId ? 'ویرایش خاطره' : `خاطره جدید — ${todayLabel}`, `
+        <form onsubmit="handleSaveDiaryPost(event, ${editId ? `'${editId}'` : 'null'})" class="space-y-4">
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1.5">متن خاطره</label>
+            <textarea id="diaryText" required rows="5" placeholder="امروز چه خبر بود؟..." class="w-full px-4 py-3 rounded-2xl border border-slate-200 focus:outline-none focus:border-rose-500 text-sm leading-relaxed">${post ? escapeHtml(post.text) : ''}</textarea>
+          </div>
+          <button type="submit" class="w-full py-3.5 rounded-2xl bg-rose-500 text-white font-bold text-xs active:scale-95 transition">${editId ? 'ذخیره تغییر' : 'ثبت خاطره'}</button>
+        </form>`);
+      setTimeout(() => document.getElementById('diaryText')?.focus(), 100);
+    }
+
+    /* ---------- UTILS ---------- */
+    function escapeHtml(str) {
+      if (str === null || str === undefined) return '';
+      return String(str)
+        .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;').replace(/'/g, '&#039;');
+    }
+
+    /* ==================== END OF PART 2 ==================== */
+        /* ============================================================
        WHEEL — بهینه‌شده با Offscreen Canvas (بدون لگ)
        ============================================================ */
     let currentWheelAngle = 0;
@@ -2174,6 +2636,7 @@ async function searchCheapShark(query) {
 
       ctx.clearRect(0, 0, W, H);
 
+      // هاله بیرونی
       const bgGrad = ctx.createRadialGradient(cx, cy, outerR * 0.9, cx, cy, outerR + 24);
       bgGrad.addColorStop(0, 'rgba(244, 63, 110, 0)');
       bgGrad.addColorStop(0.7, 'rgba(244, 63, 110, 0.08)');
@@ -2183,6 +2646,7 @@ async function searchCheapShark(query) {
       ctx.fillStyle = bgGrad;
       ctx.fill();
 
+      // رینگ صورتی
       const rimGrad = ctx.createLinearGradient(cx - outerR, cy - outerR, cx + outerR, cy + outerR);
       rimGrad.addColorStop(0, '#FECDD7');
       rimGrad.addColorStop(0.25, '#FB7193');
@@ -2199,6 +2663,7 @@ async function searchCheapShark(query) {
       ctx.lineWidth = 2;
       ctx.stroke();
 
+      // سگمنت‌ها
       ctx.save();
       ctx.translate(cx, cy);
       for (let i = 0; i < numSegments; i++) {
@@ -2217,6 +2682,7 @@ async function searchCheapShark(query) {
         ctx.fillStyle = grad;
         ctx.fill();
 
+        // براقیت
         ctx.save();
         ctx.globalCompositeOperation = 'overlay';
         const shine = ctx.createRadialGradient(0, -outerR * 0.55, outerR * 0.05, 0, 0, outerR);
@@ -2231,6 +2697,7 @@ async function searchCheapShark(query) {
         ctx.fill();
         ctx.restore();
 
+        // خط جداکننده
         ctx.beginPath();
         ctx.moveTo(0, 0);
         ctx.lineTo(Math.cos(start) * outerR, Math.sin(start) * outerR);
@@ -2238,11 +2705,12 @@ async function searchCheapShark(query) {
         ctx.lineWidth = 1.5;
         ctx.stroke();
 
+        // شماره
         ctx.save();
         ctx.rotate(start + arcSize / 2);
         ctx.textAlign = 'right';
         ctx.textBaseline = 'middle';
-        const numStr = String(i + 1);
+        const numStr = toFa(i + 1);
         const fontSize = numSegments > 40 ? 22 : numSegments > 24 ? 26 : 32;
         const textX = outerR - 34;
         const circleR = numSegments > 40 ? 12 : 15;
@@ -2265,6 +2733,7 @@ async function searchCheapShark(query) {
       }
       ctx.restore();
 
+      // هاب مرکزی
       ctx.beginPath();
       ctx.arc(cx, cy + 4, innerR + 4, 0, 2 * Math.PI);
       ctx.fillStyle = 'rgba(190, 18, 72, 0.15)';
@@ -2318,7 +2787,6 @@ async function searchCheapShark(query) {
       const ctx = canvas.getContext('2d');
       const W = canvas.width, H = canvas.height;
       const cx = W / 2, cy = H / 2;
-
       ctx.clearRect(0, 0, W, H);
       ctx.save();
       ctx.translate(cx, cy);
@@ -2343,7 +2811,7 @@ async function searchCheapShark(query) {
       const randomOffset = Math.random() * 2 * Math.PI;
       const targetAngle = startAngle + (totalSpins * 2 * Math.PI) + randomOffset;
 
-      const duration = 4500;
+      const duration = 4200;
       const startTime = performance.now();
       let lastToneAt = 0;
 
@@ -2381,7 +2849,7 @@ async function searchCheapShark(query) {
                   <span class="text-rose-600 font-extrabold text-xs">برنامه امروز</span>
                 </div>
                 <div class="flex items-center gap-2">
-                  <span class="w-7 h-7 rounded-lg bg-rose-500 text-white font-black flex items-center justify-center text-xs flex-shrink-0">${(winningIndex + 1).toLocaleString('fa-IR')}</span>
+                  <span class="w-7 h-7 rounded-lg bg-rose-500 text-white font-black flex items-center justify-center text-xs flex-shrink-0">${toFa(winningIndex + 1)}</span>
                   <span class="text-slate-800 font-black text-sm">${escapeHtml(winner)}</span>
                 </div>
               </div>`;
@@ -2530,7 +2998,20 @@ async function searchCheapShark(query) {
       bd.classList.remove('flex');
     }
 
-    /* GROCERY */
+    function requestConfirm(title, message, onConfirm) {
+      openModalWithContent(title, `
+        <p class="text-xs text-slate-600 leading-relaxed mb-4">${escapeHtml(message)}</p>
+        <div class="flex gap-2 pt-2">
+          <button onclick="__runConfirm()" class="flex-1 py-3.5 rounded-2xl bg-rose-500 text-white font-bold text-xs active:scale-95 transition">تأیید</button>
+          <button onclick="closeModal()" class="px-4 py-3.5 rounded-2xl bg-slate-100 text-slate-600 font-bold text-xs">انصراف</button>
+        </div>`);
+      window.__runConfirm = function () {
+        closeModal();
+        if (typeof onConfirm === 'function') onConfirm();
+      };
+    }
+
+    /* ---------- GROCERY ---------- */
     function openGroceryModal() {
       openModalWithContent('افزودن به سبد خرید', `
         <form onsubmit="handleSaveGrocery(event)" class="space-y-4">
@@ -2554,7 +3035,7 @@ async function searchCheapShark(query) {
       closeModal();
     }
 
-    /* CHORE */
+    /* ---------- CHORE ---------- */
     function openChoreModal() {
       openModalWithContent('ثبت کار منزل', `
         <form onsubmit="handleSaveChore(event)" class="space-y-4">
@@ -2586,7 +3067,7 @@ async function searchCheapShark(query) {
       closeModal();
     }
 
-    /* EXPENSE */
+    /* ---------- EXPENSE ---------- */
     function openExpenseModal() {
       openModalWithContent('ثبت هزینه', `
         <form onsubmit="handleSaveExpense(event)" class="space-y-4">
@@ -2596,7 +3077,7 @@ async function searchCheapShark(query) {
           </div>
           <div>
             <label class="block text-xs font-semibold text-slate-700 mb-1.5">مبلغ (تومان)</label>
-            <input id="inputExpAmount" type="number" required placeholder="450000" class="w-full px-4 py-3 rounded-2xl border border-slate-200 focus:outline-none focus:border-rose-500 text-sm">
+            <input id="inputExpAmount" type="number" required placeholder="450000" class="w-full px-4 py-3 rounded-2xl border border-slate-200 focus:outline-none focus:border-rose-500 text-sm" dir="ltr">
           </div>
           <div>
             <label class="block text-xs font-semibold text-slate-700 mb-1.5">دسته</label>
@@ -2621,13 +3102,13 @@ async function searchCheapShark(query) {
       closeModal();
     }
 
-    /* BUDGET LIMIT */
+    /* ---------- BUDGET LIMIT ---------- */
     function openSetMonthlyBudgetModal() {
       openModalWithContent('تعیین سقف بودجه', `
         <form onsubmit="handleSaveBudgetLimit(event)" class="space-y-4">
           <div>
             <label class="block text-xs font-semibold text-slate-700 mb-1.5">سقف کل مخارج ماه (تومان)</label>
-            <input id="inputBudgetLimit" type="number" value="${appState.monthlyBudgetLimit || ''}" placeholder="25000000" class="w-full px-4 py-3 rounded-2xl border border-slate-200 focus:outline-none focus:border-amber-500 text-sm">
+            <input id="inputBudgetLimit" type="number" value="${appState.monthlyBudgetLimit || ''}" placeholder="25000000" class="w-full px-4 py-3 rounded-2xl border border-slate-200 focus:outline-none focus:border-amber-500 text-sm" dir="ltr">
           </div>
           <button type="submit" class="w-full py-3.5 rounded-2xl bg-amber-500 text-white font-bold text-xs active:scale-95 transition">ذخیره</button>
         </form>`);
@@ -2639,7 +3120,7 @@ async function searchCheapShark(query) {
       closeModal();
     }
 
-    /* COUPLE EVENT */
+    /* ---------- COUPLE EVENT ---------- */
     function openAddEventModal() {
       const mp = String(calMonth).padStart(2, '0');
       const dp = String(selectedCalDay || 1).padStart(2, '0');
@@ -2683,7 +3164,7 @@ async function searchCheapShark(query) {
       closeModal();
     }
 
-    /* WATCHLIST — با جستجوی پوستر */
+    /* ---------- WATCHLIST ADD ---------- */
     function openWatchlistModal() {
       openModalWithContent('افزودن به لیست تماشا', `
         <form onsubmit="handleSaveWatchlist(event)" class="space-y-4">
@@ -2698,7 +3179,7 @@ async function searchCheapShark(query) {
             </select>
           </div>
           <div>
-            <button type="button" onclick="doSearchWatch()" class="w-full py-2.5 rounded-2xl bg-purple-100 hover:bg-purple-200 text-purple-700 font-bold text-xs flex items-center justify-center gap-2">
+            <button type="button" onclick="doSearchWatch()" id="watchSearchBtn" class="w-full py-2.5 rounded-2xl bg-purple-100 hover:bg-purple-200 text-purple-700 font-bold text-xs flex items-center justify-center gap-2">
               <i class="fa-solid fa-magnifying-glass"></i>
               <span>جستجوی خودکار پوستر</span>
             </button>
@@ -2707,6 +3188,10 @@ async function searchCheapShark(query) {
           <div>
             <label class="block text-xs font-semibold text-slate-700 mb-1.5">یا لینک پوستر (دستی)</label>
             <input id="inputWatchPoster" type="url" placeholder="https://..." class="w-full px-4 py-3 rounded-2xl border border-slate-200 text-xs" dir="ltr">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1.5">خلاصه (اختیاری)</label>
+            <textarea id="inputWatchOverview" rows="2" placeholder="۲-۳ خط توضیح..." class="w-full px-4 py-3 rounded-2xl border border-slate-200 text-xs leading-relaxed"></textarea>
           </div>
           <div class="grid grid-cols-2 gap-3">
             <div>
@@ -2742,13 +3227,18 @@ async function searchCheapShark(query) {
       const title = document.getElementById('inputWatchTitle').value.trim();
       const type = document.getElementById('selectWatchType').value;
       const results = document.getElementById('watchSearchResults');
+      const btn = document.getElementById('watchSearchBtn');
       if (!title) { results.innerHTML = `<p class="text-xs text-rose-500 text-center py-2">اول نام اثر رو بنویس</p>`; return; }
+
       results.innerHTML = `<div class="text-center py-3 text-xs text-slate-400"><i class="fa-solid fa-spinner fa-spin"></i> جستجو...</div>`;
+      if (btn) btn.disabled = true;
 
       let items = [];
       if (type === 'movie') items = await searchTMDB(title, 'movie');
       else if (type === 'series') items = await searchTMDB(title, 'tv');
       else if (type === 'anime') items = await searchJikan(title);
+
+      if (btn) btn.disabled = false;
 
       if (items.length === 0) {
         results.innerHTML = `<p class="text-xs text-slate-400 text-center py-2">چیزی پیدا نشد — خودت پوستر رو پیست کن</p>`;
@@ -2760,7 +3250,7 @@ async function searchCheapShark(query) {
           <div class="flex-1 min-w-0">
             <p class="text-xs font-bold text-slate-800 truncate">${escapeHtml(it.title)}</p>
             ${it.originalTitle && it.originalTitle !== it.title ? `<p class="text-[10px] text-slate-400 truncate" dir="ltr">${escapeHtml(it.originalTitle)}</p>` : ''}
-            ${it.year ? `<p class="text-[10px] text-slate-400">${it.year}</p>` : ''}
+            ${it.year ? `<p class="text-[10px] text-slate-400">${toFa(it.year)}</p>` : ''}
           </div>
         </div>`).join('');
       window._watchSearchItems = items;
@@ -2773,6 +3263,8 @@ async function searchCheapShark(query) {
       _watchSearchSelection = it;
       document.getElementById('inputWatchTitle').value = it.title;
       document.getElementById('inputWatchPoster').value = it.poster;
+      const overviewEl = document.getElementById('inputWatchOverview');
+      if (overviewEl && it.overview) overviewEl.value = it.overview;
       document.querySelectorAll('#watchSearchResults .search-result-item').forEach((el, idx) => {
         el.style.borderColor = idx === i ? '#f43f6e' : '#e2e8f0';
         el.style.background = idx === i ? '#fff5f7' : '#fff';
@@ -2788,6 +3280,7 @@ async function searchCheapShark(query) {
       const rating = document.getElementById('inputWatchRating').value;
       const totalEpisodes = Number(document.getElementById('inputWatchTotal')?.value) || 0;
       const posterUrl = document.getElementById('inputWatchPoster').value.trim();
+      const overview = document.getElementById('inputWatchOverview').value.trim();
       if (!title) return;
       if (!appState.watchList) appState.watchList = [];
       appState.watchList.push({
@@ -2795,7 +3288,7 @@ async function searchCheapShark(query) {
         title, type, status, rating,
         originalTitle: _watchSearchSelection?.originalTitle || '',
         posterUrl,
-        overview: _watchSearchSelection?.overview || '',
+        overview: overview || (_watchSearchSelection?.overview || ''),
         currentEpisode: 0,
         totalEpisodes,
         lastWatched: null,
@@ -2844,6 +3337,10 @@ async function searchCheapShark(query) {
             <label class="block text-xs font-semibold text-slate-700 mb-1.5">لینک پوستر</label>
             <input id="editWatchPoster" type="url" value="${item.posterUrl || ''}" class="w-full px-4 py-3 rounded-2xl border border-slate-200 text-xs" dir="ltr">
           </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1.5">خلاصه</label>
+            <textarea id="editWatchOverview" rows="3" class="w-full px-4 py-3 rounded-2xl border border-slate-200 text-xs leading-relaxed">${escapeHtml(item.overview || '')}</textarea>
+          </div>
           <div class="flex gap-2 pt-2">
             <button type="submit" class="flex-1 py-3.5 rounded-2xl bg-purple-600 text-white font-bold text-xs active:scale-95 transition">ذخیره</button>
             <button type="button" onclick="closeModal()" class="px-4 py-3.5 rounded-2xl bg-slate-100 text-slate-600 font-bold text-xs">انصراف</button>
@@ -2863,6 +3360,7 @@ async function searchCheapShark(query) {
       item.status = document.getElementById('editWatchStatus').value;
       item.rating = document.getElementById('editWatchRating').value;
       item.posterUrl = document.getElementById('editWatchPoster').value.trim();
+      item.overview = document.getElementById('editWatchOverview').value.trim();
       if (item.totalEpisodes > 0 && item.currentEpisode >= item.totalEpisodes) item.status = 'watched';
       if (item.currentEpisode > 0 && item.status === 'queued') item.status = 'watching';
       playTone(600, 'sine', 0.1);
@@ -2870,7 +3368,7 @@ async function searchCheapShark(query) {
       closeModal();
     }
 
-    /* GAME MODAL */
+    /* ---------- GAME ADD/EDIT ---------- */
     function openGameModal() {
       openModalWithContent('افزودن بازی', `
         <form onsubmit="handleSaveGame(event)" class="space-y-4">
@@ -2885,7 +3383,7 @@ async function searchCheapShark(query) {
             </select>
           </div>
           <div>
-            <button type="button" onclick="doSearchGame()" class="w-full py-2.5 rounded-2xl bg-indigo-100 hover:bg-indigo-200 text-indigo-700 font-bold text-xs flex items-center justify-center gap-2">
+            <button type="button" onclick="doSearchGame()" id="gameSearchBtn" class="w-full py-2.5 rounded-2xl bg-indigo-100 hover:bg-indigo-200 text-indigo-700 font-bold text-xs flex items-center justify-center gap-2">
               <i class="fa-solid fa-magnifying-glass"></i>
               <span>جستجوی خودکار پوستر</span>
             </button>
@@ -2919,9 +3417,14 @@ async function searchCheapShark(query) {
     async function doSearchGame() {
       const title = document.getElementById('inputGameTitle').value.trim();
       const results = document.getElementById('gameSearchResults');
+      const btn = document.getElementById('gameSearchBtn');
       if (!title) { results.innerHTML = `<p class="text-xs text-rose-500 text-center py-2">اول نام بازی رو بنویس</p>`; return; }
       results.innerHTML = `<div class="text-center py-3 text-xs text-slate-400"><i class="fa-solid fa-spinner fa-spin"></i> جستجو...</div>`;
+      if (btn) btn.disabled = true;
+
       const items = await searchCheapShark(title);
+      if (btn) btn.disabled = false;
+
       if (items.length === 0) {
         results.innerHTML = `<p class="text-xs text-slate-400 text-center py-2">چیزی پیدا نشد — خودت پوستر رو پیست کن</p>`;
         return;
@@ -3032,7 +3535,7 @@ async function searchCheapShark(query) {
       closeModal();
     }
 
-    /* MOOD */
+    /* ---------- MOOD ---------- */
     let tempMoodKey = 'smile';
     function openMoodModal(targetPersona) {
       tempMoodKey = (appState.moods && appState.moods[targetPersona]?.key) || 'smile';
@@ -3075,11 +3578,16 @@ async function searchCheapShark(query) {
       const txt = document.getElementById('inputCustomMoodText').value.trim() || 'خوب';
       if (!appState.moods) appState.moods = {};
       appState.moods[targetPersona] = { key: tempMoodKey || 'smile', text: txt };
+      // ذخیره در تاریخچه
+      if (!appState.moodHistory) appState.moodHistory = {};
+      const todayKey = getTodayKey();
+      appState.moodHistory[`${todayKey}_${targetPersona}`] = { key: tempMoodKey || 'smile', text: txt };
       playTone(550, 'sine', 0.1);
       saveState();
       closeModal();
     }
 
+    /* ---------- CUSTOM IDEA ---------- */
     function openCustomIdeaModal() {
       openModalWithContent('افزودن ایده به چرخونه', `
         <form onsubmit="handleSaveCustomIdea(event)" class="space-y-4">
@@ -3104,6 +3612,7 @@ async function searchCheapShark(query) {
       closeModal();
     }
 
+    /* ---------- BUCKET ---------- */
     function openBucketModal() {
       openModalWithContent('ثبت در باکت‌لیست', `
         <form onsubmit="handleSaveBucket(event)" class="space-y-4">
@@ -3125,6 +3634,7 @@ async function searchCheapShark(query) {
       closeModal();
     }
 
+    /* ---------- NOTE (نامه) ---------- */
     function openNoteModal() {
       openModalWithContent('نوشتن نامه عاشقانه', `
         <form onsubmit="handleSaveNote(event)" class="space-y-4">
@@ -3147,7 +3657,9 @@ async function searchCheapShark(query) {
       closeModal();
     }
 
-    /* SETTINGS */
+    /* ============================================================
+       SETTINGS
+       ============================================================ */
     function openSettingsModal() {
       openModalWithContent('تنظیمات', `
         <div class="space-y-4 text-xs">
@@ -3185,7 +3697,7 @@ async function searchCheapShark(query) {
             <img src="${ICONS_CAL[p.icon] || ICONS_CAL.anniversary}" data-cal-icon="${p.icon || 'anniversary'}" class="w-5 h-5 rounded" alt="" onerror="this.style.display='none'" />
             <div class="min-w-0">
               <p class="font-bold text-slate-700 truncate">${escapeHtml(p.title)}</p>
-              <p class="text-[10px] text-slate-400">${p.md} • از ${p.year}</p>
+              <p class="text-[10px] text-slate-400">${toFa(p.md)} • از ${toFa(p.year)}</p>
             </div>
           </div>
           <button onclick="deletePersonalDate('${p.id}')" class="w-7 h-7 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 flex items-center justify-center flex-shrink-0">
@@ -3270,6 +3782,7 @@ async function searchCheapShark(query) {
       renderPersonalDatesSettings();
     }
 
+    /* ---------- BACKUP ---------- */
     function downloadBackupJson() {
       const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(appState, null, 2));
       const a = document.createElement('a');
@@ -3301,6 +3814,7 @@ async function searchCheapShark(query) {
       };
       reader.readAsText(file);
     }
+
   </script>
 </body>
 </html>
