@@ -1,0 +1,3115 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover" />
+  <title>TwoOfUs | امیرمحمد و آرمیتا</title>
+
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="TwoOfUs" />
+  <meta name="format-detection" content="telephone=no" />
+  <meta name="theme-color" content="#fff0f3" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@100..900&family=Plus+Jakarta+Sans:wght@500..900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css" />
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/dist/confetti.browser.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Vazirmatn', 'Vazir', 'Segoe UI', 'Tahoma', 'sans-serif'],
+            display: ['Vazirmatn', 'Plus Jakarta Sans', 'sans-serif']
+          },
+          colors: {
+            clay: {
+              50: '#fff5f7', 100: '#ffe4e9', 200: '#fecdd7', 300: '#fda4b8',
+              400: '#fb7193', 500: '#f43f6e', 600: '#e11d59', 700: '#be1248'
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    :root {
+      --sat: env(safe-area-inset-top, 0px);
+      --sab: env(safe-area-inset-bottom, 0px);
+      --sal: env(safe-area-inset-left, 0px);
+      --sar: env(safe-area-inset-right, 0px);
+      --nav-h: 70px;
+      --bubble-size: 54px;
+    }
+    * { box-sizing: border-box; }
+    html { -webkit-text-size-adjust: 100%; }
+    body {
+      font-family: 'Vazirmatn', 'Vazir', 'Segoe UI', Tahoma, sans-serif;
+      font-feature-settings: 'ss02' 1, 'ss03' 1;
+      padding-top: var(--sat);
+      padding-bottom: calc(var(--sab) + var(--nav-h) + 5rem);
+      padding-left: max(0.75rem, var(--sal));
+      padding-right: max(0.75rem, var(--sar));
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+      -webkit-user-select: none;
+      background-color: #FAF6F6;
+      margin: 0;
+      min-height: 100dvh;
+      overflow-x: hidden;
+      font-weight: 500;
+    }
+    input, textarea, select { font-family: inherit; user-select: text; -webkit-user-select: text; }
+    .clay-surface {
+      background: rgba(255, 255, 255, 0.88);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      border: 1px solid rgba(255, 255, 255, 0.95);
+    }
+    .squircle-card { border-radius: 24px; }
+    @media (min-width: 640px) { .squircle-card { border-radius: 28px; } }
+    .squircle-btn { border-radius: 18px; }
+    @media (min-width: 640px) { .squircle-btn { border-radius: 20px; } }
+    .hide-scrollbar::-webkit-scrollbar { display: none; }
+    .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    .icon-3d { filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.1)); display: inline-block; vertical-align: middle; object-fit: contain; }
+    .icon-3d-md { width: 28px; height: 28px; }
+    @media (min-width: 640px) { .icon-3d-md { width: 32px; height: 32px; } }
+    @keyframes gentlePulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.06); } }
+    .animate-gentle-pulse { animation: gentlePulse 2.6s infinite ease-in-out; }
+    @keyframes heartFloat {
+      0% { transform: translateY(0) scale(0.9); opacity: 0; }
+      50% { opacity: 1; }
+      100% { transform: translateY(-70px) scale(1.3); opacity: 0; }
+    }
+    .floating-kiss { position: absolute; animation: heartFloat 2s forwards ease-out; pointer-events: none; z-index: 50; }
+
+    #bgParticles {
+      position: fixed;
+      inset: 0;
+      z-index: -1;
+      overflow: hidden;
+      pointer-events: none;
+      background: radial-gradient(circle at 20% 30%, #FFF5F7 0%, #FAF6F6 45%),
+                  radial-gradient(circle at 80% 70%, #FFE4E9 0%, transparent 50%);
+    }
+    .bg-particle {
+      position: absolute;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(244, 63, 110, 0.3), rgba(244, 63, 110, 0.05));
+      animation: floatUp linear infinite;
+      pointer-events: none;
+    }
+    @keyframes floatUp {
+      0% { transform: translateY(0) scale(1); opacity: 0; }
+      20% { opacity: 0.6; }
+      80% { opacity: 0.3; }
+      100% { transform: translateY(-100vh) scale(0.4); opacity: 0; }
+    }
+
+    .bottom-nav {
+      position: fixed;
+      bottom: max(0.7rem, calc(var(--sab) + 0.5rem));
+      left: 50%;
+      transform: translateX(-50%);
+      width: calc(100% - 1rem);
+      max-width: 560px;
+      z-index: 40;
+      pointer-events: none;
+    }
+    .bottom-nav-bar {
+      position: relative;
+      height: var(--nav-h);
+      background: linear-gradient(180deg, #ffffff 0%, #fff5f7 100%);
+      border-radius: 26px;
+      box-shadow:
+        0 20px 40px -14px rgba(244, 63, 110, 0.18),
+        0 4px 12px rgba(244, 63, 110, 0.06),
+        0 0 0 1px rgba(244, 63, 110, 0.10),
+        inset 0 -2px 0 rgba(244, 63, 110, 0.06);
+      pointer-events: auto;
+      overflow: visible;
+    }
+    .bottom-nav-bubble {
+      position: absolute;
+      top: calc((var(--nav-h) - var(--bubble-size)) / -1.4);
+      left: 0;
+      width: var(--bubble-size);
+      height: var(--bubble-size);
+      border-radius: 50%;
+      background: linear-gradient(135deg, #fb7193 0%, #f43f6e 45%, #be1248 100%);
+      box-shadow:
+        0 14px 28px rgba(244, 63, 110, 0.40),
+        0 6px 12px rgba(244, 63, 110, 0.20),
+        inset 0 3px 0 rgba(255, 255, 255, 0.55),
+        inset 0 -3px 6px rgba(0, 0, 0, 0.12);
+      transform: translateX(0);
+      transition: transform 0.6s cubic-bezier(0.34, 1.35, 0.5, 1);
+      will-change: transform;
+      pointer-events: none;
+      z-index: 2;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .bottom-nav-bubble img {
+      width: 30px; height: 30px; object-fit: contain;
+      filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.22));
+      transition: transform 0.28s ease, opacity 0.28s ease;
+    }
+    .bottom-nav-bubble.bubble-swap img { transform: scale(0.55) rotate(-12deg); opacity: 0.35; }
+    .bottom-nav-items { position: absolute; inset: 0; display: flex; align-items: stretch; justify-content: space-around; z-index: 3; }
+    .nav-item {
+      position: relative;
+      flex: 1 1 0;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      padding: 10px 1px 12px;
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      color: #94a3b8;
+      transition: color 0.3s ease, transform 0.15s ease;
+      -webkit-tap-highlight-color: transparent;
+      font-family: inherit;
+      outline: none;
+    }
+    .nav-item:active { transform: scale(0.9); }
+    .nav-item .nav-icon {
+      width: 20px; height: 20px; object-fit: contain; opacity: 0.55;
+      transition: opacity 0.32s ease, transform 0.42s cubic-bezier(0.34, 1.35, 0.5, 1);
+      filter: grayscale(0.85) brightness(1.05) contrast(0.95);
+    }
+    .nav-item .nav-label {
+      font-size: 9.5px; font-weight: 700; line-height: 1.2; white-space: nowrap;
+      opacity: 0.85; color: #94a3b8;
+      transition: opacity 0.32s ease, transform 0.42s cubic-bezier(0.34, 1.35, 0.5, 1), color 0.3s ease;
+      display: inline-block;
+    }
+    .nav-item.active { color: #f43f6e; }
+    .nav-item.active .nav-icon { opacity: 0; transform: translateY(-46px) scale(0.5); }
+    .nav-item.active .nav-label { opacity: 1; transform: translateY(-1px); color: #f43f6e; font-weight: 800; font-size: 10px; }
+    .nav-item.active::after {
+      content: '';
+      position: absolute;
+      bottom: 6px; left: 50%;
+      transform: translateX(-50%);
+      width: 16px; height: 2.5px;
+      border-radius: 4px;
+      background: linear-gradient(90deg, #fb7193, #f43f6e);
+      box-shadow: 0 1px 4px rgba(244, 63, 110, 0.4);
+    }
+    @media (min-width: 640px) {
+      .nav-item .nav-icon { width: 22px; height: 22px; }
+      .nav-item .nav-label { font-size: 10.5px; }
+      .nav-item.active .nav-label { font-size: 11px; }
+    }
+
+    .cal-cell { position: relative; }
+    .cal-holiday { background: linear-gradient(180deg, #fff 0%, #ffe4e9 100%); }
+    .cal-gift {
+      background: linear-gradient(180deg, #fff5f7 0%, #ffd8e0 100%);
+      box-shadow: 0 0 10px rgba(244, 63, 110, 0.2), inset 0 0 0 1px rgba(244, 63, 110, 0.15);
+    }
+    .cal-personal {
+      background: linear-gradient(135deg, #fecdd7 0%, #fb7193 50%, #f43f6e 100%);
+      box-shadow: 0 0 12px rgba(244, 63, 110, 0.4), inset 0 2px 0 rgba(255,255,255,0.5);
+    }
+    .cal-today { outline: 2px solid #f43f6e; outline-offset: 1px; }
+    .cal-badge {
+      position: absolute;
+      width: 22px;
+      height: 22px;
+      pointer-events: none;
+      filter: drop-shadow(0 2px 3px rgba(0,0,0,0.2));
+    }
+    .cal-badge-tr { top: -5px; right: -5px; }
+    .cal-badge-bl { bottom: -5px; left: -5px; width: 18px; height: 18px; }
+
+    .poster-thumb { width: 56px; height: 80px; object-fit: cover; border-radius: 10px; flex-shrink: 0; background: #f8f8f8; }
+    .poster-preview { width: 100%; max-height: 240px; object-fit: contain; border-radius: 16px; background: #f8f8f8; }
+    .search-result-item {
+      display: flex;
+      gap: 10px;
+      padding: 8px;
+      border-radius: 14px;
+      border: 1px solid #e2e8f0;
+      cursor: pointer;
+      transition: all 0.2s;
+      background: #fff;
+      align-items: center;
+    }
+    .search-result-item:hover { border-color: #f43f6e; background: #fff5f7; }
+  </style>
+</head>
+<body class="text-slate-800 min-h-screen font-sans antialiased">
+
+  <div id="bgParticles"></div>
+  <div id="kissFloatingContainer" class="fixed inset-0 pointer-events-none z-50 overflow-hidden"></div>
+
+  <header class="sticky top-0 z-40 bg-white/95 backdrop-blur-xl border-b border-rose-100/70 px-3 sm:px-6 py-2.5" style="padding-top: calc(var(--sat) + 0.6rem);">
+    <div class="max-w-4xl mx-auto flex items-center justify-between gap-2">
+      <div class="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
+        <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-2xl bg-gradient-to-tr from-rose-100 to-pink-50 p-1.5 flex items-center justify-center shadow-md shadow-rose-200/40 border border-rose-100 flex-shrink-0">
+          <img src="https://cdn.jsdelivr.net/gh/microsoft/fluentui-emoji@main/assets/Red%20heart/3D/red_heart_3d.png" class="w-full h-full object-contain" alt="" />
+        </div>
+        <div class="min-w-0">
+          <div class="flex items-center gap-1.5 flex-wrap">
+            <h1 class="font-display font-black text-base sm:text-xl tracking-tight text-slate-900 leading-tight">TwoOfUs</h1>
+            <span class="hidden sm:inline-block px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-rose-100/80 text-rose-600 border border-rose-200/60 whitespace-nowrap">امیرمحمد & آرمیتا</span>
+          </div>
+          <div class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-xl bg-rose-50/70 border border-rose-100/60 mt-0.5">
+            <img src="https://cdn.jsdelivr.net/gh/microsoft/fluentui-emoji@main/assets/Alarm%20clock/3D/alarm_clock_3d.png" class="w-4 h-4 flex-shrink-0" alt="" />
+            <div class="flex items-center gap-1 text-[10px] sm:text-xs font-bold whitespace-nowrap">
+              <span id="headerJalaliDate" class="text-slate-600">--</span>
+              <span class="text-slate-300">•</span>
+              <span id="headerLiveTime" class="text-rose-600 font-mono" dir="ltr">--:--:--</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-1 sm:gap-2 flex-shrink-0">
+        <button onclick="toggleSound()" id="soundToggleBtn" class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl sm:rounded-2xl bg-white border border-slate-200/80 hover:bg-rose-50 text-slate-600 flex items-center justify-center transition shadow-sm">
+          <i class="fa-solid fa-volume-high text-xs"></i>
+        </button>
+        <button onclick="openSettingsModal()" class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl sm:rounded-2xl bg-white border border-slate-200/80 hover:bg-rose-50 text-slate-600 flex items-center justify-center transition shadow-sm">
+          <i class="fa-solid fa-gear text-xs"></i>
+        </button>
+        <div class="flex items-center bg-slate-100/90 p-0.5 sm:p-1 rounded-xl sm:rounded-2xl border border-slate-200/60">
+          <button id="personaAmir" onclick="setPersona('p1')" class="px-2 sm:px-3 py-1 rounded-lg sm:rounded-xl text-[10px] sm:text-xs font-bold transition flex items-center gap-1">
+            <img src="https://cdn.jsdelivr.net/gh/microsoft/fluentui-emoji@main/assets/Technologist/Light/3D/technologist_3d_light.png" class="w-3.5 h-3.5 sm:w-4 sm:h-4" alt="" />
+            <span class="persona-label hidden xs:inline sm:inline">امیرمحمد</span>
+          </button>
+          <button id="personaArmita" onclick="setPersona('p2')" class="px-2 sm:px-3 py-1 rounded-lg sm:rounded-xl text-[10px] sm:text-xs font-bold transition flex items-center gap-1">
+            <img src="https://cdn.jsdelivr.net/gh/microsoft/fluentui-emoji@main/assets/Woman%20technologist/Light/3D/woman_technologist_3d_light.png" class="w-3.5 h-3.5 sm:w-4 sm:h-4" alt="" />
+            <span class="persona-label hidden xs:inline sm:inline">آرمیتا</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="max-w-4xl mx-auto pt-4 sm:pt-5 space-y-5 sm:space-y-6">
+
+    <section id="tabContent-tasks" class="space-y-5">
+      <div class="relative overflow-hidden squircle-card clay-surface shadow-lg p-5 sm:p-6 border border-white">
+        <div class="absolute -right-16 -top-16 w-64 h-64 bg-rose-200/35 rounded-full blur-3xl pointer-events-none"></div>
+        <div class="absolute -left-16 -bottom-16 w-64 h-64 bg-pink-200/35 rounded-full blur-3xl pointer-events-none"></div>
+
+        <div class="relative z-10 flex flex-col md:flex-row items-center justify-between gap-5">
+          <div class="text-center md:text-right space-y-2 w-full md:w-auto">
+            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold bg-rose-50 text-rose-600 border border-rose-200/60">
+              <img src="https://cdn.jsdelivr.net/gh/microsoft/fluentui-emoji@main/assets/Sparkles/3D/sparkles_3d.png" class="w-3.5 h-3.5" alt="" />
+              <span>همراه و هم‌قدم از ۱۵ مهر ۱۴۰۳</span>
+            </span>
+            <div class="flex items-baseline justify-center md:justify-start gap-2 pt-1 flex-wrap">
+              <span class="text-xs font-medium text-slate-400">امروز روزِ</span>
+              <span id="daysCount" class="font-display text-4xl sm:text-5xl font-black text-rose-600 tracking-tight">--</span>
+              <span class="text-sm font-bold text-slate-700 flex items-center gap-1.5">
+                عاشقیمونه
+                <img src="https://cdn.jsdelivr.net/gh/microsoft/fluentui-emoji@main/assets/Smiling%20face%20with%20heart-eyes/3D/smiling_face_with_heart-eyes_3d.png" class="w-5 h-5 icon-3d" alt="" />
+              </span>
+            </div>
+            <p id="nextEventTeaser" class="text-xs text-slate-500 flex items-center justify-center md:justify-start gap-1.5 pt-1"></p>
+          </div>
+
+          <div class="flex flex-col items-center gap-2 w-full md:w-auto">
+            <button onclick="sendLoveKiss()" class="group relative w-full md:w-auto px-6 py-3.5 squircle-btn bg-gradient-to-r from-rose-500 via-pink-500 to-rose-600 text-white font-bold text-sm shadow-lg active:scale-95 transition flex items-center justify-center gap-2.5">
+              <img src="https://cdn.jsdelivr.net/gh/microsoft/fluentui-emoji@main/assets/Face%20blowing%20a%20kiss/3D/face_blowing_a_kiss_3d.png" class="w-6 h-6 animate-gentle-pulse" alt="" />
+              <span>یه بوسه برات فرستادم!</span>
+            </button>
+            <span id="kissFeedback" class="text-[11px] font-semibold text-rose-500 opacity-0 transition-opacity text-center"></span>
+          </div>
+        </div>
+
+        <div class="mt-5 pt-5 border-t border-rose-100/60 grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div class="p-3 rounded-2xl bg-white/80 border border-rose-100/80 flex items-center justify-between shadow-sm">
+            <div class="flex items-center gap-2.5 min-w-0">
+              <img id="p1MoodIcon" src="https://cdn.jsdelivr.net/gh/microsoft/fluentui-emoji@main/assets/Smiling%20face%20with%20smiling%20eyes/3D/smiling_face_with_smiling_eyes_3d.png" class="icon-3d-md flex-shrink-0" alt="" />
+              <div class="min-w-0">
+                <p class="text-xs font-extrabold text-slate-800">حالِ امیرمحمد</p>
+                <p id="p1MoodText" class="text-[11px] text-slate-500 truncate">عالی و پرانرژی</p>
+              </div>
+            </div>
+            <button onclick="openMoodModal('p1')" class="text-[11px] text-rose-500 font-bold px-2 py-1 rounded-lg hover:bg-rose-50 transition flex-shrink-0">تغییر</button>
+          </div>
+
+          <div class="p-3 rounded-2xl bg-white/80 border border-rose-100/80 flex items-center justify-between shadow-sm">
+            <div class="flex items-center gap-2.5 min-w-0">
+              <img id="p2MoodIcon" src="https://cdn.jsdelivr.net/gh/microsoft/fluentui-emoji@main/assets/Smiling%20face%20with%20heart-eyes/3D/smiling_face_with_heart-eyes_3d.png" class="icon-3d-md flex-shrink-0" alt="" />
+              <div class="min-w-0">
+                <p class="text-xs font-extrabold text-slate-800">حالِ آرمیتا</p>
+                <p id="p2MoodText" class="text-[11px] text-slate-500 truncate">خوشحال و شاد</p>
+              </div>
+            </div>
+            <button onclick="openMoodModal('p2')" class="text-[11px] text-rose-500 font-bold px-2 py-1 rounded-lg hover:bg-rose-50 transition flex-shrink-0">تغییر</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+        <div class="squircle-card clay-surface p-4 sm:p-6 shadow-lg space-y-4">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 rounded-2xl bg-rose-50 border border-rose-100 flex items-center justify-center p-2 flex-shrink-0">
+                <img src="https://cdn.jsdelivr.net/gh/microsoft/fluentui-emoji@main/assets/Shopping%20cart/3D/shopping_cart_3d.png" class="w-full h-full object-contain" alt="" />
+              </div>
+              <div>
+                <h3 class="font-bold text-slate-900 text-sm sm:text-base">سبد خرید هایپر و منزل</h3>
+                <p class="text-[11px] text-slate-400">تاریخ و ساعت افزودن خودکار</p>
+              </div>
+            </div>
+            <button onclick="openGroceryModal()" class="w-10 h-10 rounded-2xl bg-rose-500 hover:bg-rose-600 active:scale-95 text-white flex items-center justify-center transition shadow-md flex-shrink-0">
+              <i class="fa-solid fa-plus text-sm"></i>
+            </button>
+          </div>
+          <div class="flex items-center justify-between text-xs text-slate-500 px-1">
+            <span id="groceryCountBadge">۰ قلم کالا</span>
+            <button onclick="clearCompletedGroceries()" class="text-[11px] text-rose-500 hover:underline">پاکسازی انجام‌شده‌ها</button>
+          </div>
+          <div id="groceryList" class="space-y-2.5 max-h-[400px] overflow-y-auto pr-1 hide-scrollbar"></div>
+        </div>
+
+        <div class="squircle-card clay-surface p-4 sm:p-6 shadow-lg space-y-4">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 rounded-2xl bg-indigo-50 border border-indigo-100 flex items-center justify-center p-2 flex-shrink-0">
+                <img src="https://cdn.jsdelivr.net/gh/microsoft/fluentui-emoji@main/assets/Broom/3D/broom_3d.png" class="w-full h-full object-contain" alt="" />
+              </div>
+              <div>
+                <h3 class="font-bold text-slate-900 text-sm sm:text-base">کارهای دونفره منزل</h3>
+                <p class="text-[11px] text-slate-400">تقسیم مهربانانه مسئولیت‌ها</p>
+              </div>
+            </div>
+            <button onclick="openChoreModal()" class="w-10 h-10 rounded-2xl bg-indigo-500 hover:bg-indigo-600 active:scale-95 text-white flex items-center justify-center transition shadow-md flex-shrink-0">
+              <i class="fa-solid fa-plus text-sm"></i>
+            </button>
+          </div>
+          <div id="choreFilters" class="flex items-center gap-1.5 overflow-x-auto hide-scrollbar pb-1 text-xs -mx-1 px-1"></div>
+          <div id="choreList" class="space-y-2.5 max-h-[400px] overflow-y-auto pr-1 hide-scrollbar"></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="tabContent-budget" class="space-y-5 hidden">
+      <div class="squircle-card clay-surface p-4 sm:p-6 shadow-lg space-y-5">
+        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-2xl bg-amber-50 border border-amber-100 flex items-center justify-center p-2 flex-shrink-0">
+              <img src="https://cdn.jsdelivr.net/gh/microsoft/fluentui-emoji@main/assets/Money%20bag/3D/money_bag_3d.png" class="w-full h-full object-contain" alt="" />
+            </div>
+            <div>
+              <h3 class="font-bold text-slate-900 text-base">بودجه و هزینه‌ها</h3>
+              <p class="text-xs text-slate-400">برآورد کلی مخارج ماهانه</p>
+            </div>
+          </div>
+          <div class="flex items-center gap-2 w-full sm:w-auto">
+            <button onclick="openSetMonthlyBudgetModal()" class="flex-1 sm:flex-initial px-3 py-2.5 rounded-2xl bg-white border border-slate-200 text-slate-700 text-xs font-bold flex items-center justify-center gap-1.5 shadow-sm">
+              <i class="fa-solid fa-bullseye text-amber-500"></i> سقف بودجه
+            </button>
+            <button onclick="openExpenseModal()" class="flex-1 sm:flex-initial px-4 py-2.5 rounded-2xl bg-rose-500 text-white text-xs font-bold flex items-center justify-center gap-1.5 shadow-md">
+              <i class="fa-solid fa-plus"></i> ثبت هزینه
+            </button>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-12 gap-5 items-center p-4 sm:p-5 rounded-3xl bg-gradient-to-br from-rose-50/40 via-white to-pink-50/30 border border-rose-100/80">
+          <div class="md:col-span-5 flex flex-col items-center justify-center">
+            <div class="relative w-40 h-40 sm:w-48 sm:h-48 flex items-center justify-center">
+              <svg id="budgetDonutSvg" class="w-full h-full transform -rotate-90" viewBox="0 0 100 100">
+                <circle cx="50" cy="50" r="38" stroke="#f1f5f9" stroke-width="11" fill="transparent" />
+              </svg>
+              <div class="absolute inset-0 flex flex-col items-center justify-center text-center">
+                <span class="text-[11px] font-semibold text-slate-400">مجموع مخارج ماه</span>
+                <span id="chartTotalAmount" class="font-display font-black text-xl text-slate-800">۰</span>
+                <span class="text-[10px] text-slate-400">تومان</span>
+              </div>
+            </div>
+            <div id="budgetLimitIndicator" class="mt-3 text-center text-xs text-slate-500 w-full"></div>
+          </div>
+          <div id="categoryBreakdownContainer" class="md:col-span-7 space-y-3 w-full"></div>
+        </div>
+
+        <div class="space-y-3">
+          <div class="flex items-center justify-between text-xs font-bold text-slate-700 px-1">
+            <span>ریز هزینه‌ها</span>
+            <span id="expenseCountText" class="text-slate-400 font-normal">۰ مورد</span>
+          </div>
+          <div id="expenseList" class="space-y-2 max-h-[380px] overflow-y-auto pr-1 hide-scrollbar"></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="tabContent-calendar" class="space-y-5 hidden">
+      <div class="squircle-card clay-surface p-4 sm:p-6 shadow-lg space-y-5">
+        <div class="flex items-center justify-between gap-2">
+          <div class="flex items-center gap-3 min-w-0">
+            <div class="w-10 h-10 rounded-2xl bg-rose-50 border border-rose-100 flex items-center justify-center p-2 flex-shrink-0">
+              <img src="https://cdn.jsdelivr.net/gh/microsoft/fluentui-emoji@main/assets/Spiral%20calendar/3D/spiral_calendar_3d.png" class="w-full h-full object-contain" alt="" />
+            </div>
+            <div class="min-w-0">
+              <h3 id="calendarMonthTitle" class="font-bold text-slate-900 text-base sm:text-lg truncate">مهر ۱۴۰۵</h3>
+              <p class="text-[11px] sm:text-xs text-rose-500 font-semibold">مناسبت‌ها و قرارهای عاشقانه</p>
+            </div>
+          </div>
+          <div class="flex items-center gap-1 bg-slate-100/90 p-1 rounded-2xl border border-slate-200/50 flex-shrink-0">
+            <button onclick="changeMonth(-1)" class="w-7 h-7 sm:w-8 sm:h-8 rounded-xl bg-white text-slate-700 flex items-center justify-center transition text-xs shadow-sm">
+              <i class="fa-solid fa-chevron-right"></i>
+            </button>
+            <button onclick="goToCurrentMonth()" class="px-2 py-1 text-[11px] sm:text-xs font-bold text-slate-600">امروز</button>
+            <button onclick="changeMonth(1)" class="w-7 h-7 sm:w-8 sm:h-8 rounded-xl bg-white text-slate-700 flex items-center justify-center transition text-xs shadow-sm">
+              <i class="fa-solid fa-chevron-left"></i>
+            </button>
+          </div>
+        </div>
+
+        <div id="calendarLegend" class="flex flex-wrap items-center gap-2 text-[10px] text-slate-500 pb-2 border-b border-slate-100"></div>
+
+        <div class="grid grid-cols-7 gap-1 text-center text-[11px] font-bold text-slate-400 pb-1">
+          <div>ش</div><div>ی</div><div>د</div><div>س</div><div>چ</div><div>پ</div>
+          <div class="text-rose-500 font-black">ج</div>
+        </div>
+        <div id="calendarGrid" class="grid grid-cols-7 gap-1.5 sm:gap-2"></div>
+
+        <div id="selectedDayCard" class="p-4 sm:p-5 rounded-3xl bg-rose-50/70 border border-rose-100 space-y-3">
+          <div class="flex items-center justify-between gap-2">
+            <span id="selectedDayLabel" class="text-xs font-extrabold text-slate-800">برنامه‌های روز</span>
+            <button onclick="openAddEventModal()" class="px-3 py-1.5 rounded-xl bg-rose-500 hover:bg-rose-600 text-white text-[11px] font-bold shadow-sm flex items-center gap-1">
+              <i class="fa-solid fa-plus text-[10px]"></i> قرار جدید
+            </button>
+          </div>
+          <div id="selectedDayEventsList" class="space-y-2 text-xs text-slate-600"></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="tabContent-watchlist" class="space-y-5 hidden">
+      <div class="squircle-card clay-surface p-4 sm:p-6 shadow-lg space-y-5">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-2xl bg-purple-50 border border-purple-100 flex items-center justify-center p-2 flex-shrink-0">
+              <img src="https://cdn.jsdelivr.net/gh/microsoft/fluentui-emoji@main/assets/Clapper%20board/3D/clapper_board_3d.png" class="w-full h-full object-contain" alt="" />
+            </div>
+            <div>
+              <h3 class="font-bold text-slate-900 text-base">فیلم، سریال و انیمه</h3>
+              <p class="text-xs text-slate-400">با پوستر خودکار (TMDB / Jikan)</p>
+            </div>
+          </div>
+          <button onclick="openWatchlistModal()" class="w-10 h-10 rounded-2xl bg-purple-600 text-white flex items-center justify-center shadow-md flex-shrink-0">
+            <i class="fa-solid fa-plus text-sm"></i>
+          </button>
+        </div>
+
+        <div class="space-y-2">
+          <p class="text-[11px] font-bold text-slate-500 px-1">وضعیت:</p>
+          <div id="watchStatusFilters" class="flex items-center gap-2 overflow-x-auto hide-scrollbar pb-1 -mx-1 px-1"></div>
+        </div>
+
+        <div class="space-y-2">
+          <p class="text-[11px] font-bold text-slate-500 px-1">نوع:</p>
+          <div id="watchTypeFilters" class="flex items-center gap-2 overflow-x-auto hide-scrollbar pb-1 -mx-1 px-1"></div>
+        </div>
+
+        <div id="watchlistContainer" class="grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-[560px] overflow-y-auto pr-1 hide-scrollbar"></div>
+      </div>
+    </section>
+
+    <section id="tabContent-games" class="space-y-5 hidden">
+      <div class="squircle-card clay-surface p-4 sm:p-6 shadow-lg space-y-5">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-2xl bg-indigo-50 border border-indigo-100 flex items-center justify-center p-2 flex-shrink-0">
+              <img src="https://cdn.jsdelivr.net/gh/microsoft/fluentui-emoji@main/assets/Video%20game/3D/video_game_3d.png" class="w-full h-full object-contain" alt="" />
+            </div>
+            <div>
+              <h3 class="font-bold text-slate-900 text-base">بازی‌های دونفره</h3>
+              <p class="text-xs text-slate-400">با پوستر خودکار (CheapShark)</p>
+            </div>
+          </div>
+          <button onclick="openGameModal()" class="w-10 h-10 rounded-2xl bg-indigo-600 text-white flex items-center justify-center shadow-md flex-shrink-0">
+            <i class="fa-solid fa-plus text-sm"></i>
+          </button>
+        </div>
+
+        <div class="space-y-2">
+          <p class="text-[11px] font-bold text-slate-500 px-1">وضعیت:</p>
+          <div id="gameStatusFilters" class="flex items-center gap-2 overflow-x-auto hide-scrollbar pb-1 -mx-1 px-1"></div>
+        </div>
+
+        <div id="gameListContainer" class="grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-[560px] overflow-y-auto pr-1 hide-scrollbar"></div>
+      </div>
+    </section>
+
+    <section id="tabContent-fun" class="space-y-5 hidden">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+        <div class="squircle-card clay-surface p-4 sm:p-6 shadow-lg space-y-4 text-center">
+          <div class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-rose-300 to-pink-500 p-2 flex items-center justify-center mx-auto shadow-lg">
+            <img src="https://cdn.jsdelivr.net/gh/microsoft/fluentui-emoji@main/assets/Game%20die/3D/game_die_3d.png" class="w-full h-full object-contain" alt="" />
+          </div>
+          <div>
+            <h3 class="font-bold text-slate-900 text-base">چرخونه قرارهای عاشقانه</h3>
+            <p class="text-xs text-slate-400">شماره انتخاب‌شده پایین نمایش داده می‌شه</p>
+          </div>
+
+          <div class="relative w-64 h-64 sm:w-72 sm:h-72 mx-auto flex items-center justify-center my-3">
+            <canvas id="rouletteCanvas" width="600" height="600" style="width:100%;height:100%;display:block;"></canvas>
+            <div class="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-2 text-rose-600 text-3xl z-10 pointer-events-none">
+              <i class="fa-solid fa-caret-down"></i>
+            </div>
+          </div>
+
+          <div id="rouletteDisplay" class="p-3.5 rounded-2xl bg-slate-50 border border-slate-200/70 font-bold text-slate-700 min-h-[72px] flex items-center justify-center text-xs sm:text-sm">
+            روی دکمه بزن تا چرخونه بچرخه
+          </div>
+
+          <div class="flex items-center gap-2">
+            <button onclick="spinRouletteWheel()" id="spinWheelBtn" class="flex-1 py-3 squircle-btn bg-gradient-to-r from-rose-400 to-rose-600 text-white font-bold text-xs shadow-lg disabled:opacity-60 flex items-center justify-center gap-2">
+              <img src="https://cdn.jsdelivr.net/gh/microsoft/fluentui-emoji@main/assets/Ferris%20wheel/3D/ferris_wheel_3d.png" class="w-4 h-4" alt="" />
+              <span>بچرخون برامون</span>
+            </button>
+            <button onclick="openCustomIdeaModal()" class="px-3.5 py-3 rounded-2xl bg-white border border-slate-200 text-slate-700 text-xs font-bold flex items-center gap-1.5">
+              <i class="fa-solid fa-plus"></i> ایده
+            </button>
+          </div>
+
+          <div class="text-right pt-2 border-t border-slate-100">
+            <button onclick="toggleIdeasDrawer()" class="text-[11px] font-bold text-rose-500 flex items-center gap-1">
+              <span>مدیریت ایده‌ها</span>
+              <i class="fa-solid fa-chevron-down text-[10px]"></i>
+            </button>
+            <div id="ideasDrawer" class="hidden mt-2 space-y-1.5 max-h-40 overflow-y-auto hide-scrollbar"></div>
+          </div>
+        </div>
+
+        <div class="squircle-card clay-surface p-4 sm:p-6 shadow-lg space-y-4">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 rounded-2xl bg-amber-50 border border-amber-100 flex items-center justify-center p-2 flex-shrink-0">
+                <img src="https://cdn.jsdelivr.net/gh/microsoft/fluentui-emoji@main/assets/Trophy/3D/trophy_3d.png" class="w-full h-full object-contain" alt="" />
+              </div>
+              <div>
+                <h3 class="font-bold text-slate-900 text-base">باکت‌لیست آرزوها</h3>
+                <p class="text-xs text-slate-400">کارهایی که باید با هم تجربه کنیم</p>
+              </div>
+            </div>
+            <button onclick="openBucketModal()" class="w-10 h-10 rounded-2xl bg-amber-500 text-white flex items-center justify-center shadow-md flex-shrink-0">
+              <i class="fa-solid fa-plus text-sm"></i>
+            </button>
+          </div>
+          <div id="bucketList" class="space-y-2 max-h-[340px] overflow-y-auto pr-1 hide-scrollbar"></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="tabContent-notes" class="space-y-5 hidden">
+      <div class="squircle-card clay-surface p-4 sm:p-6 shadow-lg space-y-5">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-2xl bg-rose-50 border border-rose-100 flex items-center justify-center p-2 flex-shrink-0">
+              <img src="https://cdn.jsdelivr.net/gh/microsoft/fluentui-emoji@main/assets/Love%20letter/3D/love_letter_3d.png" class="w-full h-full object-contain" alt="" />
+            </div>
+            <div>
+              <h3 class="font-bold text-slate-900 text-base">دیوار نامه‌ها</h3>
+              <p class="text-xs text-slate-400">یادداشت‌های ماندگار</p>
+            </div>
+          </div>
+          <button onclick="openNoteModal()" class="px-3.5 py-2.5 rounded-2xl bg-rose-500 text-white text-xs font-bold flex items-center gap-1.5 shadow-md flex-shrink-0">
+            <i class="fa-solid fa-pen-fancy"></i> نامه جدید
+          </button>
+        </div>
+        <div id="notesContainer" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3"></div>
+      </div>
+    </section>
+
+  </main>
+
+  <nav class="bottom-nav" id="bottomNav">
+    <div class="bottom-nav-bar" id="navBar">
+      <div class="bottom-nav-bubble" id="navBubble">
+        <img id="navBubbleIcon" src="https://cdn.jsdelivr.net/gh/microsoft/fluentui-emoji@main/assets/Shopping%20cart/3D/shopping_cart_3d.png" alt="" />
+      </div>
+      <div class="bottom-nav-items" id="navItems">
+        <button class="nav-item active" data-tab="tasks" onclick="switchTab('tasks')">
+          <img class="nav-icon" src="https://cdn.jsdelivr.net/gh/microsoft/fluentui-emoji@main/assets/Shopping%20cart/3D/shopping_cart_3d.png" alt="" />
+          <span class="nav-label">خانه</span>
+        </button>
+        <button class="nav-item" data-tab="budget" onclick="switchTab('budget')">
+          <img class="nav-icon" src="https://cdn.jsdelivr.net/gh/microsoft/fluentui-emoji@main/assets/Money%20bag/3D/money_bag_3d.png" alt="" />
+          <span class="nav-label">بودجه</span>
+        </button>
+        <button class="nav-item" data-tab="calendar" onclick="switchTab('calendar')">
+          <img class="nav-icon" src="https://cdn.jsdelivr.net/gh/microsoft/fluentui-emoji@main/assets/Spiral%20calendar/3D/spiral_calendar_3d.png" alt="" />
+          <span class="nav-label">تقویم</span>
+        </button>
+        <button class="nav-item" data-tab="watchlist" onclick="switchTab('watchlist')">
+          <img class="nav-icon" src="https://cdn.jsdelivr.net/gh/microsoft/fluentui-emoji@main/assets/Clapper%20board/3D/clapper_board_3d.png" alt="" />
+          <span class="nav-label">سینما</span>
+        </button>
+        <button class="nav-item" data-tab="games" onclick="switchTab('games')">
+          <img class="nav-icon" src="https://cdn.jsdelivr.net/gh/microsoft/fluentui-emoji@main/assets/Video%20game/3D/video_game_3d.png" alt="" />
+          <span class="nav-label">بازی</span>
+        </button>
+        <button class="nav-item" data-tab="fun" onclick="switchTab('fun')">
+          <img class="nav-icon" src="https://cdn.jsdelivr.net/gh/microsoft/fluentui-emoji@main/assets/Game%20die/3D/game_die_3d.png" alt="" />
+          <span class="nav-label">چرخونه</span>
+        </button>
+        <button class="nav-item" data-tab="notes" onclick="switchTab('notes')">
+          <img class="nav-icon" src="https://cdn.jsdelivr.net/gh/microsoft/fluentui-emoji@main/assets/Love%20letter/3D/love_letter_3d.png" alt="" />
+          <span class="nav-label">نامه</span>
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <div id="modalBackdrop" class="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-sm hidden items-center justify-center p-3 sm:p-4">
+    <div id="modalBox" class="relative w-full max-w-lg max-h-[90dvh] overflow-y-auto bg-white rounded-3xl p-5 sm:p-7 shadow-2xl border border-rose-100 space-y-4">
+      <button onclick="closeModal()" class="absolute top-4 left-4 w-10 h-10 rounded-2xl bg-rose-50 text-rose-500 flex items-center justify-center transition shadow-sm z-30">
+        <i class="fa-solid fa-xmark text-lg"></i>
+      </button>
+      <div id="modalDynamicContent"></div>
+    </div>
+  </div>
+
+  <script>
+    /* ===== CONFIG ===== */
+    const SUPABASE_URL = "https://npwfhmoituftjycrhxqy.supabase.co";
+    const SUPABASE_KEY = "sb_publishable_b8-BEd1e8CWNkVdVvU4c-Q_Ir-isgoz";
+    const ROOM_CODE = "amir-armita-us";
+    const ANNIVERSARY_DATE = "2024-10-06";
+    const STATE_VERSION = 10;
+
+    const TMDB_API_KEY = "29fb5c7e087065a22b71f28c6b1db7e8";
+
+    let supabaseClient = null;
+    try { supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY); } catch (e) {}
+
+    /* ===== آیکون‌های تقویم — عکس‌های خودت + fallback CDN ===== */
+    const ICONS_CAL = {
+      birthday: 'icons/birthday.png',
+      anniversary: 'icons/anniversary.png',
+      celebration: 'icons/celebration.png',
+      travel: 'icons/travel.png',
+      work: 'icons/work.png',
+      rest: 'icons/rest.png'
+    };
+    const ICONS_CAL_FALLBACK = {
+      birthday: 'https://cdn.jsdelivr.net/gh/microsoft/fluentui-emoji@main/assets/Birthday%20cake/3D/birthday_cake_3d.png',
+      anniversary: 'https://cdn.jsdelivr.net/gh/microsoft/fluentui-emoji@main/assets/Red%20heart/3D/red_heart_3d.png',
+      celebration: 'https://cdn.jsdelivr.net/gh/microsoft/fluentui-emoji@main/assets/Balloon/3D/balloon_3d.png',
+      travel: 'https://cdn.jsdelivr.net/gh/microsoft/fluentui-emoji@main/assets/Airplane/3D/airplane_3d.png',
+      work: 'https://cdn.jsdelivr.net/gh/microsoft/fluentui-emoji@main/assets/Laptop/3D/laptop_3d.png',
+      rest: 'https://cdn.jsdelivr.net/gh/microsoft/fluentui-emoji@main/assets/Crescent%20moon/3D/crescent_moon_3d.png'
+    };
+    /* اگر عکس محلی لود نشد، به CDN سوییچ کن */
+    window.addEventListener('error', function (e) {
+      const t = e.target;
+      if (t && t.tagName === 'IMG' && t.dataset.calIcon && !t.dataset.fallbackDone) {
+        t.dataset.fallbackDone = '1';
+        const key = t.dataset.calIcon;
+        if (ICONS_CAL_FALLBACK[key]) {
+          t.src = ICONS_CAL_FALLBACK[key];
+        }
+      }
+    }, true);
+
+    /* ===== آیکون‌های Fluent 3D ===== */
+    const BASE_ICON = 'https://cdn.jsdelivr.net/gh/microsoft/fluentui-emoji@main/assets/';
+    const ICONS_3D = {
+      heart: BASE_ICON + 'Red%20heart/3D/red_heart_3d.png',
+      sparkles: BASE_ICON + 'Sparkles/3D/sparkles_3d.png',
+      kiss: BASE_ICON + 'Face%20blowing%20a%20kiss/3D/face_blowing_a_kiss_3d.png',
+      cart: BASE_ICON + 'Shopping%20cart/3D/shopping_cart_3d.png',
+      broom: BASE_ICON + 'Broom/3D/broom_3d.png',
+      money: BASE_ICON + 'Money%20bag/3D/money_bag_3d.png',
+      calendar: BASE_ICON + 'Spiral%20calendar/3D/spiral_calendar_3d.png',
+      clapper: BASE_ICON + 'Clapper%20board/3D/clapper_board_3d.png',
+      dice: BASE_ICON + 'Game%20die/3D/game_die_3d.png',
+      trophy: BASE_ICON + 'Trophy/3D/trophy_3d.png',
+      letter: BASE_ICON + 'Love%20letter/3D/love_letter_3d.png',
+      ferris: BASE_ICON + 'Ferris%20wheel/3D/ferris_wheel_3d.png',
+      party: BASE_ICON + 'Party%20popper/3D/party_popper_3d.png',
+      coffee: BASE_ICON + 'Hot%20beverage/3D/hot_beverage_3d.png',
+      tv: BASE_ICON + 'Television/3D/television_3d.png',
+      videoGame: BASE_ICON + 'Video%20game/3D/video_game_3d.png',
+      blossom: BASE_ICON + 'Cherry%20blossom/3D/cherry_blossom_3d.png',
+      checkBtn: BASE_ICON + 'Check%20mark%20button/3D/check_mark_button_3d.png',
+      hourglass: BASE_ICON + 'Hourglass%20not%20done/3D/hourglass_not_done_3d.png',
+      star: BASE_ICON + 'Star/3D/star_3d.png',
+      handshake: BASE_ICON + 'Handshake/Default/3D/handshake_3d_default.png',
+      manTech: BASE_ICON + 'Technologist/Light/3D/technologist_3d_light.png',
+      womanTech: BASE_ICON + 'Woman%20technologist/Light/3D/woman_technologist_3d_light.png',
+      pizza: BASE_ICON + 'Pizza/3D/pizza_3d.png',
+      smile: BASE_ICON + 'Smiling%20face%20with%20smiling%20eyes/3D/smiling_face_with_smiling_eyes_3d.png',
+      love: BASE_ICON + 'Smiling%20face%20with%20heart-eyes/3D/smiling_face_with_heart-eyes_3d.png',
+      sleepy: BASE_ICON + 'Sleeping%20face/3D/sleeping_face_3d.png',
+      pleading: BASE_ICON + 'Pleading%20face/3D/pleading_face_3d.png',
+      play: BASE_ICON + 'Play%20button/3D/play_button_3d.png',
+      eyes: BASE_ICON + 'Eyes/3D/eyes_3d.png',
+      alarm: BASE_ICON + 'Alarm%20clock/3D/alarm_clock_3d.png',
+      gift: BASE_ICON + 'Wrapped%20gift/3D/wrapped_gift_3d.png'
+    };
+
+    /* ===== صدا ===== */
+    let isSoundEnabled = (localStorage.getItem('twoOfUs_sound') !== 'false');
+    let audioCtx = null;
+    function getAudioContext() {
+      if (!audioCtx) {
+        const AC = window.AudioContext || window.webkitAudioContext;
+        if (AC) audioCtx = new AC();
+      }
+      if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
+      return audioCtx;
+    }
+    function toggleSound() {
+      isSoundEnabled = !isSoundEnabled;
+      localStorage.setItem('twoOfUs_sound', isSoundEnabled);
+      const btn = document.getElementById('soundToggleBtn');
+      btn.innerHTML = isSoundEnabled
+        ? '<i class="fa-solid fa-volume-high text-xs"></i>'
+        : '<i class="fa-solid fa-volume-xmark text-xs text-rose-500"></i>';
+      if (isSoundEnabled) playTone(600, 'sine', 0.1);
+    }
+    function playTone(freq, type = 'sine', duration = 0.15, volume = 0.12) {
+      if (!isSoundEnabled) return;
+      try {
+        const ctx = getAudioContext();
+        if (!ctx) return;
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = type;
+        osc.frequency.setValueAtTime(freq, ctx.currentTime);
+        gain.gain.setValueAtTime(volume, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + duration);
+        osc.connect(gain); gain.connect(ctx.destination);
+        osc.start(); osc.stop(ctx.currentTime + duration);
+      } catch (e) {}
+    }
+    function playKissChime() {
+      if (!isSoundEnabled) return;
+      playTone(523.25, 'sine', 0.1);
+      setTimeout(() => playTone(659.25, 'sine', 0.15), 100);
+      setTimeout(() => playTone(783.99, 'sine', 0.25), 200);
+    }
+
+    /* ===== تعطیلات رسمی سالانه ===== */
+    const EMBEDDED_HOLIDAYS = {
+      "01-01": "نوروز (تعطیل رسمی)",
+      "01-02": "عید نوروز (تعطیل رسمی)",
+      "01-03": "عید نوروز (تعطیل رسمی)",
+      "01-04": "عید نوروز (تعطیل رسمی)",
+      "01-12": "روز جمهوری اسلامی (تعطیل رسمی)",
+      "01-13": "روز طبیعت (تعطیل رسمی)",
+      "03-14": "رحلت امام خمینی (تعطیل رسمی)",
+      "03-15": "قیام ۱۵ خرداد (تعطیل رسمی)",
+      "11-22": "پیروزی انقلاب (تعطیل رسمی)",
+      "12-29": "ملی شدن صنعت نفت (تعطیل رسمی)"
+    };
+
+    /* ===== مناسبت‌های کادویی ===== */
+    const GIFT_EVENTS = {
+      "11-25": { title: 'ولنتاین', icon: 'anniversary' },
+      "11-29": { title: 'سپندارمذگان', icon: 'anniversary' },
+      "09-30": { title: 'شب یلدا', icon: 'celebration' }
+    };
+
+    /* ===== مناسبت‌های شخصی ===== */
+    const DEFAULT_PERSONAL_DATES = [
+      { id: 'pd-birth-amir',   title: 'تولد امیرمحمد', md: '10-24', year: 1385, icon: 'birthday' },
+      { id: 'pd-birth-armita', title: 'تولد آرمیتا',   md: '06-14', year: 1386, icon: 'birthday' },
+      { id: 'pd-meet',         title: 'سالگرد آشنایی', md: '07-15', year: 1403, icon: 'anniversary' },
+      { id: 'pd-bleh',         title: 'بله‌برون',      md: '11-02', year: 1404, icon: 'celebration' },
+      { id: 'pd-mahram',       title: 'محرم شدن',      md: '01-04', year: 1405, icon: 'anniversary' },
+      { id: 'pd-first',        title: 'اولین بار',     md: '05-19', year: 1405, icon: 'anniversary' },
+      { id: 'pd-aghd',         title: 'عقد',           md: '06-29', year: 1405, icon: 'celebration' }
+    ];
+
+    /* ===== تبدیل تاریخ شمسی ===== */
+    function gregorianToJalali(gy, gm, gd) {
+      const g_d_m = [0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334];
+      let gy2 = (gm > 2) ? (gy + 1) : gy;
+      let days = 355666 + (365 * gy) + Math.floor((gy2 + 3) / 4) - Math.floor((gy2 + 99) / 100) + Math.floor((gy2 + 399) / 400) + gd + g_d_m[gm - 1];
+      let jy = -1595 + (33 * Math.floor(days / 12053));
+      days %= 12053;
+      jy += 4 * Math.floor(days / 1461);
+      days %= 1461;
+      if (days > 365) { jy += Math.floor((days - 1) / 365); days = (days - 1) % 365; }
+      let jm, jd;
+      if (days < 186) { jm = 1 + Math.floor(days / 31); jd = 1 + (days % 31); }
+      else { jm = 7 + Math.floor((days - 186) / 30); jd = 1 + ((days - 186) % 30); }
+      return [jy, jm, jd];
+    }
+    function jalaliToGregorian(jy, jm, jd) {
+      let gy = (jy <= 979) ? 621 : 1600;
+      jy -= (jy <= 979) ? 0 : 979;
+      let days = (365 * jy) + ((Math.floor(jy / 33)) * 8) + (Math.floor(((jy % 33) + 3) / 4)) + 78 + jd + ((jm < 7) ? (jm - 1) * 31 : ((jm - 7) * 30) + 186);
+      gy += 400 * Math.floor(days / 146097); days %= 146097;
+      if (days > 36524) { gy += 100 * Math.floor(--days / 36524); days %= 36524; if (days >= 365) days++; }
+      gy += 4 * Math.floor(days / 1461); days %= 1461;
+      if (days > 365) { gy += Math.floor((days - 1) / 365); days = (days - 1) % 365; }
+      const g_d_m = [0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334];
+      let gm = 0;
+      while (gm < 12 && days >= g_d_m[gm] + (gm === 1 && ((gy % 4 === 0 && gy % 100 !== 0) || (gy % 400 === 0)) ? 1 : 0)) gm++;
+      let gd = days - g_d_m[gm - 1] + 1;
+      return [gy, gm, gd];
+    }
+    const JALALI_MONTHS = ["فروردین", "اردیبهشت", "خرداد", "تیر", "مرداد", "شهریور", "مهر", "آبان", "آذر", "دی", "بهمن", "اسفند"];
+    function getNowJalaliString() {
+      const now = new Date();
+      const [jy, jm, jd] = gregorianToJalali(now.getFullYear(), now.getMonth() + 1, now.getDate());
+      const hours = String(now.getHours()).padStart(2, '0');
+      const mins = String(now.getMinutes()).padStart(2, '0');
+      return { jy, jm, jd, dateStr: `${jd} ${JALALI_MONTHS[jm - 1]} ${jy}`, timeStr: `${hours}:${mins}`, fullTimestamp: `${jd} ${JALALI_MONTHS[jm - 1]} - ساعت ${hours}:${mins}` };
+    }
+    function standardizeJalaliDateKey(str) {
+      if (!str) return '';
+      const s = String(str).replace(/[۰-۹]/g, c => String(c.charCodeAt(0) - 1776));
+      const parts = s.split(/[\/\-\.]/).map(p => p.trim()).filter(Boolean);
+      if (parts.length !== 3) return '';
+      return `${parts[0]}-${String(parts[1]).padStart(2, '0')}-${String(parts[2]).padStart(2, '0')}`;
+    }
+
+    /* ===== دسته‌ها ===== */
+    const BUDGET_CATEGORIES = [
+      { id: 'supermarket', name: 'سوپرمارکت', icon: 'fa-basket-shopping', color: '#f43f6e' },
+      { id: 'home', name: 'خانه و قبوض', icon: 'fa-house', color: '#8b5cf6' },
+      { id: 'fun', name: 'تفریح و رستوران', icon: 'fa-mug-hot', color: '#f59e0b' },
+      { id: 'car', name: 'خودرو', icon: 'fa-car', color: '#06b6d4' },
+      { id: 'health', name: 'سلامت', icon: 'fa-heart-pulse', color: '#10b981' },
+      { id: 'other', name: 'سایر', icon: 'fa-bag-shopping', color: '#64748b' }
+    ];
+    const EVENT_CATEGORIES = [
+      { id: 'anniversary', name: 'مناسبت دونفره', dot: 'bg-rose-500' },
+      { id: 'medical', name: 'پزشکی', dot: 'bg-emerald-500' },
+      { id: 'finance', name: 'مالی', dot: 'bg-amber-500' },
+      { id: 'trip', name: 'سفر', dot: 'bg-cyan-500' }
+    ];
+    const WATCH_STATUSES = [
+      { id: 'queued', name: 'خواهم دید', icon: 'hourglass', color: '#f59e0b' },
+      { id: 'watching', name: 'در حال دیدن', icon: 'play', color: '#06b6d4' },
+      { id: 'watched', name: 'دیده شد', icon: 'checkBtn', color: '#10b981' }
+    ];
+    const WATCH_TYPES = [
+      { id: 'movie', name: 'فیلم', icon: 'clapper' },
+      { id: 'series', name: 'سریال', icon: 'tv' },
+      { id: 'anime', name: 'انیمه', icon: 'blossom' }
+    ];
+    const GAME_STATUSES = [
+      { id: 'queued', name: 'خواهم بازی کرد', icon: 'hourglass', color: '#f59e0b' },
+      { id: 'playing', name: 'در حال بازی', icon: 'play', color: '#06b6d4' },
+      { id: 'played', name: 'تمام شد', icon: 'checkBtn', color: '#10b981' }
+    ];
+    const GAME_PLATFORMS = [
+      { id: 'ps5', name: 'PS5' }, { id: 'ps4', name: 'PS4' },
+      { id: 'xbox', name: 'Xbox' }, { id: 'pc', name: 'PC' },
+      { id: 'mobile', name: 'موبایل' }, { id: 'switch', name: 'Nintendo' },
+      { id: 'other', name: 'سایر' }
+    ];
+
+    /* ===== State ===== */
+    let currentPersona = localStorage.getItem('twoOfUs_persona') || 'p1';
+    let currentTab = 'tasks';
+    let currentChoreFilter = 'all';
+    let currentWatchFilter = 'all';
+    let currentWatchStatusFilter = 'all';
+    let currentGameStatusFilter = 'all';
+    let calYear = 1405;
+    let calMonth = 7;
+    let selectedCalDay = null;
+
+    const DEFAULT_DATE_IDEAS = [
+      "قدم زدن در بلوار ارم همدان","بازدید از آرامگاه بوعلی‌سینا","کافه‌گردی در خیابان بوعلی",
+      "پارک مردم همدان و بستنی","گنبد علویان و عکس یادگاری","تپه هگمتانه و موزه",
+      "کوهنوردی سبک در الوند","سفر یک روزه به غار علیصدر","آبشار گنج‌نامه و پیک‌نیک",
+      "خرید از بازار سنتی همدان","شام در رستوران سنتی","تماشای فیلم در سینما",
+      "کوه و کمپ یک روزه","بازدید از موزه تاریخ طبیعی","قدم زدن در خیابان بوعلی",
+      "صبحانه سنتی در کافه‌ها","خرید شیرینی معروف همدان","رفتن به پارک ارم",
+      "پختن قورمه سبزی با هم","پختن آش رشته دونفره","چای و نبات در کافه سنتی",
+      "تماشای سریال ایرانی با هم","قدم زدن زیر باران","خرید گل و چیدن در گلدان",
+      "تماشای غروب از پشت‌بام","نوشتن نامه عاشقانه","ساختن آلبوم عکس مشترک",
+      "پیاده‌روی و صبحانه","بازی منچ یا شطرنج","پختن پیتزای خونگی",
+      "تماشای ستاره‌ها از پشت‌بام","خواندن کتاب با صدای بلند","آشپزی غذای جدید",
+      "رفتن به کتاب‌فروشی","بازی ویدیویی دو نفره","پلی‌لیست مشترک موسیقی",
+      "یاد گرفتن مهارت جدید","بازی بدمینتون در پارک","نوشتن خاطرات مشترک",
+      "دیدن طلوع خورشید","خرید میوه و آشپزی","صبحانه مفصل تعطیل",
+      "دیدن آلبوم قدیمی","پختن کیک","تماشای کنسرت آنلاین",
+      "کلاس آموزشی مشترک","بازی با کارت‌های حافظه","قدم زدن در محله‌های قدیمی",
+      "سفر یک روزه به روستاها","بازدید از دریاچه سد اکباتان"
+    ];
+
+    let appState = {
+      stateVersion: STATE_VERSION,
+      groceries: [],
+      chores: [],
+      expenses: [],
+      monthlyBudgetLimit: 0,
+      coupleEvents: [],
+      watchList: [],
+      gameList: [],
+      bucketList: [],
+      dateIdeas: [...DEFAULT_DATE_IDEAS],
+      notes: [],
+      personalDates: [...DEFAULT_PERSONAL_DATES],
+      moods: {
+        p1: { key: 'smile', text: 'عالی و پرانرژی' },
+        p2: { key: 'love', text: 'خوشحال و شاد' }
+      }
+    };
+
+    /* ==================== END OF PART 1 ==================== */
+    /* ============================================================
+   LIFECYCLE
+   ============================================================ */
+document.addEventListener("DOMContentLoaded", () => {
+  setPersona(currentPersona);
+  updateAnniversaryDays();
+  updateHeaderClock();
+  setInterval(updateHeaderClock, 1000);
+  initBgParticles();
+  loadLocalState();
+  initSupabaseSync();
+
+  const now = new Date();
+  const [jy, jm, jd] = gregorianToJalali(now.getFullYear(), now.getMonth() + 1, now.getDate());
+  calYear = jy; calMonth = jm; selectedCalDay = jd;
+
+  renderChoreFilters();
+  renderWatchStatusFilters();
+  renderWatchTypeFilters();
+  renderGameStatusFilters();
+  renderAll();
+  initRouletteCanvas();
+
+  requestAnimationFrame(() => positionNavBubble('tasks', false));
+  window.addEventListener('resize', () => positionNavBubble(currentTab, false));
+  window.addEventListener('load', () => positionNavBubble(currentTab, false));
+});
+
+function initBgParticles() {
+  const box = document.getElementById('bgParticles');
+  if (!box || box.dataset.init) return;
+  box.dataset.init = '1';
+  for (let i = 0; i < 22; i++) {
+    const p = document.createElement('div');
+    p.className = 'bg-particle';
+    const size = 6 + Math.random() * 14;
+    p.style.width = size + 'px';
+    p.style.height = size + 'px';
+    p.style.left = (Math.random() * 100) + '%';
+    p.style.bottom = '-30px';
+    p.style.animationDuration = (14 + Math.random() * 16) + 's';
+    p.style.animationDelay = (Math.random() * 14) + 's';
+    box.appendChild(p);
+  }
+}
+
+function updateHeaderClock() {
+  const now = new Date();
+  const [jy, jm, jd] = gregorianToJalali(now.getFullYear(), now.getMonth() + 1, now.getDate());
+  const hh = String(now.getHours()).padStart(2, '0');
+  const mm = String(now.getMinutes()).padStart(2, '0');
+  const ss = String(now.getSeconds()).padStart(2, '0');
+  const dateEl = document.getElementById('headerJalaliDate');
+  const timeEl = document.getElementById('headerLiveTime');
+  if (dateEl) dateEl.innerText = `${jd} ${JALALI_MONTHS[jm - 1]}`;
+  if (timeEl) timeEl.innerText = `${hh}:${mm}:${ss}`;
+}
+
+function setPersona(p) {
+  currentPersona = p;
+  localStorage.setItem('twoOfUs_persona', p);
+  const amirBtn = document.getElementById('personaAmir');
+  const armitaBtn = document.getElementById('personaArmita');
+  const activeCls = "px-2 sm:px-3 py-1 rounded-lg sm:rounded-xl text-[10px] sm:text-xs font-bold transition flex items-center gap-1 bg-rose-500 text-white shadow-sm";
+  const idleCls = "px-2 sm:px-3 py-1 rounded-lg sm:rounded-xl text-[10px] sm:text-xs font-bold transition flex items-center gap-1 text-slate-500 hover:text-slate-800";
+  if (!amirBtn || !armitaBtn) return;
+  if (p === 'p1') { amirBtn.className = activeCls; armitaBtn.className = idleCls; }
+  else { armitaBtn.className = activeCls; amirBtn.className = idleCls; }
+}
+
+function updateAnniversaryDays() {
+  const start = new Date(ANNIVERSARY_DATE);
+  const now = new Date();
+  const diffDays = Math.ceil(Math.abs(now - start) / 86400000);
+  const el = document.getElementById('daysCount');
+  if (el) el.innerText = diffDays.toLocaleString('fa-IR');
+}
+
+/* ============================================================
+   TAB SWITCHING
+   ============================================================ */
+function switchTab(tabId) {
+  currentTab = tabId;
+  ['tasks', 'budget', 'calendar', 'watchlist', 'games', 'fun', 'notes'].forEach(t => {
+    const sec = document.getElementById(`tabContent-${t}`);
+    if (sec) sec.classList.toggle('hidden', t !== tabId);
+  });
+  document.querySelectorAll('.nav-item').forEach(b => {
+    b.classList.toggle('active', b.dataset.tab === tabId);
+  });
+  positionNavBubble(tabId, true);
+  playTone(520, 'sine', 0.04, 0.06);
+
+  if (tabId === 'calendar') renderCalendar();
+  if (tabId === 'budget') renderBudgetChart();
+  if (tabId === 'watchlist') renderWatchlist();
+  if (tabId === 'games') renderGameList();
+  if (tabId === 'fun') requestAnimationFrame(() => { if (!isWheelSpinning) drawWheel(currentWheelAngle); });
+}
+
+function positionNavBubble(tabId, animate) {
+  const items = document.querySelectorAll('.nav-item');
+  const target = Array.from(items).find(i => i.dataset.tab === tabId);
+  if (!target) return;
+  const bubble = document.getElementById('navBubble');
+  const bubbleIcon = document.getElementById('navBubbleIcon');
+  const navBar = document.getElementById('navBar');
+  if (!bubble || !navBar || !bubbleIcon) return;
+
+  const barRect = navBar.getBoundingClientRect();
+  const itemRect = target.getBoundingClientRect();
+  const centerX = itemRect.left - barRect.left + itemRect.width / 2;
+  const bubbleW = parseFloat(getComputedStyle(bubble).width);
+  const tx = centerX - bubbleW / 2;
+
+  if (!animate) {
+    bubble.style.transition = 'none';
+    bubble.style.transform = `translateX(${tx}px)`;
+    requestAnimationFrame(() => { bubble.style.transition = ''; });
+  } else {
+    bubble.style.transform = `translateX(${tx}px)`;
+  }
+
+  const iconSrc = target.querySelector('.nav-icon')?.src || '';
+  if (iconSrc && bubbleIcon.dataset.currentSrc !== iconSrc) {
+    bubble.classList.add('bubble-swap');
+    setTimeout(() => {
+      bubbleIcon.src = iconSrc;
+      bubbleIcon.dataset.currentSrc = iconSrc;
+      bubble.classList.remove('bubble-swap');
+    }, animate ? 160 : 0);
+  }
+}
+
+/* ============================================================
+   STATE PERSIST
+   ============================================================ */
+function loadLocalState() {
+  const local = localStorage.getItem(`twoOfUs_state_${ROOM_CODE}`);
+  if (local) {
+    try {
+      const parsed = JSON.parse(local);
+      appState = { ...appState, ...parsed };
+      if (!Array.isArray(appState.dateIdeas) || appState.dateIdeas.length < 10 ||
+          (parsed.stateVersion || 0) < STATE_VERSION) {
+        appState.dateIdeas = [...DEFAULT_DATE_IDEAS];
+      }
+      if (Array.isArray(appState.watchList)) {
+        appState.watchList = appState.watchList.map(w => {
+          if (!w) return null;
+          const st = (w.status === 'watching' || w.status === 'watched' || w.status === 'queued') ? w.status : 'queued';
+          return {
+            ...w, status: st,
+            currentEpisode: Number(w.currentEpisode) || 0,
+            totalEpisodes: Number(w.totalEpisodes) || 0,
+            lastWatched: w.lastWatched || null,
+            posterUrl: w.posterUrl || '',
+            originalTitle: w.originalTitle || ''
+          };
+        }).filter(Boolean);
+      }
+      if (Array.isArray(appState.gameList)) {
+        appState.gameList = appState.gameList.map(g => {
+          if (!g) return null;
+          const st = (g.status === 'playing' || g.status === 'played' || g.status === 'queued') ? g.status : 'queued';
+          return {
+            ...g, status: st,
+            hours: Number(g.hours) || 0,
+            posterUrl: g.posterUrl || '',
+            platform: g.platform || 'pc'
+          };
+        }).filter(Boolean);
+      }
+      if (!Array.isArray(appState.personalDates) || appState.personalDates.length === 0) {
+        appState.personalDates = [...DEFAULT_PERSONAL_DATES];
+      }
+      appState.stateVersion = STATE_VERSION;
+    } catch (e) {}
+  }
+}
+
+function saveState(broadcast = true) {
+  appState.stateVersion = STATE_VERSION;
+  localStorage.setItem(`twoOfUs_state_${ROOM_CODE}`, JSON.stringify(appState));
+  renderAll();
+  if (supabaseClient && broadcast) {
+    supabaseClient.from('couple_rooms').upsert({
+      room_code: ROOM_CODE, state: appState, updated_at: new Date().toISOString()
+    }, { onConflict: 'room_code' }).then(({ error }) => { if (error) console.error(error); });
+  }
+}
+
+async function initSupabaseSync() {
+  if (!supabaseClient) return;
+  const { data } = await supabaseClient.from('couple_rooms').select('state').eq('room_code', ROOM_CODE).maybeSingle();
+  if (data && data.state) {
+    appState = { ...appState, ...data.state };
+    if (!Array.isArray(appState.dateIdeas) || appState.dateIdeas.length < 10 ||
+        (data.state.stateVersion || 0) < STATE_VERSION) {
+      appState.dateIdeas = [...DEFAULT_DATE_IDEAS];
+    }
+    if (!Array.isArray(appState.personalDates) || appState.personalDates.length === 0) {
+      appState.personalDates = [...DEFAULT_PERSONAL_DATES];
+    }
+    appState.stateVersion = STATE_VERSION;
+    localStorage.setItem(`twoOfUs_state_${ROOM_CODE}`, JSON.stringify(appState));
+    renderAll();
+  }
+  supabaseClient.channel(`room_${ROOM_CODE}`)
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'couple_rooms', filter: `room_code=eq.${ROOM_CODE}` }, payload => {
+      if (payload.new && payload.new.state) {
+        appState = { ...appState, ...payload.new.state };
+        localStorage.setItem(`twoOfUs_state_${ROOM_CODE}`, JSON.stringify(appState));
+        renderAll();
+      }
+    })
+    .on('broadcast', { event: 'love_kiss' }, payload => { showKissCelebration(payload.payload.senderName); })
+    .subscribe();
+}
+
+/* ============================================================
+   RENDER MASTER
+   ============================================================ */
+function renderAll() {
+  renderMoods();
+  renderGroceries();
+  renderChores();
+  renderBudgetChart();
+  renderCalendar();
+  renderWatchlist();
+  renderGameList();
+  renderBucketList();
+  renderDateIdeasDrawer();
+  renderNotes();
+  updateUpcomingEventTeaser();
+}
+
+function renderMoods() {
+  if (!appState.moods) return;
+  const p1Key = appState.moods.p1?.key || 'smile';
+  const p2Key = appState.moods.p2?.key || 'love';
+  const i1 = document.getElementById('p1MoodIcon'), i2 = document.getElementById('p2MoodIcon');
+  const t1 = document.getElementById('p1MoodText'), t2 = document.getElementById('p2MoodText');
+  if (i1) i1.src = ICONS_3D[p1Key] || ICONS_3D.smile;
+  if (t1) t1.innerText = appState.moods.p1?.text || 'عالی';
+  if (i2) i2.src = ICONS_3D[p2Key] || ICONS_3D.love;
+  if (t2) t2.innerText = appState.moods.p2?.text || 'شاد';
+}
+
+/* ---------- GROCERIES ---------- */
+function renderGroceries() {
+  const c = document.getElementById('groceryList');
+  if (!c) return;
+  const list = appState.groceries || [];
+  const badge = document.getElementById('groceryCountBadge');
+  if (badge) badge.innerText = `${list.length.toLocaleString('fa-IR')} قلم کالا`;
+  if (list.length === 0) {
+    c.innerHTML = `<div class="text-center py-8 text-slate-400 text-xs">
+      <img src="${ICONS_3D.cart}" class="w-10 h-10 mx-auto mb-2 opacity-40" alt="" />
+      <p>سبد خرید خالیه</p></div>`;
+    return;
+  }
+  c.innerHTML = list.map(item => `
+    <div class="flex items-center justify-between p-3 rounded-2xl ${item.done ? 'bg-slate-50/70 border border-slate-200/50' : 'bg-white border border-rose-100/80 shadow-sm'}">
+      <div class="flex items-center gap-2.5 min-w-0 flex-1">
+        <button onclick="toggleGrocery('${item.id}')" class="w-6 h-6 rounded-lg border-2 ${item.done ? 'bg-rose-500 border-rose-500 text-white' : 'border-slate-300'} flex items-center justify-center text-[10px] flex-shrink-0">
+          ${item.done ? '<i class="fa-solid fa-check"></i>' : ''}
+        </button>
+        <div class="min-w-0 flex-1">
+          <p class="text-xs font-bold ${item.done ? 'line-through text-slate-400' : 'text-slate-800'} break-words">${escapeHtml(item.name)}</p>
+          <div class="flex items-center gap-1.5 mt-0.5 flex-wrap">
+            <span class="text-[10px] text-slate-400 flex items-center gap-1"><i class="fa-regular fa-clock text-[9px]"></i> ${item.timeBadge || ''}</span>
+            <img src="${item.addedBy === 'p1' ? ICONS_3D.manTech : ICONS_3D.womanTech}" class="w-3.5 h-3.5" alt="" />
+          </div>
+        </div>
+      </div>
+      <button onclick="deleteGrocery('${item.id}')" class="w-7 h-7 rounded-xl text-slate-300 hover:text-rose-500 hover:bg-rose-50 flex items-center justify-center flex-shrink-0">
+        <i class="fa-solid fa-trash-can text-[10px]"></i>
+      </button>
+    </div>`).join('');
+}
+
+function clearCompletedGroceries() {
+  appState.groceries = (appState.groceries || []).filter(g => !g.done);
+  saveState(); playTone(450);
+}
+
+/* ---------- CHORES ---------- */
+function renderChoreFilters() {
+  const box = document.getElementById('choreFilters');
+  if (!box) return;
+  const opts = [
+    { id: 'all', label: 'همه' },
+    { id: 'both', label: 'دونفره', icon: ICONS_3D.handshake },
+    { id: 'p1', label: 'امیرمحمد', icon: ICONS_3D.manTech },
+    { id: 'p2', label: 'آرمیتا', icon: ICONS_3D.womanTech }
+  ];
+  box.innerHTML = opts.map(o => `
+    <button onclick="filterChores('${o.id}')" id="choreFilter-${o.id}" class="shrink-0 px-2.5 py-1 rounded-xl ${currentChoreFilter === o.id ? 'bg-indigo-500 text-white' : 'bg-white text-slate-600 border border-slate-200'} font-bold flex items-center gap-1 whitespace-nowrap transition">
+      ${o.icon ? `<img src="${o.icon}" class="w-3.5 h-3.5" alt="" />` : ''}
+      <span>${o.label}</span>
+    </button>`).join('');
+}
+
+function renderChores() {
+  const c = document.getElementById('choreList');
+  if (!c) return;
+  let list = appState.chores || [];
+  if (currentChoreFilter !== 'all') list = list.filter(x => x.assignee === currentChoreFilter);
+  if (list.length === 0) {
+    c.innerHTML = `<div class="text-center py-8 text-slate-400 text-xs">
+      <img src="${ICONS_3D.broom}" class="w-10 h-10 mx-auto mb-2 opacity-40" alt="" />
+      <p>همه کارها انجام شده</p></div>`;
+    return;
+  }
+  c.innerHTML = list.map(x => `
+    <div class="flex items-center justify-between p-3 rounded-2xl ${x.done ? 'bg-slate-50/70 border border-slate-200/50' : 'bg-white border border-indigo-100/80 shadow-sm'}">
+      <div class="flex items-center gap-2.5 min-w-0 flex-1">
+        <button onclick="toggleChore('${x.id}')" class="w-6 h-6 rounded-lg border-2 ${x.done ? 'bg-indigo-500 border-indigo-500 text-white' : 'border-slate-300'} flex items-center justify-center text-[10px] flex-shrink-0">
+          ${x.done ? '<i class="fa-solid fa-check"></i>' : ''}
+        </button>
+        <div class="min-w-0 flex-1">
+          <p class="text-xs font-bold ${x.done ? 'line-through text-slate-400' : 'text-slate-800'} break-words">${escapeHtml(x.title)}</p>
+          <div class="flex items-center gap-1.5 mt-0.5 flex-wrap">
+            <span class="text-[10px] text-slate-400">${x.timeBadge || ''}</span>
+            <img src="${x.assignee === 'p1' ? ICONS_3D.manTech : x.assignee === 'p2' ? ICONS_3D.womanTech : ICONS_3D.handshake}" class="w-3.5 h-3.5" alt="" />
+          </div>
+        </div>
+      </div>
+      <button onclick="deleteChore('${x.id}')" class="w-7 h-7 rounded-xl text-slate-300 hover:text-rose-500 hover:bg-rose-50 flex items-center justify-center flex-shrink-0">
+        <i class="fa-solid fa-trash-can text-[10px]"></i>
+      </button>
+    </div>`).join('');
+}
+
+function filterChores(id) {
+  currentChoreFilter = id;
+  renderChoreFilters();
+  renderChores();
+}
+
+/* ---------- BUDGET ---------- */
+function renderBudgetChart() {
+  const expenses = appState.expenses || [];
+  const total = expenses.reduce((s, x) => s + (Number(x.amount) || 0), 0);
+  const amtEl = document.getElementById('chartTotalAmount');
+  const cntEl = document.getElementById('expenseCountText');
+  if (amtEl) amtEl.innerText = total.toLocaleString('fa-IR');
+  if (cntEl) cntEl.innerText = `${expenses.length.toLocaleString('fa-IR')} فقره`;
+
+  const limit = Number(appState.monthlyBudgetLimit) || 0;
+  const ind = document.getElementById('budgetLimitIndicator');
+  if (ind) {
+    if (limit > 0) {
+      const rem = limit - total;
+      const pct = Math.min(100, Math.round((total / limit) * 100));
+      ind.innerHTML = `
+        <div class="flex items-center justify-between text-[11px] mb-1">
+          <span>سقف: <strong>${limit.toLocaleString('fa-IR')}</strong></span>
+          <span class="${rem >= 0 ? 'text-emerald-600' : 'text-rose-600'} font-bold">${rem >= 0 ? `${rem.toLocaleString('fa-IR')} باقی` : `${Math.abs(rem).toLocaleString('fa-IR')} فراتر`}</span>
+        </div>
+        <div class="w-full h-2 rounded-full bg-slate-100 overflow-hidden">
+          <div class="h-full rounded-full ${pct > 90 ? 'bg-rose-500' : pct > 70 ? 'bg-amber-400' : 'bg-emerald-500'}" style="width: ${pct}%"></div>
+        </div>`;
+    } else {
+      ind.innerHTML = `<button onclick="openSetMonthlyBudgetModal()" class="text-rose-500 font-bold underline text-xs">تعیین سقف بودجه</button>`;
+    }
+  }
+
+  const catTotals = {};
+  BUDGET_CATEGORIES.forEach(c => catTotals[c.id] = 0);
+  expenses.forEach(e => { const c = e.category || 'other'; catTotals[c] = (catTotals[c] || 0) + (Number(e.amount) || 0); });
+
+  const svg = document.getElementById('budgetDonutSvg');
+  if (svg) {
+    const circ = 2 * Math.PI * 38;
+    let offset = 0;
+    let html = `<circle cx="50" cy="50" r="38" stroke="#f1f5f9" stroke-width="11" fill="transparent"/>`;
+    BUDGET_CATEGORIES.forEach(cat => {
+      const v = catTotals[cat.id];
+      if (v > 0 && total > 0) {
+        const dash = (v / total) * circ;
+        html += `<circle cx="50" cy="50" r="38" stroke="${cat.color}" stroke-width="11" fill="transparent" stroke-dasharray="${dash} ${circ}" stroke-dashoffset="${-offset}" stroke-linecap="round"/>`;
+        offset += dash;
+      }
+    });
+    svg.innerHTML = html;
+  }
+
+  const catBox = document.getElementById('categoryBreakdownContainer');
+  if (catBox) {
+    catBox.innerHTML = BUDGET_CATEGORIES.map(cat => {
+      const v = catTotals[cat.id] || 0;
+      const pct = total > 0 ? Math.round((v / total) * 100) : 0;
+      return `<div class="space-y-1">
+        <div class="flex items-center justify-between text-xs">
+          <div class="flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-full" style="background:${cat.color}"></span><span class="font-bold text-slate-700">${cat.name}</span></div>
+          <div class="flex items-center gap-2 text-slate-500"><span class="font-extrabold text-slate-800">${v.toLocaleString('fa-IR')}</span><span class="text-[10px] w-8 text-left font-semibold">${pct}%</span></div>
+        </div>
+        <div class="w-full h-2 rounded-full bg-slate-100 overflow-hidden"><div class="h-full rounded-full" style="width:${pct}%;background:${cat.color}"></div></div>
+      </div>`;
+    }).join('');
+  }
+
+  const lc = document.getElementById('expenseList');
+  if (!lc) return;
+  if (expenses.length === 0) {
+    lc.innerHTML = `<div class="text-center py-6 text-slate-400 text-xs">هنوز خرجی ثبت نشده</div>`;
+    return;
+  }
+  lc.innerHTML = [...expenses].reverse().map(e => {
+    const ci = BUDGET_CATEGORIES.find(c => c.id === e.category) || BUDGET_CATEGORIES[5];
+    return `<div class="flex items-center justify-between p-3 rounded-2xl bg-white border border-slate-100 shadow-sm gap-2">
+      <div class="flex items-center gap-2.5 min-w-0 flex-1">
+        <div class="w-9 h-9 rounded-xl flex items-center justify-center text-xs font-bold flex-shrink-0" style="background:${ci.color}15;color:${ci.color}"><i class="fa-solid ${ci.icon}"></i></div>
+        <div class="min-w-0">
+          <p class="text-xs font-bold text-slate-800 break-words">${escapeHtml(e.title)}</p>
+          <div class="flex items-center gap-1.5 text-[10px] text-slate-400 mt-0.5 flex-wrap">
+            <span>${e.dateStr || ''}</span>
+            <img src="${e.registeredBy === 'p1' ? ICONS_3D.manTech : ICONS_3D.womanTech}" class="w-3 h-3" alt="" />
+          </div>
+        </div>
+      </div>
+      <div class="flex items-center gap-2 flex-shrink-0">
+        <span class="font-display font-extrabold text-sm text-slate-800">${Number(e.amount).toLocaleString('fa-IR')}</span>
+        <button onclick="deleteExpense('${e.id}')" class="text-slate-300 hover:text-rose-500 p-1"><i class="fa-solid fa-trash-can text-xs"></i></button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+/* ---------- CALENDAR با ۴ دسته ---------- */
+function getDayCategory(md) {
+  const personal = (appState.personalDates || []).find(p => p.md === md);
+  if (personal) return { type: 'personal', data: personal };
+  if (GIFT_EVENTS[md]) return { type: 'gift', data: GIFT_EVENTS[md] };
+  if (EMBEDDED_HOLIDAYS[md]) return { type: 'holiday', data: { title: EMBEDDED_HOLIDAYS[md] } };
+  return { type: 'normal', data: null };
+}
+
+function renderCalendarLegend() {
+  const box = document.getElementById('calendarLegend');
+  if (!box) return;
+  const items = [
+    { key: 'birthday',    icon: ICONS_CAL.birthday,    label: 'تولد' },
+    { key: 'anniversary', icon: ICONS_CAL.anniversary, label: 'سالگرد' },
+    { key: 'celebration', icon: ICONS_CAL.celebration, label: 'جشن' },
+    { key: 'travel',      icon: ICONS_CAL.travel,      label: 'سفر' },
+    { key: 'work',        icon: ICONS_CAL.work,        label: 'کار' },
+    { key: 'rest',        icon: ICONS_CAL.rest,        label: 'استراحت' }
+  ];
+  box.innerHTML = `<span class="font-bold text-slate-400">راهنما:</span>` +
+    items.map(i => `
+      <span class="flex items-center gap-1 px-1.5 py-0.5 rounded-lg bg-rose-50/60 border border-rose-100/60">
+        <img src="${i.icon}" data-cal-icon="${i.key}" class="w-3.5 h-3.5" alt="" />
+        <span>${i.label}</span>
+      </span>`).join('');
+}
+
+function renderCalendar() {
+  const titleEl = document.getElementById('calendarMonthTitle');
+  if (titleEl) titleEl.innerText = `${JALALI_MONTHS[calMonth - 1]} ${calYear}`;
+
+  renderCalendarLegend();
+
+  const grid = document.getElementById('calendarGrid');
+  if (!grid) return;
+  grid.innerHTML = '';
+  const dim = (calMonth <= 6) ? 31 : (calMonth <= 11) ? 30 : 29;
+  const [gy, gm, gd] = jalaliToGregorian(calYear, calMonth, 1);
+  const startDOW = (new Date(gy, gm - 1, gd).getDay() + 1) % 7;
+
+  const now = new Date();
+  const [tjy, tjm, tjd] = gregorianToJalali(now.getFullYear(), now.getMonth() + 1, now.getDate());
+  const isCurrentMonth = (tjy === calYear && tjm === calMonth);
+
+  for (let i = 0; i < startDOW; i++) grid.innerHTML += `<div class="aspect-square"></div>`;
+
+  for (let day = 1; day <= dim; day++) {
+    const mp = String(calMonth).padStart(2, '0');
+    const dp = String(day).padStart(2, '0');
+    const md = `${mp}-${dp}`;
+    const cat = getDayCategory(md);
+    const isSel = (selectedCalDay === day);
+    const isToday = isCurrentMonth && (day === tjd);
+
+    let cellCls = 'bg-white hover:bg-rose-50 text-slate-700 border border-slate-100';
+    if (isSel) {
+      cellCls = 'bg-rose-500 text-white shadow-lg shadow-rose-500/30 scale-105 z-10';
+    } else if (cat.type === 'personal') {
+      cellCls = 'cal-personal text-white';
+    } else if (cat.type === 'gift') {
+      cellCls = 'cal-gift text-slate-800';
+    } else if (cat.type === 'holiday') {
+      cellCls = 'cal-holiday text-slate-800';
+    }
+
+    const todayCls = isToday && !isSel ? 'cal-today' : '';
+
+    let badgeHtml = '';
+    if (!isSel) {
+      if (cat.type === 'personal' && cat.data.icon) {
+        badgeHtml = `<img src="${ICONS_CAL[cat.data.icon] || ICONS_CAL.birthday}" data-cal-icon="${cat.data.icon || 'birthday'}" class="cal-badge cal-badge-tr" alt="" onerror="this.style.display='none'" />`;
+      } else if (cat.type === 'gift') {
+        badgeHtml = `<img src="${ICONS_3D.gift}" class="cal-badge cal-badge-tr" alt="" />`;
+      } else if (cat.type === 'holiday') {
+        badgeHtml = `<img src="${ICONS_CAL.celebration}" data-cal-icon="celebration" class="cal-badge cal-badge-tr" alt="" />`;
+      }
+    }
+
+    grid.innerHTML += `
+      <button onclick="selectCalendarDay(${day})" class="aspect-square rounded-2xl flex flex-col items-center justify-center relative transition-all ${cellCls} ${todayCls}">
+        ${badgeHtml}
+        <span class="text-xs sm:text-sm font-bold">${day}</span>
+      </button>`;
+  }
+  renderSelectedDayDetails();
+}
+
+function selectCalendarDay(day) { selectedCalDay = day; playTone(500, 'sine', 0.05); renderCalendar(); }
+
+function renderSelectedDayDetails() {
+  if (!selectedCalDay) return;
+  const mp = String(calMonth).padStart(2, '0');
+  const dp = String(selectedCalDay).padStart(2, '0');
+  const full = `${calYear}/${mp}/${dp}`;
+  const md = `${mp}-${dp}`;
+  const cat = getDayCategory(md);
+  const labelEl = document.getElementById('selectedDayLabel');
+  if (labelEl) labelEl.innerText = `${selectedCalDay} ${JALALI_MONTHS[calMonth - 1]}`;
+  const box = document.getElementById('selectedDayEventsList');
+  if (!box) return;
+  let html = '';
+
+  if (cat.type === 'holiday') {
+    html += `<div class="p-3 rounded-2xl bg-rose-100/70 text-rose-700 font-bold flex items-center gap-2.5 text-xs">
+      <img src="${ICONS_CAL.celebration}" data-cal-icon="celebration" class="w-5 h-5" alt="" />
+      <span>${cat.data.title}</span>
+    </div>`;
+  } else if (cat.type === 'gift') {
+    html += `<div class="p-3 rounded-2xl bg-gradient-to-l from-rose-50 to-pink-100 text-rose-700 font-bold flex items-center gap-2.5 text-xs border border-rose-200">
+      <img src="${ICONS_3D.gift}" class="w-5 h-5" alt="" />
+      <span>${cat.data.title} — روز کادو!</span>
+    </div>`;
+  } else if (cat.type === 'personal') {
+    html += `<div class="p-3 rounded-2xl bg-gradient-to-l from-rose-100 to-pink-200 text-rose-800 font-bold flex items-center gap-2.5 text-xs border border-rose-300">
+      <img src="${ICONS_CAL[cat.data.icon] || ICONS_CAL.anniversary}" data-cal-icon="${cat.data.icon || 'anniversary'}" class="w-5 h-5" alt="" />
+      <span>${cat.data.title} (شروع از سال ${cat.data.year})</span>
+    </div>`;
+  }
+
+  const dEvs = (appState.coupleEvents || []).filter(e => e.jalaliDate === full);
+  dEvs.forEach(ev => {
+    const co = EVENT_CATEGORIES.find(c => c.id === ev.category) || EVENT_CATEGORIES[0];
+    html += `<div class="p-3 rounded-2xl bg-white border border-slate-200/80 flex items-center justify-between shadow-sm gap-2">
+      <div class="flex items-center gap-2.5 min-w-0">
+        <span class="w-2.5 h-2.5 rounded-full ${co.dot} flex-shrink-0"></span>
+        <div class="min-w-0">
+          <p class="font-bold text-slate-800 text-xs break-words">${escapeHtml(ev.title)}</p>
+          <p class="text-[10px] text-slate-400">${ev.time ? `ساعت ${ev.time} • ` : ''}${co.name}</p>
+        </div>
+      </div>
+      <button onclick="deleteCoupleEvent('${ev.id}')" class="text-slate-300 hover:text-rose-500 p-1 flex-shrink-0"><i class="fa-solid fa-trash-can text-xs"></i></button>
+    </div>`;
+  });
+
+  if (cat.type === 'normal' && dEvs.length === 0) {
+    html += `<p class="text-slate-400 text-[11px] py-1">روز عادی</p>`;
+  }
+
+  box.innerHTML = html;
+}
+
+function changeMonth(dir) {
+  calMonth += dir;
+  if (calMonth > 12) { calMonth = 1; calYear++; } else if (calMonth < 1) { calMonth = 12; calYear--; }
+  selectedCalDay = 1; playTone(400); renderCalendar();
+}
+function goToCurrentMonth() {
+  const now = new Date();
+  const [jy, jm, jd] = gregorianToJalali(now.getFullYear(), now.getMonth() + 1, now.getDate());
+  calYear = jy; calMonth = jm; selectedCalDay = jd; playTone(480); renderCalendar();
+}
+
+function updateUpcomingEventTeaser() {
+  const t = document.getElementById('nextEventTeaser');
+  if (!t) return;
+  const now = getNowJalaliString();
+  const todayKey = `${now.jy}-${String(now.jm).padStart(2, '0')}-${String(now.jd).padStart(2, '0')}`;
+
+  const candidates = [];
+  (appState.coupleEvents || []).forEach(ev => {
+    const k = standardizeJalaliDateKey(ev.jalaliDate);
+    if (k && k >= todayKey) candidates.push({ title: ev.title, dateKey: k, kind: 'event' });
+  });
+  (appState.personalDates || []).forEach(p => {
+    [now.jy, now.jy + 1].forEach(y => {
+      const k = `${y}-${p.md}`;
+      if (k >= todayKey) candidates.push({ title: p.title, dateKey: k, kind: 'personal', icon: p.icon });
+    });
+  });
+  // مناسبت‌های کادویی
+  Object.entries(GIFT_EVENTS).forEach(([md, info]) => {
+    [now.jy, now.jy + 1].forEach(y => {
+      const k = `${y}-${md}`;
+      if (k >= todayKey) candidates.push({ title: info.title, dateKey: k, kind: 'gift', icon: info.icon });
+    });
+  });
+
+  if (candidates.length === 0) {
+    t.innerHTML = `<i class="fa-regular fa-calendar-check text-rose-400"></i> <span>قرار نزدیکی ثبت نشده</span>`;
+    return;
+  }
+
+  candidates.sort((a, b) => a.dateKey.localeCompare(b.dateKey));
+  const next = candidates[0];
+
+  const tomorrow = new Date(); tomorrow.setDate(tomorrow.getDate() + 1);
+  const [ty, tm, td] = gregorianToJalali(tomorrow.getFullYear(), tomorrow.getMonth() + 1, tomorrow.getDate());
+  const tomorrowKey = `${ty}-${String(tm).padStart(2, '0')}-${String(td).padStart(2, '0')}`;
+
+  let label;
+  if (next.dateKey === todayKey) label = 'امروز';
+  else if (next.dateKey === tomorrowKey) label = 'فردا';
+  else {
+    const [, mm, dd] = next.dateKey.split('-');
+    label = `${parseInt(dd)} ${JALALI_MONTHS[parseInt(mm) - 1]}`;
+  }
+
+  const icon = (next.icon && ICONS_CAL[next.icon])
+    ? `<img src="${ICONS_CAL[next.icon]}" data-cal-icon="${next.icon}" class="w-4 h-4 inline-block" alt="" />`
+    : `<img src="${ICONS_3D.heart}" class="w-3.5 h-3.5 inline-block" alt="" />`;
+
+  t.innerHTML = `${icon} <span>بعدی: <strong>${escapeHtml(next.title)}</strong> <span class="text-slate-400">(${label})</span></span>`;
+}
+
+/* ---------- WATCHLIST ---------- */
+function renderWatchStatusFilters() {
+  const box = document.getElementById('watchStatusFilters');
+  if (!box) return;
+  const opts = [
+    { id: 'all', label: 'همه', icon: ICONS_3D.eyes },
+    ...WATCH_STATUSES.map(s => ({ id: s.id, label: s.name, icon: ICONS_3D[s.icon] }))
+  ];
+  box.innerHTML = opts.map(o => `
+    <button onclick="filterWatchStatus('${o.id}')" class="shrink-0 px-3 py-1.5 rounded-xl text-[11px] font-bold flex items-center gap-1.5 whitespace-nowrap transition ${currentWatchStatusFilter === o.id ? 'bg-rose-600 text-white shadow-sm' : 'bg-white text-slate-600 border border-slate-200'}">
+      ${o.icon ? `<img src="${o.icon}" class="w-4 h-4 flex-shrink-0" alt="" onerror="this.style.display='none'" />` : ''}
+      <span>${o.label}</span>
+    </button>`).join('');
+}
+
+function renderWatchTypeFilters() {
+  const box = document.getElementById('watchTypeFilters');
+  if (!box) return;
+  const opts = [
+    { id: 'all', label: 'همه', icon: null },
+    ...WATCH_TYPES.map(t => ({ id: t.id, label: t.name, icon: ICONS_3D[t.icon] }))
+  ];
+  box.innerHTML = opts.map(o => `
+    <button onclick="filterWatchType('${o.id}')" class="shrink-0 px-3 py-1.5 rounded-xl text-[11px] font-bold flex items-center gap-1.5 whitespace-nowrap transition ${currentWatchFilter === o.id ? 'bg-purple-600 text-white shadow-sm' : 'bg-white text-slate-600 border border-slate-200'}">
+      ${o.icon ? `<img src="${o.icon}" class="w-4 h-4 flex-shrink-0" alt="" onerror="this.style.display='none'" />` : ''}
+      <span>${o.label}</span>
+    </button>`).join('');
+}
+
+function renderWatchlist() {
+  const c = document.getElementById('watchlistContainer');
+  if (!c) return;
+  let list = appState.watchList || [];
+  if (currentWatchFilter !== 'all') list = list.filter(x => x.type === currentWatchFilter);
+  if (currentWatchStatusFilter !== 'all') list = list.filter(x => x.status === currentWatchStatusFilter);
+
+  if (list.length === 0) {
+    c.innerHTML = `<div class="col-span-full text-center py-8 text-slate-400 text-xs">
+      <img src="${ICONS_3D.clapper}" class="w-10 h-10 mx-auto mb-2 opacity-40" alt="" />
+      <p>موردی با این فیلترها پیدا نشد</p></div>`;
+    return;
+  }
+
+  const typeIcons = { movie: ICONS_3D.clapper, series: ICONS_3D.tv, anime: ICONS_3D.blossom };
+  const typeLabels = { movie: 'فیلم', series: 'سریال', anime: 'انیمه' };
+
+  c.innerHTML = list.map(item => {
+    const statusObj = WATCH_STATUSES.find(s => s.id === item.status) || WATCH_STATUSES[0];
+    const cur = Number(item.currentEpisode) || 0;
+    const total = Number(item.totalEpisodes) || 0;
+    const pct = total > 0 ? Math.min(100, Math.round((cur / total) * 100)) : 0;
+    const isSerial = (item.type === 'series' || item.type === 'anime');
+    const showProgress = isSerial && total > 0;
+
+    const poster = item.posterUrl
+      ? `<img src="${item.posterUrl}" class="poster-thumb" alt="" onerror="this.style.display='none'" />`
+      : `<div class="poster-thumb flex items-center justify-center"><img src="${typeIcons[item.type]}" class="w-7 h-7" alt="" /></div>`;
+
+    return `
+      <div class="flex flex-col p-3 rounded-2xl bg-white border border-slate-200/70 shadow-sm gap-2">
+        <div class="flex items-start justify-between gap-2">
+          <div class="flex items-start gap-2.5 min-w-0 flex-1">
+            ${poster}
+            <div class="min-w-0 flex-1">
+              <p class="text-xs font-bold ${item.status === 'watched' ? 'line-through text-slate-400' : 'text-slate-800'} break-words">${escapeHtml(item.title)}</p>
+              ${item.originalTitle && item.originalTitle !== item.title ? `<p class="text-[9px] text-slate-400" dir="ltr">${escapeHtml(item.originalTitle)}</p>` : ''}
+              <div class="flex items-center gap-1.5 mt-1 text-[10px] text-slate-500 flex-wrap">
+                <img src="${typeIcons[item.type]}" class="w-3 h-3" alt="" />
+                <span class="text-purple-600 font-semibold">${typeLabels[item.type] || ''}</span>
+                <span>•</span>
+                <span class="font-bold" style="color:${statusObj.color}">${statusObj.name}</span>
+                ${item.rating ? `<span class="flex items-center gap-0.5"><img src="${ICONS_3D.star}" class="w-3 h-3" alt="" /> ${item.rating}/5</span>` : ''}
+              </div>
+              <div class="flex items-center gap-1 mt-1.5">
+                <button onclick="cycleWatchStatus('${item.id}')" class="w-6 h-6 rounded-lg flex items-center justify-center flex-shrink-0" style="background:${statusObj.color}22;">
+                  <img src="${ICONS_3D[statusObj.icon]}" class="w-3.5 h-3.5" alt="" />
+                </button>
+                <button onclick="openWatchEditModal('${item.id}')" class="w-6 h-6 rounded-lg text-slate-400 hover:text-purple-600 hover:bg-purple-50 flex items-center justify-center">
+                  <i class="fa-solid fa-pen text-[9px]"></i>
+                </button>
+                <button onclick="deleteWatchItem('${item.id}')" class="w-6 h-6 rounded-lg text-slate-300 hover:text-rose-500 hover:bg-rose-50 flex items-center justify-center">
+                  <i class="fa-solid fa-trash-can text-[9px]"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        ${showProgress ? `
+          <div class="space-y-1.5 pt-1.5 border-t border-slate-100">
+            <div class="flex items-center justify-between text-[10px] font-bold">
+              <span class="text-slate-500">پیشرفت</span>
+              <span class="text-purple-600">${cur.toLocaleString('fa-IR')} از ${total.toLocaleString('fa-IR')} (${pct.toLocaleString('fa-IR')}٪)</span>
+            </div>
+            <div class="w-full h-2 rounded-full bg-slate-100 overflow-hidden">
+              <div class="h-full rounded-full bg-gradient-to-r from-purple-400 to-rose-400" style="width:${pct}%"></div>
+            </div>
+            <div class="flex items-center gap-1.5 pt-1">
+              <button onclick="incrementWatchEpisode('${item.id}')" class="flex-1 py-1.5 rounded-lg bg-purple-100 hover:bg-purple-200 text-purple-700 text-[10px] font-bold flex items-center justify-center gap-1">
+                <i class="fa-solid fa-plus text-[9px]"></i> قسمت بعد
+              </button>
+              ${cur > 0 ? `<button onclick="decrementWatchEpisode('${item.id}')" class="px-2.5 py-1.5 rounded-lg bg-slate-100 text-slate-600 text-[10px] font-bold"><i class="fa-solid fa-minus text-[9px]"></i></button>` : ''}
+            </div>
+          </div>
+        ` : isSerial ? `
+          <div class="pt-1.5 border-t border-slate-100">
+            <button onclick="openWatchEditModal('${item.id}')" class="text-[10px] font-bold text-purple-600 flex items-center gap-1">
+              <i class="fa-solid fa-plus text-[9px]"></i> افزودن تعداد قسمت‌ها
+            </button>
+          </div>
+        ` : ''}
+      </div>`;
+  }).join('');
+}
+
+function filterWatchStatus(id) { currentWatchStatusFilter = id; renderWatchStatusFilters(); renderWatchlist(); }
+function filterWatchType(id) { currentWatchFilter = id; renderWatchTypeFilters(); renderWatchlist(); }
+
+/* ---------- GAMES ---------- */
+function renderGameStatusFilters() {
+  const box = document.getElementById('gameStatusFilters');
+  if (!box) return;
+  const opts = [
+    { id: 'all', label: 'همه', icon: ICONS_3D.eyes },
+    ...GAME_STATUSES.map(s => ({ id: s.id, label: s.name, icon: ICONS_3D[s.icon] }))
+  ];
+  box.innerHTML = opts.map(o => `
+    <button onclick="filterGameStatus('${o.id}')" class="shrink-0 px-3 py-1.5 rounded-xl text-[11px] font-bold flex items-center gap-1.5 whitespace-nowrap transition ${currentGameStatusFilter === o.id ? 'bg-indigo-600 text-white shadow-sm' : 'bg-white text-slate-600 border border-slate-200'}">
+      ${o.icon ? `<img src="${o.icon}" class="w-4 h-4 flex-shrink-0" alt="" onerror="this.style.display='none'" />` : ''}
+      <span>${o.label}</span>
+    </button>`).join('');
+}
+
+function renderGameList() {
+  const c = document.getElementById('gameListContainer');
+  if (!c) return;
+  let list = appState.gameList || [];
+  if (currentGameStatusFilter !== 'all') list = list.filter(x => x.status === currentGameStatusFilter);
+
+  if (list.length === 0) {
+    c.innerHTML = `<div class="col-span-full text-center py-8 text-slate-400 text-xs">
+      <img src="${ICONS_3D.videoGame}" class="w-10 h-10 mx-auto mb-2 opacity-40" alt="" />
+      <p>هنوز بازی‌ای اضافه نشده</p></div>`;
+    return;
+  }
+
+  c.innerHTML = list.map(g => {
+    const statusObj = GAME_STATUSES.find(s => s.id === g.status) || GAME_STATUSES[0];
+    const platformName = GAME_PLATFORMS.find(p => p.id === g.platform)?.name || g.platform;
+    const poster = g.posterUrl
+      ? `<img src="${g.posterUrl}" class="poster-thumb" alt="" onerror="this.style.display='none'" />`
+      : `<div class="poster-thumb flex items-center justify-center"><img src="${ICONS_3D.videoGame}" class="w-7 h-7" alt="" /></div>`;
+
+    return `
+      <div class="flex flex-col p-3 rounded-2xl bg-white border border-slate-200/70 shadow-sm gap-2">
+        <div class="flex items-start gap-2.5">
+          ${poster}
+          <div class="min-w-0 flex-1">
+            <p class="text-xs font-bold ${g.status === 'played' ? 'line-through text-slate-400' : 'text-slate-800'} break-words">${escapeHtml(g.title)}</p>
+            <div class="flex items-center gap-1.5 mt-1 text-[10px] text-slate-500 flex-wrap">
+              <span class="px-1.5 py-0.5 rounded-md bg-indigo-50 text-indigo-600 font-semibold">${platformName}</span>
+              <span class="font-bold" style="color:${statusObj.color}">${statusObj.name}</span>
+              ${g.hours > 0 ? `<span class="flex items-center gap-0.5"><i class="fa-regular fa-clock text-[9px]"></i> ${g.hours}س</span>` : ''}
+              ${g.rating ? `<span class="flex items-center gap-0.5"><img src="${ICONS_3D.star}" class="w-3 h-3" alt="" /> ${g.rating}/5</span>` : ''}
+            </div>
+            <div class="flex items-center gap-1 mt-1.5">
+              <button onclick="cycleGameStatus('${g.id}')" class="w-6 h-6 rounded-lg flex items-center justify-center" style="background:${statusObj.color}22;">
+                <img src="${ICONS_3D[statusObj.icon]}" class="w-3.5 h-3.5" alt="" />
+              </button>
+              <button onclick="openGameEditModal('${g.id}')" class="w-6 h-6 rounded-lg text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 flex items-center justify-center">
+                <i class="fa-solid fa-pen text-[9px]"></i>
+              </button>
+              <button onclick="deleteGame('${g.id}')" class="w-6 h-6 rounded-lg text-slate-300 hover:text-rose-500 hover:bg-rose-50 flex items-center justify-center">
+                <i class="fa-solid fa-trash-can text-[9px]"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>`;
+  }).join('');
+}
+
+function filterGameStatus(id) { currentGameStatusFilter = id; renderGameStatusFilters(); renderGameList(); }
+
+/* ---------- BUCKET ---------- */
+function renderBucketList() {
+  const c = document.getElementById('bucketList');
+  if (!c) return;
+  const list = appState.bucketList || [];
+  if (list.length === 0) {
+    c.innerHTML = `<p class="text-center py-6 text-slate-400 text-xs">هنوز آرزویی ننوشتیم</p>`;
+    return;
+  }
+  c.innerHTML = list.map(item => `
+    <div class="flex items-center justify-between p-3 rounded-2xl ${item.done ? 'bg-slate-50 border border-slate-200/60' : 'bg-white border border-rose-100'} shadow-sm gap-2">
+      <div class="flex items-center gap-2.5 min-w-0 flex-1">
+        <button onclick="toggleBucket('${item.id}')" class="w-5 h-5 rounded-lg border-2 ${item.done ? 'bg-amber-400 border-amber-400 text-white' : 'border-slate-300'} flex items-center justify-center text-[10px] flex-shrink-0">
+          ${item.done ? '<i class="fa-solid fa-check"></i>' : ''}
+        </button>
+        <span class="text-xs font-bold ${item.done ? 'line-through text-slate-400' : 'text-slate-700'} break-words">${escapeHtml(item.title)}</span>
+      </div>
+      <button onclick="deleteBucket('${item.id}')" class="text-slate-300 hover:text-rose-500 p-1 flex-shrink-0"><i class="fa-solid fa-trash-can text-xs"></i></button>
+    </div>`).join('');
+}
+
+/* ---------- IDEAS ---------- */
+function renderDateIdeasDrawer() {
+  const d = document.getElementById('ideasDrawer');
+  if (!d) return;
+  const list = appState.dateIdeas || [];
+  d.innerHTML = list.map((idea, i) => `
+    <div class="flex items-center justify-between p-2 rounded-xl bg-slate-100 text-[11px] text-slate-700 gap-2">
+      <span class="flex-1 flex items-center gap-2 min-w-0">
+        <span class="w-6 h-6 rounded-md bg-rose-100 text-rose-700 font-bold flex items-center justify-center flex-shrink-0 text-[10px]">${(i + 1).toLocaleString('fa-IR')}</span>
+        <span class="truncate">${escapeHtml(idea)}</span>
+      </span>
+      <button onclick="deleteCustomIdea(${i})" class="text-slate-400 hover:text-rose-500 flex-shrink-0"><i class="fa-solid fa-xmark text-xs"></i></button>
+    </div>`).join('');
+}
+
+function toggleIdeasDrawer() {
+  const d = document.getElementById('ideasDrawer');
+  if (d) d.classList.toggle('hidden');
+}
+
+/* ---------- NOTES ---------- */
+function renderNotes() {
+  const c = document.getElementById('notesContainer');
+  if (!c) return;
+  const notes = appState.notes || [];
+  if (notes.length === 0) {
+    c.innerHTML = `<div class="col-span-full text-center py-8 text-slate-400 text-xs">دیوار نامه‌ها خالیه</div>`;
+    return;
+  }
+  const grad = [
+    'from-pink-50 to-rose-100 border-rose-200',
+    'from-amber-50 to-orange-100 border-amber-200',
+    'from-purple-50 to-fuchsia-100 border-purple-200',
+    'from-teal-50 to-emerald-100 border-teal-200'
+  ];
+  c.innerHTML = [...notes].reverse().map((n, i) => `
+    <div class="p-4 rounded-3xl bg-gradient-to-br ${grad[i % grad.length]} border shadow-sm space-y-2 relative">
+      <p class="text-xs font-semibold text-slate-800 leading-relaxed break-words">${escapeHtml(n.content)}</p>
+      <div class="flex items-center justify-between text-[10px] text-slate-500 pt-2 border-t border-black/5">
+        <img src="${n.author === 'p1' ? ICONS_3D.manTech : ICONS_3D.womanTech}" class="w-4 h-4" alt="" />
+        <span>${n.timeBadge || ''}</span>
+      </div>
+      <button onclick="deleteNote('${n.id}')" class="absolute top-2 left-2 text-slate-400 hover:text-rose-600 p-1"><i class="fa-solid fa-xmark text-xs"></i></button>
+    </div>`).join('');
+}
+
+/* ---------- UTILS ---------- */
+function escapeHtml(str) {
+  if (str === null || str === undefined) return '';
+  return String(str)
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;').replace(/'/g, '&#039;');
+}
+
+/* ============================================================
+   SEARCH APIs
+   ============================================================ */
+async function searchTMDB(query, type) {
+  if (!query) return [];
+  try {
+    const url = `https://api.themoviedb.org/3/search/${type}?api_key=${TMDB_API_KEY}&query=${encodeURIComponent(query)}&language=fa-IR&include_adult=false`;
+    const res = await fetch(url);
+    const data = await res.json();
+    if (!data.results) return [];
+    return data.results.slice(0, 8).map(r => ({
+      id: r.id,
+      title: r.title || r.name || '',
+      originalTitle: r.original_title || r.original_name || '',
+      year: (r.release_date || r.first_air_date || '').slice(0, 4),
+      poster: r.poster_path ? `https://image.tmdb.org/t/p/w342${r.poster_path}` : '',
+      overview: (r.overview || '').slice(0, 120)
+    }));
+  } catch (e) { console.warn('TMDB error', e); return []; }
+}
+
+async function searchJikan(query) {
+  if (!query) return [];
+  try {
+    const url = `https://api.jikan.moe/v4/anime?q=${encodeURIComponent(query)}&limit=8`;
+    const res = await fetch(url);
+    const data = await res.json();
+    if (!data.data) return [];
+    return data.data.map(a => ({
+      id: a.mal_id,
+      title: a.title_japanese || a.title || '',
+      originalTitle: a.title || '',
+      year: (a.year || (a.aired?.prop?.from?.year) || '').toString(),
+      poster: a.images?.jpg?.image_url || '',
+      overview: (a.synopsis || '').slice(0, 120)
+    }));
+  } catch (e) { console.warn('Jikan error', e); return []; }
+}
+
+async function searchCheapShark(query) {
+  if (!query) return [];
+  try {
+    const url = `https://www.cheapshark.com/api/1.0/games?title=${encodeURIComponent(query)}&limit=8`;
+    const res = await fetch(url);
+    const data = await res.json();
+    if (!Array.isArray(data)) return [];
+    const seen = new Set();
+    return data.filter(g => {
+      if (seen.has(g.external)) return false;
+      seen.add(g.external);
+      return true;
+    }).map(g => ({
+      id: g.gameID,
+      title: g.external || '',
+      originalTitle: g.external || '',
+      year: '',
+      poster: g.thumb || '',
+      overview: ''
+    }));
+  } catch (e) { console.warn('CheapShark error', e); return []; }
+}
+
+/* ==================== END OF PART 2 ==================== */
+    /* ============================================================
+       WHEEL — بهینه‌شده با Offscreen Canvas (بدون لگ)
+       ============================================================ */
+    let currentWheelAngle = 0;
+    let isWheelSpinning = false;
+    let wheelPalette = [];
+    let wheelCache = null;
+    let wheelCacheSize = 0;
+
+    function initRouletteCanvas() {
+      buildWheelPalette();
+      renderWheelToCache();
+      drawWheel(currentWheelAngle);
+      if (document.fonts && document.fonts.ready) {
+        document.fonts.ready.then(() => {
+          renderWheelToCache();
+          if (!isWheelSpinning) drawWheel(currentWheelAngle);
+        });
+      }
+    }
+
+    function buildWheelPalette() {
+      const pinkPairs = [
+        ['#FFE4E9', '#FDA4B8'], ['#F43F6E', '#BE1248'],
+        ['#FFC9D4', '#FB7193'], ['#E11D59', '#9F1240'],
+        ['#FECDD7', '#F43F6E'], ['#FB7193', '#BE1248'],
+        ['#FFB8C6', '#E11D59'], ['#FDA4B8', '#9F1240']
+      ];
+      const items = (appState.dateIdeas && appState.dateIdeas.length > 0) ? appState.dateIdeas : ["ایده ۱"];
+      wheelPalette = items.map((_, i) => pinkPairs[i % pinkPairs.length]);
+    }
+
+    function renderWheelToCache() {
+      const mainCanvas = document.getElementById('rouletteCanvas');
+      if (!mainCanvas) return;
+      const W = mainCanvas.width, H = mainCanvas.height;
+
+      if (!wheelCache || wheelCacheSize !== W) {
+        wheelCache = document.createElement('canvas');
+        wheelCache.width = W;
+        wheelCache.height = H;
+        wheelCacheSize = W;
+      }
+
+      const ctx = wheelCache.getContext('2d');
+      const cx = W / 2, cy = H / 2;
+
+      const items = (Array.isArray(appState.dateIdeas) && appState.dateIdeas.length > 0)
+        ? appState.dateIdeas : ["ایده ۱", "ایده ۲"];
+      if (wheelPalette.length !== items.length) buildWheelPalette();
+
+      const numSegments = items.length;
+      const arcSize = (2 * Math.PI) / numSegments;
+      const outerR = Math.min(cx, cy) - 22;
+      const innerR = 66;
+
+      ctx.clearRect(0, 0, W, H);
+
+      const bgGrad = ctx.createRadialGradient(cx, cy, outerR * 0.9, cx, cy, outerR + 24);
+      bgGrad.addColorStop(0, 'rgba(244, 63, 110, 0)');
+      bgGrad.addColorStop(0.7, 'rgba(244, 63, 110, 0.08)');
+      bgGrad.addColorStop(1, 'rgba(244, 63, 110, 0)');
+      ctx.beginPath();
+      ctx.arc(cx, cy, outerR + 22, 0, 2 * Math.PI);
+      ctx.fillStyle = bgGrad;
+      ctx.fill();
+
+      const rimGrad = ctx.createLinearGradient(cx - outerR, cy - outerR, cx + outerR, cy + outerR);
+      rimGrad.addColorStop(0, '#FECDD7');
+      rimGrad.addColorStop(0.25, '#FB7193');
+      rimGrad.addColorStop(0.5, '#F43F6E');
+      rimGrad.addColorStop(0.75, '#E11D59');
+      rimGrad.addColorStop(1, '#FDA4B8');
+      ctx.beginPath();
+      ctx.arc(cx, cy, outerR + 8, 0, 2 * Math.PI);
+      ctx.fillStyle = rimGrad;
+      ctx.fill();
+      ctx.beginPath();
+      ctx.arc(cx, cy, outerR + 2, 0, 2 * Math.PI);
+      ctx.strokeStyle = 'rgba(159, 18, 64, 0.2)';
+      ctx.lineWidth = 2;
+      ctx.stroke();
+
+      ctx.save();
+      ctx.translate(cx, cy);
+      for (let i = 0; i < numSegments; i++) {
+        const start = i * arcSize;
+        const end = start + arcSize;
+        const colors = wheelPalette[i] || ['#FB7193', '#BE1248'];
+
+        const grad = ctx.createRadialGradient(0, 0, innerR, 0, 0, outerR);
+        grad.addColorStop(0, colors[0]);
+        grad.addColorStop(1, colors[1]);
+
+        ctx.beginPath();
+        ctx.moveTo(0, 0);
+        ctx.arc(0, 0, outerR, start, end);
+        ctx.closePath();
+        ctx.fillStyle = grad;
+        ctx.fill();
+
+        ctx.save();
+        ctx.globalCompositeOperation = 'overlay';
+        const shine = ctx.createRadialGradient(0, -outerR * 0.55, outerR * 0.05, 0, 0, outerR);
+        shine.addColorStop(0, 'rgba(255,255,255,0.55)');
+        shine.addColorStop(0.55, 'rgba(255,255,255,0.08)');
+        shine.addColorStop(1, 'rgba(0,0,0,0.25)');
+        ctx.beginPath();
+        ctx.moveTo(0, 0);
+        ctx.arc(0, 0, outerR, start, end);
+        ctx.closePath();
+        ctx.fillStyle = shine;
+        ctx.fill();
+        ctx.restore();
+
+        ctx.beginPath();
+        ctx.moveTo(0, 0);
+        ctx.lineTo(Math.cos(start) * outerR, Math.sin(start) * outerR);
+        ctx.strokeStyle = 'rgba(255,255,255,0.7)';
+        ctx.lineWidth = 1.5;
+        ctx.stroke();
+
+        ctx.save();
+        ctx.rotate(start + arcSize / 2);
+        ctx.textAlign = 'right';
+        ctx.textBaseline = 'middle';
+        const numStr = String(i + 1);
+        const fontSize = numSegments > 40 ? 22 : numSegments > 24 ? 26 : 32;
+        const textX = outerR - 34;
+        const circleR = numSegments > 40 ? 12 : 15;
+        const circleX = textX + (numSegments > 30 ? 12 : 15);
+
+        ctx.beginPath();
+        ctx.arc(circleX, 0, circleR, 0, 2 * Math.PI);
+        ctx.fillStyle = 'rgba(255,255,255,0.92)';
+        ctx.fill();
+        ctx.strokeStyle = 'rgba(244,63,110,0.4)';
+        ctx.lineWidth = 1;
+        ctx.stroke();
+
+        ctx.fillStyle = colors[1] || '#BE1248';
+        ctx.font = `900 ${fontSize}px Vazirmatn, Vazir, Tahoma, sans-serif`;
+        ctx.shadowColor = 'rgba(255,255,255,0.6)';
+        ctx.shadowBlur = 2;
+        ctx.fillText(numStr, textX + (numSegments > 30 ? 22 : 26), 0);
+        ctx.restore();
+      }
+      ctx.restore();
+
+      ctx.beginPath();
+      ctx.arc(cx, cy + 4, innerR + 4, 0, 2 * Math.PI);
+      ctx.fillStyle = 'rgba(190, 18, 72, 0.15)';
+      ctx.filter = 'blur(4px)';
+      ctx.fill();
+      ctx.filter = 'none';
+
+      const hubOuterGrad = ctx.createLinearGradient(cx - innerR, cy - innerR, cx + innerR, cy + innerR);
+      hubOuterGrad.addColorStop(0, '#FFFFFF');
+      hubOuterGrad.addColorStop(0.5, '#FFF5F7');
+      hubOuterGrad.addColorStop(1, '#FFE4E9');
+      ctx.beginPath();
+      ctx.arc(cx, cy, innerR, 0, 2 * Math.PI);
+      ctx.fillStyle = hubOuterGrad;
+      ctx.fill();
+      ctx.strokeStyle = 'rgba(244,63,110,0.45)';
+      ctx.lineWidth = 3;
+      ctx.stroke();
+
+      const hubMidGrad = ctx.createRadialGradient(cx - 14, cy - 14, 4, cx, cy, 46);
+      hubMidGrad.addColorStop(0, '#FB7193');
+      hubMidGrad.addColorStop(0.6, '#F43F6E');
+      hubMidGrad.addColorStop(1, '#BE1248');
+      ctx.beginPath();
+      ctx.arc(cx, cy, 42, 0, 2 * Math.PI);
+      ctx.fillStyle = hubMidGrad;
+      ctx.fill();
+
+      ctx.beginPath();
+      ctx.arc(cx, cy - 10, 18, 0, 2 * Math.PI);
+      ctx.fillStyle = 'rgba(255,255,255,0.32)';
+      ctx.filter = 'blur(3px)';
+      ctx.fill();
+      ctx.filter = 'none';
+
+      const centerDot = ctx.createRadialGradient(cx - 5, cy - 5, 1, cx, cy, 14);
+      centerDot.addColorStop(0, '#FFFFFF');
+      centerDot.addColorStop(1, '#FCE7F3');
+      ctx.beginPath();
+      ctx.arc(cx, cy, 14, 0, 2 * Math.PI);
+      ctx.fillStyle = centerDot;
+      ctx.fill();
+      ctx.strokeStyle = 'rgba(244,63,110,0.6)';
+      ctx.lineWidth = 2;
+      ctx.stroke();
+    }
+
+    function drawWheel(angle) {
+      const canvas = document.getElementById('rouletteCanvas');
+      if (!canvas || !wheelCache) return;
+      const ctx = canvas.getContext('2d');
+      const W = canvas.width, H = canvas.height;
+      const cx = W / 2, cy = H / 2;
+
+      ctx.clearRect(0, 0, W, H);
+      ctx.save();
+      ctx.translate(cx, cy);
+      ctx.rotate(angle);
+      ctx.drawImage(wheelCache, -cx, -cy);
+      ctx.restore();
+    }
+
+    function spinRouletteWheel() {
+      if (isWheelSpinning) return;
+      isWheelSpinning = true;
+      const btn = document.getElementById('spinWheelBtn');
+      if (btn) btn.disabled = true;
+
+      const items = (Array.isArray(appState.dateIdeas) && appState.dateIdeas.length > 0)
+        ? appState.dateIdeas : ["ایده ۱", "ایده ۲"];
+      const numSegments = items.length;
+      const arcSize = (2 * Math.PI) / numSegments;
+
+      const totalSpins = 6 + Math.random() * 4;
+      const startAngle = currentWheelAngle;
+      const randomOffset = Math.random() * 2 * Math.PI;
+      const targetAngle = startAngle + (totalSpins * 2 * Math.PI) + randomOffset;
+
+      const duration = 4500;
+      const startTime = performance.now();
+      let lastToneAt = 0;
+
+      function frame(now) {
+        const elapsed = now - startTime;
+        const progress = Math.min(elapsed / duration, 1);
+        const easeOut = 1 - Math.pow(1 - progress, 3.2);
+        const angle = startAngle + (targetAngle - startAngle) * easeOut;
+        drawWheel(angle);
+
+        if (now - lastToneAt > 120) {
+          lastToneAt = now;
+          playTone(400 + Math.random() * 260, 'triangle', 0.03, 0.07);
+        }
+
+        if (progress < 1) {
+          requestAnimationFrame(frame);
+        } else {
+          currentWheelAngle = ((angle % (2 * Math.PI)) + 2 * Math.PI) % (2 * Math.PI);
+          isWheelSpinning = false;
+          if (btn) btn.disabled = false;
+
+          const pointerAngle = ((-Math.PI / 2 - currentWheelAngle) % (2 * Math.PI) + 2 * Math.PI) % (2 * Math.PI);
+          let winningIndex = Math.floor(pointerAngle / arcSize);
+          if (winningIndex < 0) winningIndex = 0;
+          if (winningIndex >= numSegments) winningIndex = numSegments - 1;
+          const winner = items[winningIndex];
+
+          const display = document.getElementById('rouletteDisplay');
+          if (display) {
+            display.innerHTML = `
+              <div class="flex flex-col items-center gap-1.5">
+                <div class="flex items-center gap-2">
+                  <img src="${ICONS_3D.party}" class="w-5 h-5" alt="" />
+                  <span class="text-rose-600 font-extrabold text-xs">برنامه امروز</span>
+                </div>
+                <div class="flex items-center gap-2">
+                  <span class="w-7 h-7 rounded-lg bg-rose-500 text-white font-black flex items-center justify-center text-xs flex-shrink-0">${(winningIndex + 1).toLocaleString('fa-IR')}</span>
+                  <span class="text-slate-800 font-black text-sm">${escapeHtml(winner)}</span>
+                </div>
+              </div>`;
+          }
+          playKissChime();
+          try { if (typeof confetti === 'function') confetti({ particleCount: 70, spread: 75, origin: { y: 0.7 }, colors: ['#f43f6e', '#fb7193', '#fda4b8', '#ffccd5', '#ffe4e9'] }); } catch (e) {}
+        }
+      }
+      requestAnimationFrame(frame);
+    }
+
+    /* ============================================================
+       ACTIONS
+       ============================================================ */
+    function sendLoveKiss() {
+      const sender = (currentPersona === 'p1') ? 'امیرمحمد' : 'آرمیتا';
+      showKissCelebration(sender);
+      const nowInfo = getNowJalaliString();
+      const sweetNotes = [
+        "یه بوسه زنده فرستادم تا یادت بندازم چقدر دوستت دارم",
+        "امروز بیشتر از دیروز عاشقتم",
+        "همین الان به یادت بودم و دلم برات پر کشید"
+      ];
+      const note = sweetNotes[Math.floor(Math.random() * sweetNotes.length)];
+      if (!appState.notes) appState.notes = [];
+      appState.notes.push({ id: 'note_' + Date.now(), content: note, author: currentPersona, timeBadge: nowInfo.fullTimestamp });
+      saveState(true);
+      if (supabaseClient) {
+        supabaseClient.channel(`room_${ROOM_CODE}`).send({ type: 'broadcast', event: 'love_kiss', payload: { senderName: sender } });
+      }
+    }
+
+    function showKissCelebration(senderName) {
+      playKissChime();
+      try {
+        if (typeof confetti === 'function') {
+          confetti({ particleCount: 90, spread: 75, origin: { y: 0.6 }, colors: ['#f43f6e', '#fb7193', '#fda4b8', '#ffccd5'] });
+        }
+      } catch (e) {}
+      const container = document.getElementById('kissFloatingContainer');
+      for (let i = 0; i < 6; i++) {
+        const heart = document.createElement('img');
+        heart.src = ICONS_3D.heart;
+        heart.className = 'floating-kiss w-10 h-10';
+        heart.style.left = `${20 + Math.random() * 60}%`;
+        heart.style.bottom = '20%';
+        heart.style.animationDelay = `${i * 0.15}s`;
+        container.appendChild(heart);
+        setTimeout(() => heart.remove(), 2200);
+      }
+      const fb = document.getElementById('kissFeedback');
+      if (fb) {
+        fb.innerText = `بوسه‌ای از طرف ${senderName} رسید`;
+        fb.classList.remove('opacity-0');
+        setTimeout(() => fb.classList.add('opacity-0'), 4000);
+      }
+    }
+
+    function toggleGrocery(id) {
+      const item = (appState.groceries || []).find(g => g.id === id);
+      if (item) { item.done = !item.done; playTone(item.done ? 650 : 350, 'sine', 0.08); saveState(); }
+    }
+    function deleteGrocery(id) { appState.groceries = (appState.groceries || []).filter(g => g.id !== id); saveState(); }
+    function toggleChore(id) {
+      const c = (appState.chores || []).find(x => x.id === id);
+      if (c) { c.done = !c.done; playTone(c.done ? 650 : 350, 'sine', 0.08); saveState(); }
+    }
+    function deleteChore(id) { appState.chores = (appState.chores || []).filter(x => x.id !== id); saveState(); }
+    function deleteExpense(id) { appState.expenses = (appState.expenses || []).filter(e => e.id !== id); saveState(); }
+    function deleteCoupleEvent(id) { appState.coupleEvents = (appState.coupleEvents || []).filter(e => e.id !== id); saveState(); }
+
+    function cycleWatchStatus(id) {
+      const item = (appState.watchList || []).find(w => w.id === id);
+      if (!item) return;
+      const order = ['queued', 'watching', 'watched'];
+      item.status = order[(order.indexOf(item.status) + 1) % order.length];
+      playTone(item.status === 'watched' ? 700 : item.status === 'watching' ? 600 : 500, 'sine', 0.1);
+      saveState();
+    }
+    function incrementWatchEpisode(id) {
+      const item = (appState.watchList || []).find(w => w.id === id);
+      if (!item) return;
+      const total = Number(item.totalEpisodes) || 0;
+      const cur = Number(item.currentEpisode) || 0;
+      if (total > 0 && cur >= total) { item.status = 'watched'; saveState(); return; }
+      item.currentEpisode = cur + 1;
+      item.lastWatched = new Date().toLocaleDateString('fa-IR');
+      if (total > 0 && item.currentEpisode >= total) item.status = 'watched';
+      else if (item.status === 'queued') item.status = 'watching';
+      playTone(650, 'sine', 0.08);
+      saveState();
+    }
+    function decrementWatchEpisode(id) {
+      const item = (appState.watchList || []).find(w => w.id === id);
+      if (!item) return;
+      const cur = Number(item.currentEpisode) || 0;
+      if (cur <= 0) return;
+      item.currentEpisode = cur - 1;
+      if (item.currentEpisode === 0) item.status = 'queued';
+      playTone(400, 'sine', 0.08);
+      saveState();
+    }
+    function deleteWatchItem(id) { appState.watchList = (appState.watchList || []).filter(w => w.id !== id); saveState(); }
+
+    function cycleGameStatus(id) {
+      const g = (appState.gameList || []).find(x => x.id === id);
+      if (!g) return;
+      const order = ['queued', 'playing', 'played'];
+      g.status = order[(order.indexOf(g.status) + 1) % order.length];
+      playTone(g.status === 'played' ? 700 : g.status === 'playing' ? 600 : 500, 'sine', 0.1);
+      saveState();
+    }
+    function deleteGame(id) { appState.gameList = (appState.gameList || []).filter(g => g.id !== id); saveState(); }
+
+    function toggleBucket(id) {
+      const b = (appState.bucketList || []).find(x => x.id === id);
+      if (b) { b.done = !b.done; playTone(700, 'sine', 0.1); saveState(); }
+    }
+    function deleteBucket(id) { appState.bucketList = (appState.bucketList || []).filter(x => x.id !== id); saveState(); }
+    function deleteNote(id) { appState.notes = (appState.notes || []).filter(n => n.id !== id); saveState(); }
+    function deleteCustomIdea(idx) {
+      if (!Array.isArray(appState.dateIdeas)) return;
+      appState.dateIdeas.splice(idx, 1);
+      saveState();
+      renderDateIdeasDrawer();
+      buildWheelPalette();
+      renderWheelToCache();
+      drawWheel(currentWheelAngle);
+    }
+
+    /* ============================================================
+       MODAL
+       ============================================================ */
+    function openModalWithContent(title, bodyHtml) {
+      document.getElementById('modalDynamicContent').innerHTML = `
+        <h3 class="font-bold text-slate-900 text-base mb-5 pr-1">${title}</h3>
+        ${bodyHtml}`;
+      const bd = document.getElementById('modalBackdrop');
+      bd.classList.remove('hidden');
+      bd.classList.add('flex');
+    }
+
+    function closeModal() {
+      const bd = document.getElementById('modalBackdrop');
+      bd.classList.add('hidden');
+      bd.classList.remove('flex');
+    }
+
+    /* GROCERY */
+    function openGroceryModal() {
+      openModalWithContent('افزودن به سبد خرید', `
+        <form onsubmit="handleSaveGrocery(event)" class="space-y-4">
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1.5">نام کالا</label>
+            <input id="inputGroceryName" type="text" required placeholder="مثلاً: شیر بادام..." class="w-full px-4 py-3 rounded-2xl border border-slate-200 focus:outline-none focus:border-rose-500 text-sm">
+          </div>
+          <button type="submit" class="w-full py-3.5 rounded-2xl bg-rose-500 text-white font-bold text-xs active:scale-95 transition">ثبت</button>
+        </form>`);
+      setTimeout(() => document.getElementById('inputGroceryName')?.focus(), 100);
+    }
+    function handleSaveGrocery(e) {
+      e.preventDefault();
+      const val = document.getElementById('inputGroceryName').value.trim();
+      if (!val) return;
+      const n = getNowJalaliString();
+      if (!appState.groceries) appState.groceries = [];
+      appState.groceries.push({ id: 'g_' + Date.now(), name: val, done: false, addedBy: currentPersona, timeBadge: n.fullTimestamp });
+      playTone(550, 'sine', 0.1);
+      saveState();
+      closeModal();
+    }
+
+    /* CHORE */
+    function openChoreModal() {
+      openModalWithContent('ثبت کار منزل', `
+        <form onsubmit="handleSaveChore(event)" class="space-y-4">
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1.5">عنوان کار</label>
+            <input id="inputChoreTitle" type="text" required placeholder="مثلاً: شستن لباس‌ها" class="w-full px-4 py-3 rounded-2xl border border-slate-200 focus:outline-none focus:border-indigo-500 text-sm">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1.5">مسئول</label>
+            <select id="selectChoreAssignee" class="w-full px-4 py-3 rounded-2xl border border-slate-200 text-sm">
+              <option value="both">دونفره</option>
+              <option value="p1">امیرمحمد</option>
+              <option value="p2">آرمیتا</option>
+            </select>
+          </div>
+          <button type="submit" class="w-full py-3.5 rounded-2xl bg-indigo-500 text-white font-bold text-xs active:scale-95 transition">ثبت</button>
+        </form>`);
+    }
+    function handleSaveChore(e) {
+      e.preventDefault();
+      const val = document.getElementById('inputChoreTitle').value.trim();
+      const assignee = document.getElementById('selectChoreAssignee').value;
+      if (!val) return;
+      const n = getNowJalaliString();
+      if (!appState.chores) appState.chores = [];
+      appState.chores.push({ id: 'c_' + Date.now(), title: val, assignee, done: false, timeBadge: n.fullTimestamp });
+      playTone(550, 'sine', 0.1);
+      saveState();
+      closeModal();
+    }
+
+    /* EXPENSE */
+    function openExpenseModal() {
+      openModalWithContent('ثبت هزینه', `
+        <form onsubmit="handleSaveExpense(event)" class="space-y-4">
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1.5">بابت چه چیزی؟</label>
+            <input id="inputExpTitle" type="text" required placeholder="مثلاً: پروتئینی" class="w-full px-4 py-3 rounded-2xl border border-slate-200 focus:outline-none focus:border-rose-500 text-sm">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1.5">مبلغ (تومان)</label>
+            <input id="inputExpAmount" type="number" required placeholder="450000" class="w-full px-4 py-3 rounded-2xl border border-slate-200 focus:outline-none focus:border-rose-500 text-sm">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1.5">دسته</label>
+            <select id="selectExpCategory" class="w-full px-4 py-3 rounded-2xl border border-slate-200 text-sm">
+              ${BUDGET_CATEGORIES.map(c => `<option value="${c.id}">${c.name}</option>`).join('')}
+            </select>
+          </div>
+          <button type="submit" class="w-full py-3.5 rounded-2xl bg-rose-500 text-white font-bold text-xs active:scale-95 transition">ثبت</button>
+        </form>`);
+    }
+    function handleSaveExpense(e) {
+      e.preventDefault();
+      const title = document.getElementById('inputExpTitle').value.trim();
+      const amount = Number(document.getElementById('inputExpAmount').value);
+      const category = document.getElementById('selectExpCategory').value;
+      if (!title || !amount) return;
+      const n = getNowJalaliString();
+      if (!appState.expenses) appState.expenses = [];
+      appState.expenses.push({ id: 'exp_' + Date.now(), title, amount, category, dateStr: n.dateStr, registeredBy: currentPersona });
+      playTone(600, 'sine', 0.1);
+      saveState();
+      closeModal();
+    }
+
+    /* BUDGET LIMIT */
+    function openSetMonthlyBudgetModal() {
+      openModalWithContent('تعیین سقف بودجه', `
+        <form onsubmit="handleSaveBudgetLimit(event)" class="space-y-4">
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1.5">سقف کل مخارج ماه (تومان)</label>
+            <input id="inputBudgetLimit" type="number" value="${appState.monthlyBudgetLimit || ''}" placeholder="25000000" class="w-full px-4 py-3 rounded-2xl border border-slate-200 focus:outline-none focus:border-amber-500 text-sm">
+          </div>
+          <button type="submit" class="w-full py-3.5 rounded-2xl bg-amber-500 text-white font-bold text-xs active:scale-95 transition">ذخیره</button>
+        </form>`);
+    }
+    function handleSaveBudgetLimit(e) {
+      e.preventDefault();
+      appState.monthlyBudgetLimit = Number(document.getElementById('inputBudgetLimit').value) || 0;
+      saveState();
+      closeModal();
+    }
+
+    /* COUPLE EVENT — برای sync با Nexus */
+    function openAddEventModal() {
+      const mp = String(calMonth).padStart(2, '0');
+      const dp = String(selectedCalDay || 1).padStart(2, '0');
+      const def = `${calYear}/${mp}/${dp}`;
+      openModalWithContent('ثبت قرار دونفره', `
+        <form onsubmit="handleSaveCoupleEvent(event)" class="space-y-4">
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1.5">عنوان</label>
+            <input id="inputEventTitle" type="text" required placeholder="مثلاً: شام سالگرد" class="w-full px-4 py-3 rounded-2xl border border-slate-200 focus:outline-none focus:border-rose-500 text-sm">
+          </div>
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="block text-xs font-semibold text-slate-700 mb-1.5">تاریخ (شمسی)</label>
+              <input id="inputEventDate" type="text" required value="${def}" class="w-full px-4 py-3 rounded-2xl border border-slate-200 focus:outline-none focus:border-rose-500 text-xs text-left" dir="ltr">
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-slate-700 mb-1.5">ساعت</label>
+              <input id="inputEventTime" type="time" class="w-full px-4 py-3 rounded-2xl border border-slate-200 focus:outline-none focus:border-rose-500 text-xs">
+            </div>
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1.5">دسته</label>
+            <select id="selectEventCategory" class="w-full px-4 py-3 rounded-2xl border border-slate-200 text-sm">
+              ${EVENT_CATEGORIES.map(c => `<option value="${c.id}">${c.name}</option>`).join('')}
+            </select>
+          </div>
+          <button type="submit" class="w-full py-3.5 rounded-2xl bg-rose-500 text-white font-bold text-xs active:scale-95 transition">ثبت در تقویم</button>
+        </form>`);
+    }
+    function handleSaveCoupleEvent(e) {
+      e.preventDefault();
+      const title = document.getElementById('inputEventTitle').value.trim();
+      const date = document.getElementById('inputEventDate').value.trim();
+      const time = document.getElementById('inputEventTime').value;
+      const category = document.getElementById('selectEventCategory').value;
+      if (!title || !date) return;
+      if (!appState.coupleEvents) appState.coupleEvents = [];
+      appState.coupleEvents.push({ id: 'ev_' + Date.now(), title, jalaliDate: date, time, category });
+      playTone(550, 'sine', 0.1);
+      saveState();
+      closeModal();
+    }
+
+    /* WATCHLIST — با جستجوی پوستر */
+    function openWatchlistModal() {
+      openModalWithContent('افزودن به لیست تماشا', `
+        <form onsubmit="handleSaveWatchlist(event)" class="space-y-4">
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1.5">نام اثر</label>
+            <input id="inputWatchTitle" type="text" required placeholder="مثلاً: Interstellar یا فرین" class="w-full px-4 py-3 rounded-2xl border border-slate-200 focus:outline-none focus:border-purple-500 text-sm">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1.5">نوع</label>
+            <select id="selectWatchType" class="w-full px-4 py-3 rounded-2xl border border-slate-200 text-sm">
+              ${WATCH_TYPES.map(t => `<option value="${t.id}">${t.name}</option>`).join('')}
+            </select>
+          </div>
+          <div>
+            <button type="button" onclick="doSearchWatch()" class="w-full py-2.5 rounded-2xl bg-purple-100 hover:bg-purple-200 text-purple-700 font-bold text-xs flex items-center justify-center gap-2">
+              <i class="fa-solid fa-magnifying-glass"></i>
+              <span>جستجوی خودکار پوستر</span>
+            </button>
+          </div>
+          <div id="watchSearchResults" class="space-y-2 max-h-64 overflow-y-auto"></div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1.5">یا لینک پوستر (دستی)</label>
+            <input id="inputWatchPoster" type="url" placeholder="https://..." class="w-full px-4 py-3 rounded-2xl border border-slate-200 text-xs" dir="ltr">
+          </div>
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="block text-xs font-semibold text-slate-700 mb-1.5">وضعیت</label>
+              <select id="selectWatchStatus" class="w-full px-4 py-3 rounded-2xl border border-slate-200 text-sm">
+                ${WATCH_STATUSES.map(s => `<option value="${s.id}">${s.name}</option>`).join('')}
+              </select>
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-slate-700 mb-1.5">امتیاز</label>
+              <input id="inputWatchRating" type="number" min="1" max="5" value="5" class="w-full px-4 py-3 rounded-2xl border border-slate-200 text-sm">
+            </div>
+          </div>
+          <div id="watchTotalWrapper" style="display:none;">
+            <label class="block text-xs font-semibold text-slate-700 mb-1.5">تعداد کل قسمت‌ها</label>
+            <input id="inputWatchTotal" type="number" min="0" placeholder="12" class="w-full px-4 py-3 rounded-2xl border border-slate-200 text-sm">
+          </div>
+          <button type="submit" class="w-full py-3.5 rounded-2xl bg-purple-600 text-white font-bold text-xs active:scale-95 transition">افزودن</button>
+        </form>`);
+      setTimeout(() => {
+        const typeSel = document.getElementById('selectWatchType');
+        const totalWrap = document.getElementById('watchTotalWrapper');
+        if (typeSel && totalWrap) {
+          const toggle = () => { totalWrap.style.display = (typeSel.value === 'series' || typeSel.value === 'anime') ? 'block' : 'none'; };
+          typeSel.addEventListener('change', toggle);
+          toggle();
+        }
+      }, 80);
+    }
+
+    let _watchSearchSelection = null;
+    async function doSearchWatch() {
+      const title = document.getElementById('inputWatchTitle').value.trim();
+      const type = document.getElementById('selectWatchType').value;
+      const results = document.getElementById('watchSearchResults');
+      if (!title) { results.innerHTML = `<p class="text-xs text-rose-500 text-center py-2">اول نام اثر رو بنویس</p>`; return; }
+      results.innerHTML = `<div class="text-center py-3 text-xs text-slate-400"><i class="fa-solid fa-spinner fa-spin"></i> جستجو...</div>`;
+
+      let items = [];
+      if (type === 'movie') items = await searchTMDB(title, 'movie');
+      else if (type === 'series') items = await searchTMDB(title, 'tv');
+      else if (type === 'anime') items = await searchJikan(title);
+
+      if (items.length === 0) {
+        results.innerHTML = `<p class="text-xs text-slate-400 text-center py-2">چیزی پیدا نشد — خودت پوستر رو پیست کن</p>`;
+        return;
+      }
+      results.innerHTML = items.map((it, i) => `
+        <div class="search-result-item" onclick="selectWatchResult(${i})" data-idx="${i}">
+          <img src="${it.poster || ''}" class="w-12 h-16 object-cover rounded-lg flex-shrink-0" alt="" onerror="this.style.background='#f0f0f0'" />
+          <div class="flex-1 min-w-0">
+            <p class="text-xs font-bold text-slate-800 truncate">${escapeHtml(it.title)}</p>
+            ${it.originalTitle && it.originalTitle !== it.title ? `<p class="text-[10px] text-slate-400 truncate" dir="ltr">${escapeHtml(it.originalTitle)}</p>` : ''}
+            ${it.year ? `<p class="text-[10px] text-slate-400">${it.year}</p>` : ''}
+          </div>
+        </div>`).join('');
+      window._watchSearchItems = items;
+    }
+
+    function selectWatchResult(i) {
+      const items = window._watchSearchItems || [];
+      const it = items[i];
+      if (!it) return;
+      _watchSearchSelection = it;
+      document.getElementById('inputWatchTitle').value = it.title;
+      document.getElementById('inputWatchPoster').value = it.poster;
+      document.querySelectorAll('#watchSearchResults .search-result-item').forEach((el, idx) => {
+        el.style.borderColor = idx === i ? '#f43f6e' : '#e2e8f0';
+        el.style.background = idx === i ? '#fff5f7' : '#fff';
+      });
+      playTone(600, 'sine', 0.08);
+    }
+
+    function handleSaveWatchlist(e) {
+      e.preventDefault();
+      const title = document.getElementById('inputWatchTitle').value.trim();
+      const type = document.getElementById('selectWatchType').value;
+      const status = document.getElementById('selectWatchStatus').value;
+      const rating = document.getElementById('inputWatchRating').value;
+      const totalEpisodes = Number(document.getElementById('inputWatchTotal')?.value) || 0;
+      const posterUrl = document.getElementById('inputWatchPoster').value.trim();
+      if (!title) return;
+      if (!appState.watchList) appState.watchList = [];
+      appState.watchList.push({
+        id: 'w_' + Date.now(),
+        title, type, status, rating,
+        originalTitle: _watchSearchSelection?.originalTitle || '',
+        posterUrl,
+        currentEpisode: 0,
+        totalEpisodes,
+        lastWatched: null,
+        createdAt: new Date().toISOString()
+      });
+      _watchSearchSelection = null;
+      playTone(550, 'sine', 0.1);
+      saveState();
+      closeModal();
+    }
+
+    function openWatchEditModal(id) {
+      const item = (appState.watchList || []).find(w => w.id === id);
+      if (!item) return;
+      const isSerial = item.type === 'series' || item.type === 'anime';
+      openModalWithContent(`ویرایش «${escapeHtml(item.title)}»`, `
+        <form onsubmit="handleSaveWatchEdit(event, '${id}')" class="space-y-4">
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1.5">نام</label>
+            <input id="editWatchTitle" type="text" required value="${escapeHtml(item.title)}" class="w-full px-4 py-3 rounded-2xl border border-slate-200 text-sm">
+          </div>
+          ${isSerial ? `
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="block text-xs font-semibold text-slate-700 mb-1.5">کل قسمت‌ها</label>
+              <input id="editWatchTotal" type="number" min="0" value="${item.totalEpisodes || ''}" class="w-full px-4 py-3 rounded-2xl border border-slate-200 text-sm">
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-slate-700 mb-1.5">قسمت فعلی</label>
+              <input id="editWatchCurrent" type="number" min="0" value="${item.currentEpisode || 0}" class="w-full px-4 py-3 rounded-2xl border border-slate-200 text-sm">
+            </div>
+          </div>` : ''}
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="block text-xs font-semibold text-slate-700 mb-1.5">وضعیت</label>
+              <select id="editWatchStatus" class="w-full px-4 py-3 rounded-2xl border border-slate-200 text-sm">
+                ${WATCH_STATUSES.map(s => `<option value="${s.id}" ${s.id === item.status ? 'selected' : ''}>${s.name}</option>`).join('')}
+              </select>
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-slate-700 mb-1.5">امتیاز</label>
+              <input id="editWatchRating" type="number" min="1" max="5" value="${item.rating || 5}" class="w-full px-4 py-3 rounded-2xl border border-slate-200 text-sm">
+            </div>
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1.5">لینک پوستر</label>
+            <input id="editWatchPoster" type="url" value="${item.posterUrl || ''}" class="w-full px-4 py-3 rounded-2xl border border-slate-200 text-xs" dir="ltr">
+          </div>
+          <div class="flex gap-2 pt-2">
+            <button type="submit" class="flex-1 py-3.5 rounded-2xl bg-purple-600 text-white font-bold text-xs active:scale-95 transition">ذخیره</button>
+            <button type="button" onclick="closeModal()" class="px-4 py-3.5 rounded-2xl bg-slate-100 text-slate-600 font-bold text-xs">انصراف</button>
+          </div>
+        </form>`);
+    }
+    function handleSaveWatchEdit(e, id) {
+      e.preventDefault();
+      const item = (appState.watchList || []).find(w => w.id === id);
+      if (!item) return;
+      const newTitle = document.getElementById('editWatchTitle').value.trim();
+      if (newTitle) item.title = newTitle;
+      const totalEl = document.getElementById('editWatchTotal');
+      const curEl = document.getElementById('editWatchCurrent');
+      if (totalEl) item.totalEpisodes = Math.max(0, Number(totalEl.value) || 0);
+      if (curEl) item.currentEpisode = Math.max(0, Number(curEl.value) || 0);
+      item.status = document.getElementById('editWatchStatus').value;
+      item.rating = document.getElementById('editWatchRating').value;
+      item.posterUrl = document.getElementById('editWatchPoster').value.trim();
+      if (item.totalEpisodes > 0 && item.currentEpisode >= item.totalEpisodes) item.status = 'watched';
+      if (item.currentEpisode > 0 && item.status === 'queued') item.status = 'watching';
+      playTone(600, 'sine', 0.1);
+      saveState();
+      closeModal();
+    }
+
+    /* GAME MODAL */
+    function openGameModal() {
+      openModalWithContent('افزودن بازی', `
+        <form onsubmit="handleSaveGame(event)" class="space-y-4">
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1.5">نام بازی</label>
+            <input id="inputGameTitle" type="text" required placeholder="مثلاً: Elden Ring" class="w-full px-4 py-3 rounded-2xl border border-slate-200 focus:outline-none focus:border-indigo-500 text-sm">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1.5">پلتفرم</label>
+            <select id="inputGamePlatform" class="w-full px-4 py-3 rounded-2xl border border-slate-200 text-sm">
+              ${GAME_PLATFORMS.map(p => `<option value="${p.id}">${p.name}</option>`).join('')}
+            </select>
+          </div>
+          <div>
+            <button type="button" onclick="doSearchGame()" class="w-full py-2.5 rounded-2xl bg-indigo-100 hover:bg-indigo-200 text-indigo-700 font-bold text-xs flex items-center justify-center gap-2">
+              <i class="fa-solid fa-magnifying-glass"></i>
+              <span>جستجوی خودکار پوستر</span>
+            </button>
+          </div>
+          <div id="gameSearchResults" class="space-y-2 max-h-64 overflow-y-auto"></div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1.5">یا لینک پوستر (دستی)</label>
+            <input id="inputGamePoster" type="url" placeholder="https://..." class="w-full px-4 py-3 rounded-2xl border border-slate-200 text-xs" dir="ltr">
+          </div>
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="block text-xs font-semibold text-slate-700 mb-1.5">وضعیت</label>
+              <select id="inputGameStatus" class="w-full px-4 py-3 rounded-2xl border border-slate-200 text-sm">
+                ${GAME_STATUSES.map(s => `<option value="${s.id}">${s.name}</option>`).join('')}
+              </select>
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-slate-700 mb-1.5">امتیاز</label>
+              <input id="inputGameRating" type="number" min="1" max="5" value="5" class="w-full px-4 py-3 rounded-2xl border border-slate-200 text-sm">
+            </div>
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1.5">ساعت بازی‌شده (اختیاری)</label>
+            <input id="inputGameHours" type="number" min="0" placeholder="20" class="w-full px-4 py-3 rounded-2xl border border-slate-200 text-sm">
+          </div>
+          <button type="submit" class="w-full py-3.5 rounded-2xl bg-indigo-600 text-white font-bold text-xs active:scale-95 transition">افزودن</button>
+        </form>`);
+    }
+
+    let _gameSearchSelection = null;
+    async function doSearchGame() {
+      const title = document.getElementById('inputGameTitle').value.trim();
+      const results = document.getElementById('gameSearchResults');
+      if (!title) { results.innerHTML = `<p class="text-xs text-rose-500 text-center py-2">اول نام بازی رو بنویس</p>`; return; }
+      results.innerHTML = `<div class="text-center py-3 text-xs text-slate-400"><i class="fa-solid fa-spinner fa-spin"></i> جستجو...</div>`;
+      const items = await searchCheapShark(title);
+      if (items.length === 0) {
+        results.innerHTML = `<p class="text-xs text-slate-400 text-center py-2">چیزی پیدا نشد — خودت پوستر رو پیست کن</p>`;
+        return;
+      }
+      results.innerHTML = items.map((it, i) => `
+        <div class="search-result-item" onclick="selectGameResult(${i})" data-idx="${i}">
+          <img src="${it.poster || ''}" class="w-12 h-16 object-cover rounded-lg flex-shrink-0" alt="" onerror="this.style.background='#f0f0f0'" />
+          <div class="flex-1 min-w-0">
+            <p class="text-xs font-bold text-slate-800 truncate" dir="ltr">${escapeHtml(it.title)}</p>
+          </div>
+        </div>`).join('');
+      window._gameSearchItems = items;
+    }
+
+    function selectGameResult(i) {
+      const items = window._gameSearchItems || [];
+      const it = items[i];
+      if (!it) return;
+      _gameSearchSelection = it;
+      document.getElementById('inputGameTitle').value = it.title;
+      document.getElementById('inputGamePoster').value = it.poster;
+      document.querySelectorAll('#gameSearchResults .search-result-item').forEach((el, idx) => {
+        el.style.borderColor = idx === i ? '#6366f1' : '#e2e8f0';
+        el.style.background = idx === i ? '#eef2ff' : '#fff';
+      });
+      playTone(600, 'sine', 0.08);
+    }
+
+    function handleSaveGame(e) {
+      e.preventDefault();
+      const title = document.getElementById('inputGameTitle').value.trim();
+      const platform = document.getElementById('inputGamePlatform').value;
+      const status = document.getElementById('inputGameStatus').value;
+      const rating = document.getElementById('inputGameRating').value;
+      const hours = Number(document.getElementById('inputGameHours').value) || 0;
+      const posterUrl = document.getElementById('inputGamePoster').value.trim();
+      if (!title) return;
+      if (!appState.gameList) appState.gameList = [];
+      appState.gameList.push({
+        id: 'gm_' + Date.now(),
+        title, platform, status, rating, hours,
+        originalTitle: _gameSearchSelection?.originalTitle || '',
+        posterUrl,
+        createdAt: new Date().toISOString()
+      });
+      _gameSearchSelection = null;
+      playTone(550, 'sine', 0.1);
+      saveState();
+      closeModal();
+    }
+
+    function openGameEditModal(id) {
+      const g = (appState.gameList || []).find(x => x.id === id);
+      if (!g) return;
+      openModalWithContent(`ویرایش «${escapeHtml(g.title)}»`, `
+        <form onsubmit="handleSaveGameEdit(event, '${id}')" class="space-y-4">
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1.5">نام</label>
+            <input id="editGameTitle" type="text" required value="${escapeHtml(g.title)}" class="w-full px-4 py-3 rounded-2xl border border-slate-200 text-sm">
+          </div>
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="block text-xs font-semibold text-slate-700 mb-1.5">پلتفرم</label>
+              <select id="editGamePlatform" class="w-full px-4 py-3 rounded-2xl border border-slate-200 text-sm">
+                ${GAME_PLATFORMS.map(p => `<option value="${p.id}" ${p.id === g.platform ? 'selected' : ''}>${p.name}</option>`).join('')}
+              </select>
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-slate-700 mb-1.5">وضعیت</label>
+              <select id="editGameStatus" class="w-full px-4 py-3 rounded-2xl border border-slate-200 text-sm">
+                ${GAME_STATUSES.map(s => `<option value="${s.id}" ${s.id === g.status ? 'selected' : ''}>${s.name}</option>`).join('')}
+              </select>
+            </div>
+          </div>
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="block text-xs font-semibold text-slate-700 mb-1.5">امتیاز</label>
+              <input id="editGameRating" type="number" min="1" max="5" value="${g.rating || 5}" class="w-full px-4 py-3 rounded-2xl border border-slate-200 text-sm">
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-slate-700 mb-1.5">ساعت بازی</label>
+              <input id="editGameHours" type="number" min="0" value="${g.hours || 0}" class="w-full px-4 py-3 rounded-2xl border border-slate-200 text-sm">
+            </div>
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1.5">لینک پوستر</label>
+            <input id="editGamePoster" type="url" value="${g.posterUrl || ''}" class="w-full px-4 py-3 rounded-2xl border border-slate-200 text-xs" dir="ltr">
+          </div>
+          <div class="flex gap-2 pt-2">
+            <button type="submit" class="flex-1 py-3.5 rounded-2xl bg-indigo-600 text-white font-bold text-xs active:scale-95 transition">ذخیره</button>
+            <button type="button" onclick="closeModal()" class="px-4 py-3.5 rounded-2xl bg-slate-100 text-slate-600 font-bold text-xs">انصراف</button>
+          </div>
+        </form>`);
+    }
+    function handleSaveGameEdit(e, id) {
+      e.preventDefault();
+      const g = (appState.gameList || []).find(x => x.id === id);
+      if (!g) return;
+      g.title = document.getElementById('editGameTitle').value.trim() || g.title;
+      g.platform = document.getElementById('editGamePlatform').value;
+      g.status = document.getElementById('editGameStatus').value;
+      g.rating = document.getElementById('editGameRating').value;
+      g.hours = Number(document.getElementById('editGameHours').value) || 0;
+      g.posterUrl = document.getElementById('editGamePoster').value.trim();
+      playTone(600, 'sine', 0.1);
+      saveState();
+      closeModal();
+    }
+
+    /* MOOD */
+    let tempMoodKey = 'smile';
+    function openMoodModal(targetPersona) {
+      tempMoodKey = (appState.moods && appState.moods[targetPersona]?.key) || 'smile';
+      const moods = [
+        { key: 'love', text: 'غرق در عشق', icon: ICONS_3D.love },
+        { key: 'smile', text: 'خوشحال و پرانرژی', icon: ICONS_3D.smile },
+        { key: 'sleepy', text: 'خسته ولی راضی', icon: ICONS_3D.sleepy },
+        { key: 'pleading', text: 'نیاز به توجه', icon: ICONS_3D.pleading },
+        { key: 'coffee', text: 'در حال کار', icon: ICONS_3D.coffee },
+        { key: 'pizza', text: 'گرسنه', icon: ICONS_3D.pizza }
+      ];
+      const cur = (appState.moods && appState.moods[targetPersona]?.text) || '';
+      openModalWithContent(`احوال امروزِ ${targetPersona === 'p1' ? 'امیرمحمد' : 'آرمیتا'}`, `
+        <div class="space-y-4">
+          <div class="grid grid-cols-2 gap-2.5" id="moodChoices">
+            ${moods.map(m => `
+              <button type="button" data-mood="${m.key}" data-text="${escapeHtml(m.text)}" onclick="setMoodChoice('${targetPersona}', '${m.key}', this.dataset.text)" class="mood-choice p-3 rounded-2xl border-2 ${tempMoodKey === m.key ? 'border-rose-400 bg-rose-50' : 'border-rose-100 bg-rose-50/40'} flex items-center gap-3 transition text-right">
+                <img src="${m.icon}" class="w-7 h-7 flex-shrink-0" alt="" />
+                <span class="text-xs font-bold text-slate-700">${m.text}</span>
+              </button>`).join('')}
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1.5">یا متن دلخواه</label>
+            <input id="inputCustomMoodText" type="text" value="${escapeHtml(cur)}" placeholder="حس و حال..." class="w-full px-4 py-3 rounded-2xl border border-slate-200 text-sm">
+          </div>
+          <button onclick="saveCustomMood('${targetPersona}')" class="w-full py-3.5 rounded-2xl bg-rose-500 text-white font-bold text-xs active:scale-95 transition">ثبت حال</button>
+        </div>`);
+    }
+    function setMoodChoice(targetPersona, key, text) {
+      tempMoodKey = key;
+      document.querySelectorAll('#moodChoices .mood-choice').forEach(b => {
+        b.className = b.dataset.mood === key
+          ? "mood-choice p-3 rounded-2xl border-2 border-rose-400 bg-rose-50 flex items-center gap-3 transition text-right"
+          : "mood-choice p-3 rounded-2xl border-2 border-rose-100 bg-rose-50/40 flex items-center gap-3 transition text-right";
+      });
+      const input = document.getElementById('inputCustomMoodText');
+      if (input && text) input.value = text;
+    }
+    function saveCustomMood(targetPersona) {
+      const txt = document.getElementById('inputCustomMoodText').value.trim() || 'خوب';
+      if (!appState.moods) appState.moods = {};
+      appState.moods[targetPersona] = { key: tempMoodKey || 'smile', text: txt };
+      playTone(550, 'sine', 0.1);
+      saveState();
+      closeModal();
+    }
+
+    function openCustomIdeaModal() {
+      openModalWithContent('افزودن ایده به چرخونه', `
+        <form onsubmit="handleSaveCustomIdea(event)" class="space-y-4">
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1.5">پیشنهاد تفریح</label>
+            <input id="inputIdeaText" type="text" required placeholder="مثلاً: پیک‌نیک در بام همدان" class="w-full px-4 py-3 rounded-2xl border border-slate-200 focus:outline-none focus:border-rose-500 text-sm">
+          </div>
+          <button type="submit" class="w-full py-3.5 rounded-2xl bg-rose-500 text-white font-bold text-xs active:scale-95 transition">افزودن</button>
+        </form>`);
+    }
+    function handleSaveCustomIdea(e) {
+      e.preventDefault();
+      const val = document.getElementById('inputIdeaText').value.trim();
+      if (!val) return;
+      if (!appState.dateIdeas) appState.dateIdeas = [];
+      appState.dateIdeas.push(val);
+      saveState();
+      renderDateIdeasDrawer();
+      buildWheelPalette();
+      renderWheelToCache();
+      drawWheel(currentWheelAngle);
+      closeModal();
+    }
+
+    function openBucketModal() {
+      openModalWithContent('ثبت در باکت‌لیست', `
+        <form onsubmit="handleSaveBucket(event)" class="space-y-4">
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1.5">سفر، تجربه یا آرزو</label>
+            <input id="inputBucketTitle" type="text" required placeholder="مثلاً: سفر به هرمز" class="w-full px-4 py-3 rounded-2xl border border-slate-200 focus:outline-none focus:border-amber-500 text-sm">
+          </div>
+          <button type="submit" class="w-full py-3.5 rounded-2xl bg-amber-500 text-white font-bold text-xs active:scale-95 transition">ثبت</button>
+        </form>`);
+    }
+    function handleSaveBucket(e) {
+      e.preventDefault();
+      const val = document.getElementById('inputBucketTitle').value.trim();
+      if (!val) return;
+      if (!appState.bucketList) appState.bucketList = [];
+      appState.bucketList.push({ id: 'b_' + Date.now(), title: val, done: false });
+      playTone(550, 'sine', 0.1);
+      saveState();
+      closeModal();
+    }
+
+    function openNoteModal() {
+      openModalWithContent('نوشتن نامه عاشقانه', `
+        <form onsubmit="handleSaveNote(event)" class="space-y-4">
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1.5">متن نامه</label>
+            <textarea id="inputNoteContent" required rows="4" placeholder="از صمیم قلب..." class="w-full px-4 py-3 rounded-2xl border border-slate-200 focus:outline-none focus:border-rose-500 text-sm leading-relaxed"></textarea>
+          </div>
+          <button type="submit" class="w-full py-3.5 rounded-2xl bg-rose-500 text-white font-bold text-xs active:scale-95 transition">چسباندن روی دیوار</button>
+        </form>`);
+    }
+    function handleSaveNote(e) {
+      e.preventDefault();
+      const content = document.getElementById('inputNoteContent').value.trim();
+      if (!content) return;
+      const n = getNowJalaliString();
+      if (!appState.notes) appState.notes = [];
+      appState.notes.push({ id: 'note_' + Date.now(), content, author: currentPersona, timeBadge: n.fullTimestamp });
+      playTone(600, 'sine', 0.1);
+      saveState();
+      closeModal();
+    }
+
+    /* SETTINGS */
+    function openSettingsModal() {
+      openModalWithContent('تنظیمات', `
+        <div class="space-y-4 text-xs">
+          <div>
+            <p class="font-bold text-slate-700 mb-2">مناسبت‌های شخصی سالانه</p>
+            <div id="personalDatesList" class="space-y-1.5 mb-2"></div>
+            <button onclick="openAddPersonalDateModal()" class="w-full py-2.5 rounded-2xl bg-rose-100 text-rose-700 font-bold flex items-center justify-center gap-2">
+              <i class="fa-solid fa-plus"></i> افزودن مناسبت
+            </button>
+          </div>
+          <div class="pt-3 border-t border-slate-100 space-y-2">
+            <button onclick="downloadBackupJson()" class="w-full py-2.5 rounded-2xl bg-slate-800 text-white font-bold flex items-center justify-center gap-2">
+              <i class="fa-solid fa-download"></i> دانلود پشتیبان
+            </button>
+            <label class="w-full py-2.5 rounded-2xl bg-white border border-slate-200 text-slate-700 font-bold flex items-center justify-center gap-2 cursor-pointer">
+              <i class="fa-solid fa-upload"></i> بازیابی از پشتیبان
+              <input type="file" accept=".json" onchange="restoreBackupJson(event)" class="hidden" />
+            </label>
+          </div>
+        </div>`);
+      setTimeout(renderPersonalDatesSettings, 80);
+    }
+
+    function renderPersonalDatesSettings() {
+      const box = document.getElementById('personalDatesList');
+      if (!box) return;
+      const list = appState.personalDates || [];
+      if (list.length === 0) {
+        box.innerHTML = `<p class="text-slate-400 text-center py-2">موردی ثبت نشده</p>`;
+        return;
+      }
+      box.innerHTML = list.map(p => `
+        <div class="flex items-center justify-between p-2 rounded-xl bg-slate-50 border border-slate-100 gap-2">
+          <div class="flex items-center gap-2 min-w-0">
+            <img src="${ICONS_CAL[p.icon] || ICONS_CAL.anniversary}" data-cal-icon="${p.icon || 'anniversary'}" class="w-5 h-5" alt="" onerror="this.style.display='none'" />
+            <div class="min-w-0">
+              <p class="font-bold text-slate-700 truncate">${escapeHtml(p.title)}</p>
+              <p class="text-[10px] text-slate-400">${p.md} • از ${p.year}</p>
+            </div>
+          </div>
+          <button onclick="deletePersonalDate('${p.id}')" class="w-7 h-7 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 flex items-center justify-center flex-shrink-0">
+            <i class="fa-solid fa-trash-can text-[10px]"></i>
+          </button>
+        </div>`).join('');
+    }
+
+    function openAddPersonalDateModal() {
+      const icons = [
+        { key: 'birthday', label: 'تولد' },
+        { key: 'anniversary', label: 'سالگرد' },
+        { key: 'celebration', label: 'جشن' },
+        { key: 'travel', label: 'سفر' },
+        { key: 'work', label: 'کار' },
+        { key: 'rest', label: 'استراحت' }
+      ];
+      openModalWithContent('افزودن مناسبت شخصی', `
+        <form onsubmit="handleSavePersonalDate(event)" class="space-y-4">
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1.5">عنوان</label>
+            <input id="pdTitle" type="text" required placeholder="مثلاً: سالگرد عقد" class="w-full px-4 py-3 rounded-2xl border border-slate-200 text-sm">
+          </div>
+          <div class="grid grid-cols-3 gap-2">
+            <div>
+              <label class="block text-xs font-semibold text-slate-700 mb-1.5">ماه</label>
+              <input id="pdMonth" type="number" min="1" max="12" required placeholder="6" class="w-full px-3 py-2.5 rounded-2xl border border-slate-200 text-sm text-center">
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-slate-700 mb-1.5">روز</label>
+              <input id="pdDay" type="number" min="1" max="31" required placeholder="29" class="w-full px-3 py-2.5 rounded-2xl border border-slate-200 text-sm text-center">
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-slate-700 mb-1.5">سال شروع</label>
+              <input id="pdYear" type="number" required placeholder="1405" class="w-full px-3 py-2.5 rounded-2xl border border-slate-200 text-sm text-center">
+            </div>
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1.5">آیکون</label>
+            <div id="pdIconPicker" class="grid grid-cols-3 gap-2">
+              ${icons.map(i => `
+                <button type="button" data-icon="${i.key}" onclick="pickPdIcon('${i.key}')" class="pd-icon-btn p-2 rounded-2xl border-2 ${i.key === 'anniversary' ? 'border-rose-400 bg-rose-50' : 'border-slate-200 bg-white'} flex flex-col items-center gap-1">
+                  <img src="${ICONS_CAL[i.key]}" data-cal-icon="${i.key}" class="w-7 h-7" alt="" onerror="this.style.display='none'" />
+                  <span class="text-[10px] font-bold text-slate-600">${i.label}</span>
+                </button>`).join('')}
+            </div>
+          </div>
+          <button type="submit" class="w-full py-3.5 rounded-2xl bg-rose-500 text-white font-bold text-xs active:scale-95 transition">افزودن</button>
+        </form>`);
+      window._pdIcon = 'anniversary';
+    }
+
+    function pickPdIcon(k) {
+      window._pdIcon = k;
+      document.querySelectorAll('#pdIconPicker .pd-icon-btn').forEach(b => {
+        b.className = b.dataset.icon === k
+          ? 'pd-icon-btn p-2 rounded-2xl border-2 border-rose-400 bg-rose-50 flex flex-col items-center gap-1'
+          : 'pd-icon-btn p-2 rounded-2xl border-2 border-slate-200 bg-white flex flex-col items-center gap-1';
+      });
+    }
+
+    function handleSavePersonalDate(e) {
+      e.preventDefault();
+      const title = document.getElementById('pdTitle').value.trim();
+      const m = Number(document.getElementById('pdMonth').value);
+      const d = Number(document.getElementById('pdDay').value);
+      const y = Number(document.getElementById('pdYear').value);
+      if (!title || !m || !d || !y) return;
+      const md = `${String(m).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+      const icon = window._pdIcon || 'anniversary';
+      if (!appState.personalDates) appState.personalDates = [];
+      appState.personalDates.push({ id: 'pd_' + Date.now(), title, md, year: y, icon });
+      playTone(600, 'sine', 0.1);
+      saveState();
+      closeModal();
+      setTimeout(openSettingsModal, 100);
+    }
+
+    function deletePersonalDate(id) {
+      appState.personalDates = (appState.personalDates || []).filter(p => p.id !== id);
+      saveState();
+      renderPersonalDatesSettings();
+    }
+
+    function downloadBackupJson() {
+      const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(appState, null, 2));
+      const a = document.createElement('a');
+      a.setAttribute("href", dataStr);
+      a.setAttribute("download", `TwoOfUs_Backup_${Date.now()}.json`);
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+    }
+    function restoreBackupJson(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = function (e) {
+        try {
+          const imported = JSON.parse(e.target.result);
+          if (imported && typeof imported === 'object') {
+            appState = { ...appState, ...imported };
+            if (!Array.isArray(appState.dateIdeas) || appState.dateIdeas.length < 10) {
+              appState.dateIdeas = [...DEFAULT_DATE_IDEAS];
+            }
+            buildWheelPalette();
+            renderWheelToCache();
+            saveState();
+            alert("بازیابی موفق");
+            closeModal();
+          }
+        } catch (err) { alert("خطا در خواندن فایل"); }
+      };
+      reader.readAsText(file);
+    }
+  </script>
+</body>
+</html>
