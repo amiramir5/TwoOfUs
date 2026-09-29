@@ -4,42 +4,27 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover" />
   <title>TwoOfUs | امیرمحمد و آرمیتا</title>
-
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="apple-mobile-web-app-title" content="TwoOfUs" />
   <meta name="format-detection" content="telephone=no" />
   <meta name="theme-color" content="#fff0f3" />
-
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@100..900&family=Plus+Jakarta+Sans:wght@500..900&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css" />
-
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/dist/confetti.browser.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
   <script>
     tailwind.config = {
-      theme: {
-        extend: {
-          fontFamily: {
-            sans: ['Vazirmatn', 'Vazir', 'Segoe UI', 'Tahoma', 'sans-serif'],
-            display: ['Vazirmatn', 'Plus Jakarta Sans', 'sans-serif']
-          },
-          colors: {
-            clay: {
-              50: '#fff5f7', 100: '#ffe4e9', 200: '#fecdd7', 300: '#fda4b8',
-              400: '#fb7193', 500: '#f43f6e', 600: '#e11d59', 700: '#be1248'
-            }
-          }
-        }
-      }
+      theme: { extend: {
+        fontFamily: { sans: ['Vazirmatn','Vazir','Segoe UI','Tahoma','sans-serif'], display: ['Vazirmatn','Plus Jakarta Sans','sans-serif'] },
+        colors: { clay: { 50:'#fff5f7',100:'#ffe4e9',200:'#fecdd7',300:'#fda4b8',400:'#fb7193',500:'#f43f6e',600:'#e11d59',700:'#be1248' } }
+      }}
     }
   </script>
-
   <style>
     :root {
       --sat: env(safe-area-inset-top, 0px);
@@ -52,28 +37,19 @@
     * { box-sizing: border-box; }
     html { -webkit-text-size-adjust: 100%; }
     body {
-      font-family: 'Vazirmatn', 'Vazir', 'Segoe UI', Tahoma, sans-serif;
+      font-family: 'Vazirmatn','Vazir','Segoe UI',Tahoma,sans-serif;
       font-feature-settings: 'ss02' 1, 'ss03' 1;
       padding-top: var(--sat);
       padding-bottom: calc(var(--sab) + var(--nav-h) + 5rem);
       padding-left: max(0.75rem, var(--sal));
       padding-right: max(0.75rem, var(--sar));
       -webkit-tap-highlight-color: transparent;
-      user-select: none;
-      -webkit-user-select: none;
+      user-select: none; -webkit-user-select: none;
       background-color: #FAF6F6;
-      margin: 0;
-      min-height: 100dvh;
-      overflow-x: hidden;
-      font-weight: 500;
+      margin: 0; min-height: 100dvh; overflow-x: hidden; font-weight: 500;
     }
     input, textarea, select { font-family: inherit; user-select: text; -webkit-user-select: text; }
-    .clay-surface {
-      background: rgba(255, 255, 255, 0.88);
-      backdrop-filter: blur(24px);
-      -webkit-backdrop-filter: blur(24px);
-      border: 1px solid rgba(255, 255, 255, 0.95);
-    }
+    .clay-surface { background: rgba(255,255,255,0.88); backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px); border: 1px solid rgba(255,255,255,0.95); }
     .squircle-card { border-radius: 24px; }
     @media (min-width: 640px) { .squircle-card { border-radius: 28px; } }
     .hide-scrollbar::-webkit-scrollbar { display: none; }
@@ -83,282 +59,103 @@
     @media (min-width: 640px) { .icon-3d-md { width: 32px; height: 32px; } }
     @keyframes gentlePulse { 0%,100% { transform: scale(1); } 50% { transform: scale(1.06); } }
     .animate-gentle-pulse { animation: gentlePulse 2.6s infinite ease-in-out; }
-    @keyframes heartFloat {
-      0% { transform: translateY(0) scale(0.9); opacity: 0; }
-      50% { opacity: 1; }
-      100% { transform: translateY(-70px) scale(1.3); opacity: 0; }
-    }
+    @keyframes heartFloat { 0% { transform: translateY(0) scale(0.9); opacity: 0; } 50% { opacity: 1; } 100% { transform: translateY(-70px) scale(1.3); opacity: 0; } }
     .floating-kiss { position: absolute; animation: heartFloat 2s forwards ease-out; pointer-events: none; z-index: 50; }
 
-    #bgParticles {
-      position: fixed; inset: 0; z-index: -1; overflow: hidden; pointer-events: none;
-      background: radial-gradient(circle at 20% 30%, #FFF5F7 0%, #FAF6F6 45%),
-                  radial-gradient(circle at 80% 70%, #FFE4E9 0%, transparent 50%);
-    }
-    .bg-particle {
-      position: absolute; border-radius: 50%;
-      background: radial-gradient(circle, rgba(244,63,110,0.3), rgba(244,63,110,0.05));
-      animation: floatUp linear infinite; pointer-events: none;
-    }
-    @keyframes floatUp {
-      0% { transform: translateY(0) scale(1); opacity: 0; }
-      20% { opacity: 0.6; }
-      80% { opacity: 0.3; }
-      100% { transform: translateY(-100vh) scale(0.4); opacity: 0; }
-    }
+    #bgParticles { position: fixed; inset: 0; z-index: -1; overflow: hidden; pointer-events: none; background: radial-gradient(circle at 20% 30%, #FFF5F7 0%, #FAF6F6 45%), radial-gradient(circle at 80% 70%, #FFE4E9 0%, transparent 50%); }
+    .bg-particle { position: absolute; border-radius: 50%; background: radial-gradient(circle, rgba(244,63,110,0.3), rgba(244,63,110,0.05)); animation: floatUp linear infinite; pointer-events: none; }
+    @keyframes floatUp { 0% { transform: translateY(0) scale(1); opacity: 0; } 20% { opacity: 0.6; } 80% { opacity: 0.3; } 100% { transform: translateY(-100vh) scale(0.4); opacity: 0; } }
 
-    /* ================= BOTTOM NAV ================= */
-    .bottom-nav {
-      position: fixed;
-      bottom: max(0.7rem, calc(var(--sab) + 0.5rem));
-      left: 50%;
-      transform: translateX(-50%);
-      width: calc(100% - 1rem);
-      max-width: 560px;
-      z-index: 40;
-      pointer-events: none;
-    }
-    .bottom-nav-bar {
-      position: relative;
-      height: var(--nav-h);
-      background: linear-gradient(180deg, #ffffff 0%, #fff5f7 100%);
-      border-radius: 26px;
-      box-shadow:
-        0 20px 40px -14px rgba(244, 63, 110, 0.18),
-        0 4px 12px rgba(244, 63, 110, 0.06),
-        0 0 0 1px rgba(244, 63, 110, 0.10),
-        inset 0 -2px 0 rgba(244, 63, 110, 0.06);
-      pointer-events: auto;
-      overflow: visible;
-    }
-    .bottom-nav-bubble {
-      position: absolute;
-      top: calc((var(--nav-h) - var(--bubble-size)) / -1.5);
-      left: 0;
-      width: var(--bubble-size);
-      height: var(--bubble-size);
-      border-radius: 50%;
-      background: linear-gradient(135deg, #fb7193 0%, #f43f6e 45%, #be1248 100%);
-      box-shadow:
-        0 14px 28px rgba(244, 63, 110, 0.40),
-        0 6px 12px rgba(244, 63, 110, 0.20),
-        inset 0 3px 0 rgba(255, 255, 255, 0.55),
-        inset 0 -3px 6px rgba(0, 0, 0, 0.12);
-      transform: translateX(0);
-      transition: transform 0.6s cubic-bezier(0.34, 1.35, 0.5, 1);
-      will-change: transform;
-      pointer-events: none;
-      z-index: 2;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-    .bottom-nav-bubble img {
-      width: 30px; height: 30px; object-fit: contain;
-      filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.22));
-      transition: transform 0.28s ease, opacity 0.28s ease;
-    }
+    /* ========== BOTTOM NAV ========== */
+    .bottom-nav { position: fixed; bottom: max(0.6rem, calc(var(--sab) + 0.4rem)); left: 50%; transform: translateX(-50%); width: calc(100% - 0.75rem); max-width: 580px; z-index: 40; pointer-events: none; }
+    .bottom-nav-bar { position: relative; height: var(--nav-h); background: linear-gradient(180deg, #ffffff 0%, #fff5f7 100%); border-radius: 24px; box-shadow: 0 20px 40px -14px rgba(244,63,110,0.18), 0 4px 12px rgba(244,63,110,0.06), 0 0 0 1px rgba(244,63,110,0.10), inset 0 -2px 0 rgba(244,63,110,0.06); pointer-events: auto; overflow: visible; }
+    .bottom-nav-bubble { position: absolute; top: calc((var(--nav-h) - var(--bubble-size)) / -1.5); left: 0; width: var(--bubble-size); height: var(--bubble-size); border-radius: 50%; background: linear-gradient(135deg, #fb7193 0%, #f43f6e 45%, #be1248 100%); box-shadow: 0 14px 28px rgba(244,63,110,0.40), 0 6px 12px rgba(244,63,110,0.20), inset 0 3px 0 rgba(255,255,255,0.55), inset 0 -3px 6px rgba(0,0,0,0.12); transform: translateX(0); transition: transform 0.6s cubic-bezier(0.34,1.35,0.5,1); will-change: transform; pointer-events: none; z-index: 2; display: flex; align-items: center; justify-content: center; }
+    .bottom-nav-bubble img { width: 30px; height: 30px; object-fit: contain; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.22)); transition: transform 0.28s ease, opacity 0.28s ease; }
     .bottom-nav-bubble.bubble-swap img { transform: scale(0.55) rotate(-12deg); opacity: 0.35; }
     .bottom-nav-items { position: absolute; inset: 0; display: flex; align-items: stretch; justify-content: space-around; z-index: 3; }
-
-    .nav-item {
-      position: relative;
-      flex: 1 1 0;
-      min-width: 0;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: 6px;
-      padding: 10px 1px 12px;
-      background: transparent;
-      border: none;
-      cursor: pointer;
-      color: #94a3b8;
-      transition: color 0.3s ease, transform 0.15s ease;
-      -webkit-tap-highlight-color: transparent;
-      font-family: inherit;
-      outline: none;
-    }
+    .nav-item { position: relative; flex: 1 1 0; min-width: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 5px; padding: 10px 1px 12px; background: transparent; border: none; cursor: pointer; color: #94a3b8; transition: color 0.3s ease, transform 0.15s ease; -webkit-tap-highlight-color: transparent; font-family: inherit; outline: none; }
     .nav-item:active { transform: scale(0.9); }
-    .nav-item .nav-icon {
-      width: 22px; height: 22px; object-fit: contain; opacity: 0.55;
-      transition: opacity 0.32s ease, transform 0.42s cubic-bezier(0.34, 1.35, 0.5, 1);
-      filter: grayscale(0.85) brightness(1.05) contrast(0.95);
-    }
-    .nav-item .nav-label {
-      font-size: 10px; font-weight: 700; line-height: 1.2; white-space: nowrap;
-      opacity: 0.75; color: #94a3b8;
-      transition: opacity 0.32s ease, transform 0.42s cubic-bezier(0.34, 1.35, 0.5, 1);
-      display: inline-block;
-    }
+    .nav-item .nav-icon { width: 22px; height: 22px; object-fit: contain; opacity: 0.55; transition: opacity 0.32s ease, transform 0.42s cubic-bezier(0.34,1.35,0.5,1); filter: grayscale(0.85) brightness(1.05) contrast(0.95); }
+    .nav-item .nav-label { font-size: 10px; font-weight: 700; line-height: 1.15; white-space: nowrap; opacity: 0.75; color: #94a3b8; transition: opacity 0.32s ease, transform 0.42s cubic-bezier(0.34,1.35,0.5,1); display: inline-block; }
     .nav-item.active { color: #f43f6e; }
     .nav-item.active .nav-icon { opacity: 0; transform: translateY(-46px) scale(0.5); }
     .nav-item.active .nav-label { opacity: 0; transform: translateY(6px); pointer-events: none; }
-
     @media (min-width: 640px) {
       .nav-item .nav-icon { width: 24px; height: 24px; }
       .nav-item .nav-label { font-size: 11px; }
     }
 
-    /* ================= PAGE TRANSITIONS ================= */
+    /* ========== TAB TRANSITIONS ========== */
     .tab-section { animation: tabFadeIn 0.28s ease-out; }
-    @keyframes tabFadeIn {
-      from { opacity: 0; transform: translateY(8px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
+    @keyframes tabFadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
 
-    /* ================= CALENDAR ================= */
+    /* ========== CALENDAR ========== */
     .cal-day { position: relative; overflow: hidden; isolation: isolate; transition: all 0.2s; }
-    .cal-day-bg {
-      position: absolute; inset: 0;
-      background-position: center; background-repeat: no-repeat;
-      z-index: 0; pointer-events: none;
-    }
-    .cal-day-num {
-      position: relative; z-index: 2; font-weight: 900;
-      text-shadow: 0 1px 3px rgba(255, 255, 255, 0.9), 0 0 8px rgba(255, 255, 255, 0.6);
-    }
+    .cal-day-bg { position: absolute; inset: 0; background-position: center; background-repeat: no-repeat; z-index: 0; pointer-events: none; }
+    .cal-day-num { position: relative; z-index: 2; font-weight: 900; text-shadow: 0 1px 3px rgba(255,255,255,0.9), 0 0 8px rgba(255,255,255,0.6); }
     .cal-day.sel { background: #f43f6e !important; }
     .cal-day.sel .cal-day-bg { opacity: 0.15; }
     .cal-day.sel .cal-day-num { color: #fff !important; text-shadow: 0 1px 3px rgba(0,0,0,0.5); }
-
     .cal-day-normal { background: #fff; border: 1px solid #f1f5f9; }
     .cal-day-holiday { background: linear-gradient(180deg, #fff 0%, #ffe4e9 100%); }
     .cal-day-gift { background: linear-gradient(180deg, #fff5f7 0%, #ffd8e0 100%); }
     .cal-day-personal { background: linear-gradient(135deg, #fecdd7 0%, #fb7193 60%, #f43f6e 100%); }
     .cal-day-today { outline: 2px solid #f43f6e; outline-offset: 1px; }
 
-    /* ================= MEDIA ================= */
-    .media-poster {
-      width: 82px; height: 118px;
-      object-fit: cover; border-radius: 12px; flex-shrink: 0;
-      background: #f3f4f6; box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
-    }
-    .media-poster-empty {
-      width: 82px; height: 118px;
-      display: flex; align-items: center; justify-content: center;
-      border-radius: 12px; flex-shrink: 0;
-      background: linear-gradient(135deg, #fff5f7, #fecdd7);
-    }
-    .media-overview {
-      font-size: 10px; line-height: 1.45; color: #64748b;
-      display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical;
-      overflow: hidden; text-align: justify;
-    }
-    .search-result-item {
-      display: flex; gap: 10px; padding: 8px; border-radius: 14px;
-      border: 1px solid #e2e8f0; cursor: pointer; transition: all 0.2s;
-      background: #fff; align-items: center;
-    }
+    /* ========== MEDIA ========== */
+    .media-poster { width: 82px; height: 118px; object-fit: cover; border-radius: 12px; flex-shrink: 0; background: #f3f4f6; box-shadow: 0 4px 10px rgba(0,0,0,0.08); }
+    .media-poster-empty { width: 82px; height: 118px; display: flex; align-items: center; justify-content: center; border-radius: 12px; flex-shrink: 0; background: linear-gradient(135deg, #fff5f7, #fecdd7); }
+    .media-overview { font-size: 10px; line-height: 1.45; color: #64748b; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; text-align: justify; }
+    .search-result-item { display: flex; gap: 10px; padding: 8px; border-radius: 14px; border: 1px solid #e2e8f0; cursor: pointer; transition: all 0.2s; background: #fff; align-items: center; }
     .search-result-item:hover { border-color: #f43f6e; background: #fff5f7; }
 
-    /* ================= SKELETON ================= */
-    .skeleton {
-      background: linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 50%, #f1f5f9 75%);
-      background-size: 200% 100%;
-      animation: skeletonShimmer 1.5s infinite;
-      border-radius: 12px;
-    }
-    @keyframes skeletonShimmer {
-      0% { background-position: 200% 0; }
-      100% { background-position: -200% 0; }
-    }
-
-    /* ================= PERSONA MODAL ================= */
-    .persona-modal-overlay {
-      position: fixed; inset: 0; z-index: 100;
-      background: linear-gradient(135deg, #fef2f5 0%, #fff5f7 100%);
-      display: flex; align-items: center; justify-content: center;
-      padding: 1rem;
-      animation: personaFadeIn 0.5s ease-out;
-    }
-    @keyframes personaFadeIn {
-      from { opacity: 0; }
-      to { opacity: 1; }
-    }
-    .persona-card {
-      width: 100%; max-width: 420px;
-      background: #fff; border-radius: 32px;
-      padding: 2rem 1.5rem;
-      box-shadow: 0 30px 60px -20px rgba(244, 63, 110, 0.25), 0 0 0 1px rgba(244, 63, 110, 0.08);
-      text-align: center;
-      animation: personaPop 0.55s cubic-bezier(0.34, 1.35, 0.5, 1);
-    }
-    @keyframes personaPop {
-      from { opacity: 0; transform: scale(0.85) translateY(20px); }
-      to { opacity: 1; transform: scale(1) translateY(0); }
-    }
-    .persona-avatar-btn {
-      position: relative;
-      padding: 1.25rem 1rem;
-      border-radius: 24px;
-      border: 2.5px solid transparent;
-      background: #fff5f7;
-      transition: all 0.25s ease;
-      cursor: pointer;
-      display: flex; flex-direction: column; align-items: center; gap: 0.5rem;
-      -webkit-tap-highlight-color: transparent;
-      font-family: inherit;
-      outline: none;
-    }
-    .persona-avatar-btn:hover {
-      border-color: #fda4b8;
-      background: #ffe4e9;
-      transform: translateY(-2px);
-    }
+    /* ========== PERSONA MODAL ========== */
+    .persona-modal-overlay { position: fixed; inset: 0; z-index: 100; background: linear-gradient(135deg, #fef2f5 0%, #fff5f7 100%); display: flex; align-items: center; justify-content: center; padding: 1rem; animation: personaFadeIn 0.5s ease-out; }
+    @keyframes personaFadeIn { from { opacity: 0; } to { opacity: 1; } }
+    .persona-card { width: 100%; max-width: 420px; background: #fff; border-radius: 32px; padding: 2rem 1.5rem; box-shadow: 0 30px 60px -20px rgba(244,63,110,0.25), 0 0 0 1px rgba(244,63,110,0.08); text-align: center; animation: personaPop 0.55s cubic-bezier(0.34,1.35,0.5,1); }
+    @keyframes personaPop { from { opacity: 0; transform: scale(0.85) translateY(20px); } to { opacity: 1; transform: scale(1) translateY(0); } }
+    .persona-avatar-btn { position: relative; padding: 1.25rem 1rem; border-radius: 24px; border: 2.5px solid transparent; background: #fff5f7; transition: all 0.25s ease; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 0.5rem; -webkit-tap-highlight-color: transparent; font-family: inherit; outline: none; }
+    .persona-avatar-btn:hover { border-color: #fda4b8; background: #ffe4e9; transform: translateY(-2px); }
     .persona-avatar-btn:active { transform: scale(0.95); }
 
-    /* ================= DIARY ================= */
-    .diary-post {
-      background: #fff;
-      border-radius: 20px;
-      padding: 12px;
-      border: 1px solid #fce7f3;
-      box-shadow: 0 4px 12px rgba(244, 63, 110, 0.04);
-      margin-bottom: 8px;
-    }
-    .diary-post.editing { border-color: #f43f6e; box-shadow: 0 0 0 3px rgba(244, 63, 110, 0.15); }
-    .diary-img {
-      width: 100%; max-height: 240px; object-fit: cover;
-      border-radius: 12px; margin-top: 8px;
-    }
+    /* ========== DIARY ========== */
+    .diary-post { background: #fff; border-radius: 20px; padding: 12px; border: 1px solid #fce7f3; box-shadow: 0 4px 12px rgba(244,63,110,0.04); margin-bottom: 8px; }
+    .diary-post.editing { border-color: #f43f6e; box-shadow: 0 0 0 3px rgba(244,63,110,0.15); }
+    .diary-img { width: 100%; max-height: 280px; object-fit: cover; border-radius: 12px; margin-top: 8px; }
 
-    /* ================= MOOD HISTORY ================= */
-    .mood-history-cell {
-      aspect-ratio: 1;
-      border-radius: 12px;
-      display: flex; align-items: center; justify-content: center;
-      background: #fff5f7;
-      border: 1px solid #fce7f3;
-      position: relative;
-      overflow: hidden;
-    }
+    /* ========== MOOD HISTORY ========== */
+    .mood-history-cell { aspect-ratio: 1; border-radius: 12px; display: flex; align-items: center; justify-content: center; background: #fff5f7; border: 1px solid #fce7f3; position: relative; overflow: hidden; }
     .mood-history-cell img { width: 70%; height: 70%; object-fit: contain; }
 
-    /* ================= IN-APP NOTIFICATION ================= */
+    /* ========== IN-APP BANNER ========== */
     #inAppBanner {
       position: fixed;
-      top: calc(var(--sat) + 5rem);
+      bottom: calc(var(--sab) + var(--nav-h) + 0.75rem);
       left: 50%;
-      transform: translateX(-50%) translateY(-120%);
-      width: calc(100% - 2rem);
-      max-width: 480px;
+      transform: translateX(-50%) translateY(200%);
+      width: auto; max-width: 340px; min-width: 240px;
       z-index: 45;
       background: linear-gradient(135deg, #fff 0%, #fff5f7 100%);
-      border-radius: 20px;
-      padding: 12px 16px;
-      box-shadow: 0 16px 32px -10px rgba(244, 63, 110, 0.28), 0 0 0 1px rgba(244, 63, 110, 0.15);
-      transition: transform 0.45s cubic-bezier(0.34, 1.35, 0.5, 1);
+      border-radius: 16px;
+      padding: 8px 10px;
+      box-shadow: 0 12px 24px -8px rgba(244,63,110,0.32), 0 0 0 1px rgba(244,63,110,0.14);
+      transition: transform 0.5s cubic-bezier(0.34,1.35,0.5,1);
       pointer-events: auto;
-      display: flex; align-items: center; gap: 12px;
+      display: flex; align-items: center; gap: 8px;
     }
     #inAppBanner.show { transform: translateX(-50%) translateY(0); }
+    #inAppBanner .banner-icon { width: 32px; height: 32px; border-radius: 12px; background: #fff5f7; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    #inAppBanner .banner-icon img { width: 22px; height: 22px; object-fit: contain; }
+    #inAppBanner .banner-text { flex: 1; min-width: 0; }
+    #inAppBanner .banner-title { font-size: 10.5px; font-weight: 800; color: #be1248; line-height: 1.2; }
+    #inAppBanner .banner-body { font-size: 10px; color: #64748b; line-height: 1.3; margin-top: 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    #inAppBanner .banner-close { width: 24px; height: 24px; border-radius: 8px; background: transparent; border: none; color: #94a3b8; display: flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0; transition: all 0.15s; -webkit-tap-highlight-color: transparent; font-size: 12px; }
+    #inAppBanner .banner-close:hover { background: #fee2e2; color: #e11d59; }
   </style>
 </head>
 <body class="text-slate-800 min-h-screen font-sans antialiased">
 
-  <!-- ================= PERSONA MODAL (اول از همه) ================= -->
+  <!-- ============ PERSONA MODAL ============ -->
   <div id="personaModal" class="persona-modal-overlay">
     <div class="persona-card">
       <div class="w-16 h-16 mx-auto mb-3 rounded-3xl bg-gradient-to-tr from-rose-100 to-pink-50 flex items-center justify-center shadow-md border border-rose-100">
@@ -366,7 +163,6 @@
       </div>
       <h2 class="font-black text-xl text-slate-900 tracking-tight mb-1">TwoOfUs</h2>
       <p class="text-xs text-slate-500 font-semibold mb-6">الان تو کی هستی؟</p>
-
       <div class="grid grid-cols-2 gap-3">
         <button onclick="pickPersonaStart('p1')" class="persona-avatar-btn">
           <div class="w-20 h-20 rounded-full bg-white border border-rose-100 flex items-center justify-center overflow-hidden shadow-sm">
@@ -374,7 +170,6 @@
           </div>
           <span class="text-xs font-black text-slate-800">امیرمحمد</span>
         </button>
-
         <button onclick="pickPersonaStart('p2')" class="persona-avatar-btn">
           <div class="w-20 h-20 rounded-full bg-white border border-rose-100 flex items-center justify-center overflow-hidden shadow-sm">
             <img src="https://cdn.jsdelivr.net/gh/microsoft/fluentui-emoji@main/assets/Woman%20technologist/Light/3D/woman_technologist_3d_light.png" class="w-full h-full object-contain p-2" alt="" />
@@ -382,22 +177,21 @@
           <span class="text-xs font-black text-slate-800">آرمیتا</span>
         </button>
       </div>
-
       <p class="text-[10px] text-slate-400 mt-5 leading-relaxed">هر بار که اپ رو باز می‌کنی این سؤال پرسیده می‌شه</p>
     </div>
   </div>
 
-  <!-- ================= بنر In-App Notification ================= -->
+  <!-- ============ بنر یادآور کوچیک ============ -->
   <div id="inAppBanner">
-    <div class="w-10 h-10 rounded-2xl bg-rose-50 flex items-center justify-center flex-shrink-0">
-      <img id="inAppBannerIcon" src="https://cdn.jsdelivr.net/gh/microsoft/fluentui-emoji@main/assets/Red%20heart/3D/red_heart_3d.png" class="w-6 h-6 object-contain" alt="" />
+    <div class="banner-icon">
+      <img id="inAppBannerIcon" src="https://cdn.jsdelivr.net/gh/microsoft/fluentui-emoji@main/assets/Red%20heart/3D/red_heart_3d.png" alt="" />
     </div>
-    <div class="flex-1 min-w-0">
-      <p id="inAppBannerTitle" class="text-xs font-black text-slate-800 truncate">یادآور</p>
-      <p id="inAppBannerText" class="text-[11px] text-slate-500 truncate">متن یادآور</p>
+    <div class="banner-text">
+      <p id="inAppBannerTitle" class="banner-title">یادآور</p>
+      <p id="inAppBannerBody" class="banner-body">متن یادآور</p>
     </div>
-    <button onclick="hideInAppBanner()" class="w-7 h-7 rounded-lg text-slate-300 hover:text-rose-500 flex items-center justify-center flex-shrink-0">
-      <i class="fa-solid fa-xmark text-xs"></i>
+    <button class="banner-close" onclick="hideInAppBanner()" aria-label="بستن">
+      <i class="fa-solid fa-xmark"></i>
     </button>
   </div>
 
@@ -425,7 +219,6 @@
           </div>
         </div>
       </div>
-
       <div class="flex items-center gap-1 sm:gap-2 flex-shrink-0">
         <button onclick="toggleSound()" id="soundToggleBtn" class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl sm:rounded-2xl bg-white border border-slate-200/80 hover:bg-rose-50 text-slate-600 flex items-center justify-center transition shadow-sm">
           <i class="fa-solid fa-volume-high text-xs"></i>
@@ -453,7 +246,6 @@
       <div class="relative overflow-hidden squircle-card clay-surface shadow-lg p-5 sm:p-6 border border-white">
         <div class="absolute -right-16 -top-16 w-64 h-64 bg-rose-200/35 rounded-full blur-3xl pointer-events-none"></div>
         <div class="absolute -left-16 -bottom-16 w-64 h-64 bg-pink-200/35 rounded-full blur-3xl pointer-events-none"></div>
-
         <div class="relative z-10 flex flex-col md:flex-row items-center justify-between gap-5">
           <div class="text-center md:text-right space-y-2 w-full md:w-auto">
             <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold bg-rose-50 text-rose-600 border border-rose-200/60">
@@ -470,7 +262,6 @@
             </div>
             <p id="nextEventTeaser" class="text-xs text-slate-500 flex items-center justify-center md:justify-start gap-1.5 pt-1"></p>
           </div>
-
           <div class="flex flex-col items-center gap-2 w-full md:w-auto">
             <button onclick="sendLoveKiss()" class="group relative w-full md:w-auto px-6 py-3.5 rounded-2xl bg-gradient-to-r from-rose-500 via-pink-500 to-rose-600 text-white font-bold text-sm shadow-lg active:scale-95 transition flex items-center justify-center gap-2.5">
               <img src="https://cdn.jsdelivr.net/gh/microsoft/fluentui-emoji@main/assets/Face%20blowing%20a%20kiss/3D/face_blowing_a_kiss_3d.png" class="w-6 h-6 animate-gentle-pulse" alt="" />
@@ -479,7 +270,6 @@
             <span id="kissFeedback" class="text-[11px] font-semibold text-rose-500 opacity-0 transition-opacity text-center"></span>
           </div>
         </div>
-
         <div class="mt-5 pt-5 border-t border-rose-100/60 grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div class="p-3 rounded-2xl bg-white/80 border border-rose-100/80 flex items-center justify-between shadow-sm">
             <div class="flex items-center gap-2.5 min-w-0">
@@ -502,7 +292,6 @@
             <button onclick="openMoodModal('p2')" class="text-[11px] text-rose-500 font-bold px-2 py-1 rounded-lg hover:bg-rose-50 transition flex-shrink-0">تغییر</button>
           </div>
         </div>
-
         <div class="mt-3 pt-3 border-t border-rose-100/60 flex justify-center">
           <button onclick="openMoodHistoryModal()" class="text-[11px] font-bold text-rose-500 hover:text-rose-600 flex items-center gap-1.5 px-3 py-1.5 rounded-xl hover:bg-rose-50 transition">
             <i class="fa-solid fa-chart-simple text-[10px]"></i>
@@ -533,7 +322,6 @@
           </div>
           <div id="groceryList" class="space-y-2.5 max-h-[400px] overflow-y-auto pr-1 hide-scrollbar"></div>
         </div>
-
         <div class="squircle-card clay-surface p-4 sm:p-6 shadow-lg space-y-4">
           <div class="flex items-center justify-between">
             <div class="flex items-center gap-3">
@@ -576,7 +364,6 @@
             </button>
           </div>
         </div>
-
         <div class="grid grid-cols-1 md:grid-cols-12 gap-5 items-center p-4 sm:p-5 rounded-3xl bg-gradient-to-br from-rose-50/40 via-white to-pink-50/30 border border-rose-100/80">
           <div class="md:col-span-5 flex flex-col items-center justify-center">
             <div class="relative w-40 h-40 sm:w-48 sm:h-48 flex items-center justify-center">
@@ -593,7 +380,6 @@
           </div>
           <div id="categoryBreakdownContainer" class="md:col-span-7 space-y-3 w-full"></div>
         </div>
-
         <div class="space-y-3">
           <div class="flex items-center justify-between text-xs font-bold text-slate-700 px-1">
             <span>ریز هزینه‌ها</span>
@@ -626,15 +412,12 @@
             </button>
           </div>
         </div>
-
         <div id="calendarLegend" class="flex flex-wrap items-center gap-2 text-[10px] text-slate-500 pb-2 border-b border-slate-100"></div>
-
         <div class="grid grid-cols-7 gap-1 text-center text-[11px] font-bold text-slate-400 pb-1">
           <div>ش</div><div>ی</div><div>د</div><div>س</div><div>چ</div><div>پ</div>
           <div class="text-rose-500 font-black">ج</div>
         </div>
         <div id="calendarGrid" class="grid grid-cols-7 gap-1.5 sm:gap-2"></div>
-
         <div id="selectedDayCard" class="p-4 sm:p-5 rounded-3xl bg-rose-50/70 border border-rose-100 space-y-3">
           <div class="flex items-center justify-between gap-2">
             <span id="selectedDayLabel" class="text-xs font-extrabold text-slate-800">برنامه‌های روز</span>
@@ -660,25 +443,22 @@
               <img src="https://cdn.jsdelivr.net/gh/microsoft/fluentui-emoji@main/assets/Clapper%20board/3D/clapper_board_3d.png" class="w-full h-full object-contain" alt="" />
             </div>
             <div>
-              <h3 class="font-bold text-slate-900 text-base">فیلم، سریال و انیمه</h3>
-              <p class="text-xs text-slate-400">با پوستر خودکار (TMDB / Jikan)</p>
+              <h3 class="font-bold text-slate-900 text-base">فیلم، سریال، انیمه و انیمیشن</h3>
+              <p class="text-xs text-slate-400">سینمای دونفره با پوستر خودکار</p>
             </div>
           </div>
           <button onclick="openWatchlistModal()" class="w-10 h-10 rounded-2xl bg-purple-600 text-white flex items-center justify-center shadow-md flex-shrink-0">
             <i class="fa-solid fa-plus text-sm"></i>
           </button>
         </div>
-
         <div class="space-y-2">
           <p class="text-[11px] font-bold text-slate-500 px-1">وضعیت:</p>
           <div id="watchStatusFilters" class="flex items-center gap-2 overflow-x-auto hide-scrollbar pb-1 -mx-1 px-1"></div>
         </div>
-
         <div class="space-y-2">
           <p class="text-[11px] font-bold text-slate-500 px-1">نوع:</p>
           <div id="watchTypeFilters" class="flex items-center gap-2 overflow-x-auto hide-scrollbar pb-1 -mx-1 px-1"></div>
         </div>
-
         <div id="watchlistContainer" class="grid grid-cols-1 gap-3 max-h-[560px] overflow-y-auto pr-1 hide-scrollbar"></div>
       </div>
     </section>
@@ -699,12 +479,10 @@
             <i class="fa-solid fa-plus text-sm"></i>
           </button>
         </div>
-
         <div class="space-y-2">
           <p class="text-[11px] font-bold text-slate-500 px-1">وضعیت:</p>
           <div id="gameStatusFilters" class="flex items-center gap-2 overflow-x-auto hide-scrollbar pb-1 -mx-1 px-1"></div>
         </div>
-
         <div id="gameListContainer" class="grid grid-cols-1 gap-3 max-h-[560px] overflow-y-auto pr-1 hide-scrollbar"></div>
       </div>
     </section>
@@ -719,18 +497,15 @@
             <h3 class="font-bold text-slate-900 text-base">چرخونه قرارهای عاشقانه</h3>
             <p class="text-xs text-slate-400">شماره انتخاب‌شده پایین نمایش داده می‌شه</p>
           </div>
-
           <div class="relative w-64 h-64 sm:w-72 sm:h-72 mx-auto flex items-center justify-center my-3">
             <canvas id="rouletteCanvas" width="600" height="600" style="width:100%;height:100%;display:block;"></canvas>
             <div class="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-2 text-rose-600 text-3xl z-10 pointer-events-none">
               <i class="fa-solid fa-caret-down"></i>
             </div>
           </div>
-
           <div id="rouletteDisplay" class="p-3.5 rounded-2xl bg-slate-50 border border-slate-200/70 font-bold text-slate-700 min-h-[72px] flex items-center justify-center text-xs sm:text-sm">
             روی دکمه بزن تا چرخونه بچرخه
           </div>
-
           <div class="flex items-center gap-2">
             <button onclick="spinRouletteWheel()" id="spinWheelBtn" class="flex-1 py-3 rounded-2xl bg-gradient-to-r from-rose-400 to-rose-600 text-white font-bold text-xs shadow-lg disabled:opacity-60 flex items-center justify-center gap-2">
               <img src="https://cdn.jsdelivr.net/gh/microsoft/fluentui-emoji@main/assets/Ferris%20wheel/3D/ferris_wheel_3d.png" class="w-4 h-4" alt="" />
@@ -740,7 +515,6 @@
               <i class="fa-solid fa-plus"></i> ایده
             </button>
           </div>
-
           <div class="text-right pt-2 border-t border-slate-100">
             <button onclick="toggleIdeasDrawer()" class="text-[11px] font-bold text-rose-500 flex items-center gap-1">
               <span>مدیریت ایده‌ها</span>
@@ -749,7 +523,6 @@
             <div id="ideasDrawer" class="hidden mt-2 space-y-1.5 max-h-40 overflow-y-auto hide-scrollbar"></div>
           </div>
         </div>
-
         <div class="squircle-card clay-surface p-4 sm:p-6 shadow-lg space-y-4">
           <div class="flex items-center justify-between">
             <div class="flex items-center gap-3">
@@ -787,12 +560,11 @@
           </button>
         </div>
 
-        <!-- دفتر خاطرات روزانه -->
         <div class="pt-3 border-t border-slate-100 space-y-3">
           <div class="flex items-center justify-between">
             <h4 class="text-sm font-black text-slate-800 flex items-center gap-2">
               <img src="https://cdn.jsdelivr.net/gh/microsoft/fluentui-emoji@main/assets/Bookmark%20tabs/3D/bookmark_tabs_3d.png" class="w-5 h-5" alt="" />
-              <span>دفتر خاطرات امروز</span>
+              <span>دفتر خاطرات</span>
             </h4>
             <button onclick="openDiaryPostModal()" class="text-[11px] font-bold text-rose-500 hover:text-rose-600 flex items-center gap-1">
               <i class="fa-solid fa-plus text-[10px]"></i> خاطره جدید
@@ -801,7 +573,6 @@
           <div id="diaryContainer" class="space-y-2"></div>
         </div>
 
-        <!-- دیوار نامه‌ها -->
         <div class="pt-3 border-t border-slate-100 space-y-3">
           <h4 class="text-sm font-black text-slate-800 flex items-center gap-2">
             <img src="https://cdn.jsdelivr.net/gh/microsoft/fluentui-emoji@main/assets/Love%20letter/3D/love_letter_3d.png" class="w-5 h-5" alt="" />
@@ -867,41 +638,71 @@
     const SUPABASE_KEY = "sb_publishable_b8-BEd1e8CWNkVdVvU4c-Q_Ir-isgoz";
     const ROOM_CODE = "amir-armita-us";
     const ANNIVERSARY_DATE = "2024-10-06";
-    const STATE_VERSION = 12;
-
+    const STATE_VERSION = 13;
     const TMDB_API_KEY = "29fb5c7e087065a22b71f28c6b1db7e8";
 
-    /* ⚠️ این کلید رو بعداً جایگزین کن */
-    const OPENROUTER_TRANSLATE_KEY = "PASTE_YOUR_OPENROUTER_KEY_HERE";
+    function getOpenRouterKey() {
+      try { return localStorage.getItem('twoOfUs_openrouter_key') || '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'; } catch (e) { return ''; }
+    }
+    function getOpenRouterModel() {
+      try { return localStorage.getItem('twoOfUs_openrouter_model') || 'meta-llama/llama-3.3-70b-instruct:free'; } catch (e) { return 'meta-llama/llama-3.3-70b-instruct:free'; }
+    }
+    function getReminderEnabled() {
+      try { return localStorage.getItem('twoOfUs_reminder_enabled') !== 'false'; } catch (e) { return true; }
+    }
 
     let supabaseClient = null;
     try { supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY); } catch (e) {}
 
-    /* ===== آیکون‌های تقویم — عکس‌های خودت ===== */
-    const ICONS_CAL = {
-      birthday: 'icons/birthday.png',
-      anniversary: 'icons/anniversary.png',
-      celebration: 'icons/celebration.png',
-      travel: 'icons/travel.png',
-      work: 'icons/work.png',
-      rest: 'icons/rest.png'
+    /* Aliases for popular anime/movies — حل مشکل ترجمه */
+    const ALIAS_MAP = {
+      'موشوکو تنسی': 'Mushoku Tensei','موشوکو': 'Mushoku Tensei','تناسخ یک بیکار': 'Mushoku Tensei',
+      'اتک آن تایتان': 'Attack on Titan','حمله به تایتان': 'Attack on Titan','شینگکی نو کیوجین': 'Attack on Titan',
+      'ناروتو': 'Naruto','ناروتو شیپودن': 'Naruto Shippuden','وان پیس': 'One Piece','وانپیس': 'One Piece',
+      'دیمن اسلیر': 'Demon Slayer','شیطان کش': 'Demon Slayer','کیمتسو نو یایبا': 'Demon Slayer',
+      'جوجوتسو کایزن': 'Jujutsu Kaisen','وان پانچ من': 'One Punch Man','توکیو غول': 'Tokyo Ghoul',
+      'دث نوت': 'Death Note','فول متال الکمیست': 'Fullmetal Alchemist','استینس گیت': 'Steins Gate',
+      'هانتر هانتر': 'Hunter x Hunter','مای هیرو آکادمیا': 'My Hero Academia','بلیچ': 'Bleach',
+      'فیری تیل': 'Fairy Tail','سورد آرت آنلاین': 'Sword Art Online','بلک کلوور': 'Black Clover',
+      'کاگویا ساما': 'Kaguya-sama','کودبان': 'Kaguya-sama','هایکیو': 'Haikyuu',
+      'کوروکو نو باسکِت': 'Kuroko no Basket','دراگون بال': 'Dragon Ball','دراگون بال زد': 'Dragon Ball Z',
+      'پوکمون': 'Pokemon','دیجیمون': 'Digimon','سایکی کوسو': 'Saiki Kusuo',
+      'تاتامی گالاکسی': 'Tatami Galaxy','کاوبوی بیباپ': 'Cowboy Bebop','سامورایی چمپلو': 'Samurai Champloo',
+      'آکیرا': 'Akira','گوست این د شل': 'Ghost in the Shell','اینجل بیتس': 'Angel Beats',
+      'کِلاناد': 'Clannad','یور لی': 'Your Lie in April','بوکو نو هیرو': 'My Hero Academia',
+      'هامنو': 'Hyouka','گینتاما': 'Gintama','موبین سایکو': 'Mob Psycho','وانپیس فیلم': 'One Piece Film',
+      'توی استوری': 'Toy Story','فروزن': 'Frozen','شهر اشغالی': 'Zootopia','کوکو': 'Coco',
+      'روح': 'Soul','لوکا': 'Luca','تنها در خانه': 'Home Alone','هری پاتر': 'Harry Potter',
+      'ارباب حلقه ها': 'Lord of the Rings','ماتریکس': 'The Matrix','اینتراستلار': 'Interstellar',
+      'شوالیه تاریکی': 'The Dark Knight','پارازیت': 'Parasite','جوکر': 'Joker','تلقین': 'Inception',
+      'گلدن بورن': 'Golden Boy','چرنوبیل': 'Chernobyl','برکینگ بد': 'Breaking Bad','فرندز': 'Friends',
+      'گیم آو ترونز': 'Game of Thrones','شرلوک': 'Sherlock','منچستر بای د سی': 'Manchester by the Sea',
+      'کازابلانکا': 'Casablanca','پدرخوانده': 'The Godfather','شهر خدا': 'City of God',
+      'الدن رینگ': 'Elden Ring','لست آو آس': 'The Last of Us','رد دد ریدمپشن': 'Red Dead Redemption',
+      'جی تی ای': 'Grand Theft Auto','فورتنایت': 'Fortnite','ماینکرفت': 'Minecraft'
     };
+
+    function normalizeAlias(str) {
+      if (!str) return '';
+      const s = str.trim().toLowerCase().replace(/[يى]/g, 'ی').replace(/[ك]/g, 'ک').replace(/[\u200c]/g, '').replace(/\s+/g, ' ');
+      for (const [fa, en] of Object.entries(ALIAS_MAP)) {
+        const faNorm = fa.toLowerCase().replace(/[يى]/g, 'ی').replace(/[ك]/g, 'ک').replace(/[\u200c]/g, '').replace(/\s+/g, ' ');
+        if (s === faNorm || s.includes(faNorm) || faNorm.includes(s)) return en;
+      }
+      return '';
+    }
+
+    /* ===== آیکون‌های تقویم ===== */
+    const ICONS_CAL = { birthday:'icons/birthday.png', anniversary:'icons/anniversary.png', celebration:'icons/celebration.png', travel:'icons/travel.png', work:'icons/work.png', rest:'icons/rest.png' };
     const ICONS_CAL_FALLBACK = {
-      birthday: 'https://cdn.jsdelivr.net/gh/microsoft/fluentui-emoji@main/assets/Birthday%20cake/3D/birthday_cake_3d.png',
-      anniversary: 'https://cdn.jsdelivr.net/gh/microsoft/fluentui-emoji@main/assets/Red%20heart/3D/red_heart_3d.png',
-      celebration: 'https://cdn.jsdelivr.net/gh/microsoft/fluentui-emoji@main/assets/Balloon/3D/balloon_3d.png',
-      travel: 'https://cdn.jsdelivr.net/gh/microsoft/fluentui-emoji@main/assets/Airplane/3D/airplane_3d.png',
-      work: 'https://cdn.jsdelivr.net/gh/microsoft/fluentui-emoji@main/assets/Laptop/3D/laptop_3d.png',
-      rest: 'https://cdn.jsdelivr.net/gh/microsoft/fluentui-emoji@main/assets/Crescent%20moon/3D/crescent_moon_3d.png'
+      birthday:'https://cdn.jsdelivr.net/gh/microsoft/fluentui-emoji@main/assets/Birthday%20cake/3D/birthday_cake_3d.png',
+      anniversary:'https://cdn.jsdelivr.net/gh/microsoft/fluentui-emoji@main/assets/Red%20heart/3D/red_heart_3d.png',
+      celebration:'https://cdn.jsdelivr.net/gh/microsoft/fluentui-emoji@main/assets/Balloon/3D/balloon_3d.png',
+      travel:'https://cdn.jsdelivr.net/gh/microsoft/fluentui-emoji@main/assets/Airplane/3D/airplane_3d.png',
+      work:'https://cdn.jsdelivr.net/gh/microsoft/fluentui-emoji@main/assets/Laptop/3D/laptop_3d.png',
+      rest:'https://cdn.jsdelivr.net/gh/microsoft/fluentui-emoji@main/assets/Crescent%20moon/3D/crescent_moon_3d.png'
     };
-    const CAL_ICON_STYLE = {
-      birthday:    { zoom: 122 },
-      anniversary: { zoom: 118 },
-      celebration: { zoom: 124 },
-      travel:      { zoom: 122 },
-      work:        { zoom: 120 },
-      rest:        { zoom: 118 }
-    };
+    const CAL_ICON_STYLE = { birthday:{zoom:122}, anniversary:{zoom:118}, celebration:{zoom:124}, travel:{zoom:122}, work:{zoom:120}, rest:{zoom:118} };
 
     window.addEventListener('error', function (e) {
       const t = e.target;
@@ -912,55 +713,39 @@
       }
     }, true);
 
-    /* ===== آیکون‌های Fluent 3D ===== */
     const BASE_ICON = 'https://cdn.jsdelivr.net/gh/microsoft/fluentui-emoji@main/assets/';
     const ICONS_3D = {
-      heart: BASE_ICON + 'Red%20heart/3D/red_heart_3d.png',
-      sparkles: BASE_ICON + 'Sparkles/3D/sparkles_3d.png',
-      kiss: BASE_ICON + 'Face%20blowing%20a%20kiss/3D/face_blowing_a_kiss_3d.png',
-      cart: BASE_ICON + 'Shopping%20cart/3D/shopping_cart_3d.png',
-      broom: BASE_ICON + 'Broom/3D/broom_3d.png',
-      money: BASE_ICON + 'Money%20bag/3D/money_bag_3d.png',
-      calendar: BASE_ICON + 'Spiral%20calendar/3D/spiral_calendar_3d.png',
-      clapper: BASE_ICON + 'Clapper%20board/3D/clapper_board_3d.png',
-      dice: BASE_ICON + 'Game%20die/3D/game_die_3d.png',
-      trophy: BASE_ICON + 'Trophy/3D/trophy_3d.png',
-      letter: BASE_ICON + 'Love%20letter/3D/love_letter_3d.png',
-      ferris: BASE_ICON + 'Ferris%20wheel/3D/ferris_wheel_3d.png',
-      party: BASE_ICON + 'Party%20popper/3D/party_popper_3d.png',
-      coffee: BASE_ICON + 'Hot%20beverage/3D/hot_beverage_3d.png',
-      tv: BASE_ICON + 'Television/3D/television_3d.png',
-      videoGame: BASE_ICON + 'Video%20game/3D/video_game_3d.png',
-      blossom: BASE_ICON + 'Cherry%20blossom/3D/cherry_blossom_3d.png',
-      checkBtn: BASE_ICON + 'Check%20mark%20button/3D/check_mark_button_3d.png',
-      hourglass: BASE_ICON + 'Hourglass%20not%20done/3D/hourglass_not_done_3d.png',
-      star: BASE_ICON + 'Star/3D/star_3d.png',
-      handshake: BASE_ICON + 'Handshake/Default/3D/handshake_3d_default.png',
-      manTech: BASE_ICON + 'Technologist/Light/3D/technologist_3d_light.png',
-      womanTech: BASE_ICON + 'Woman%20technologist/Light/3D/woman_technologist_3d_light.png',
-      pizza: BASE_ICON + 'Pizza/3D/pizza_3d.png',
-      smile: BASE_ICON + 'Smiling%20face%20with%20smiling%20eyes/3D/smiling_face_with_smiling_eyes_3d.png',
-      love: BASE_ICON + 'Smiling%20face%20with%20heart-eyes/3D/smiling_face_with_heart-eyes_3d.png',
-      sleepy: BASE_ICON + 'Sleeping%20face/3D/sleeping_face_3d.png',
-      pleading: BASE_ICON + 'Pleading%20face/3D/pleading_face_3d.png',
-      play: BASE_ICON + 'Play%20button/3D/play_button_3d.png',
-      eyes: BASE_ICON + 'Eyes/3D/eyes_3d.png',
-      alarm: BASE_ICON + 'Alarm%20clock/3D/alarm_clock_3d.png',
-      gift: BASE_ICON + 'Wrapped%20gift/3D/wrapped_gift_3d.png',
-      bookmark: BASE_ICON + 'Bookmark%20tabs/3D/bookmark_tabs_3d.png',
-      camera: BASE_ICON + 'Camera/3D/camera_3d.png',
-      crayon: BASE_ICON + 'Crayon/3D/crayon_3d.png',
-      thought: BASE_ICON + 'Thought%20balloon/3D/thought_balloon_3d.png'
+      heart:BASE_ICON+'Red%20heart/3D/red_heart_3d.png', sparkles:BASE_ICON+'Sparkles/3D/sparkles_3d.png',
+      kiss:BASE_ICON+'Face%20blowing%20a%20kiss/3D/face_blowing_a_kiss_3d.png',
+      cart:BASE_ICON+'Shopping%20cart/3D/shopping_cart_3d.png', broom:BASE_ICON+'Broom/3D/broom_3d.png',
+      money:BASE_ICON+'Money%20bag/3D/money_bag_3d.png', calendar:BASE_ICON+'Spiral%20calendar/3D/spiral_calendar_3d.png',
+      clapper:BASE_ICON+'Clapper%20board/3D/clapper_board_3d.png', dice:BASE_ICON+'Game%20die/3D/game_die_3d.png',
+      trophy:BASE_ICON+'Trophy/3D/trophy_3d.png', letter:BASE_ICON+'Love%20letter/3D/love_letter_3d.png',
+      ferris:BASE_ICON+'Ferris%20wheel/3D/ferris_wheel_3d.png', party:BASE_ICON+'Party%20popper/3D/party_popper_3d.png',
+      coffee:BASE_ICON+'Hot%20beverage/3D/hot_beverage_3d.png', tv:BASE_ICON+'Television/3D/television_3d.png',
+      videoGame:BASE_ICON+'Video%20game/3D/video_game_3d.png', blossom:BASE_ICON+'Cherry%20blossom/3D/cherry_blossom_3d.png',
+      checkBtn:BASE_ICON+'Check%20mark%20button/3D/check_mark_button_3d.png',
+      hourglass:BASE_ICON+'Hourglass%20not%20done/3D/hourglass_not_done_3d.png',
+      star:BASE_ICON+'Star/3D/star_3d.png', handshake:BASE_ICON+'Handshake/Default/3D/handshake_3d_default.png',
+      manTech:BASE_ICON+'Technologist/Light/3D/technologist_3d_light.png',
+      womanTech:BASE_ICON+'Woman%20technologist/Light/3D/woman_technologist_3d_light.png',
+      pizza:BASE_ICON+'Pizza/3D/pizza_3d.png',
+      smile:BASE_ICON+'Smiling%20face%20with%20smiling%20eyes/3D/smiling_face_with_smiling_eyes_3d.png',
+      love:BASE_ICON+'Smiling%20face%20with%20heart-eyes/3D/smiling_face_with_heart-eyes_3d.png',
+      sleepy:BASE_ICON+'Sleeping%20face/3D/sleeping_face_3d.png',
+      pleading:BASE_ICON+'Pleading%20face/3D/pleading_face_3d.png',
+      play:BASE_ICON+'Play%20button/3D/play_button_3d.png', eyes:BASE_ICON+'Eyes/3D/eyes_3d.png',
+      alarm:BASE_ICON+'Alarm%20clock/3D/alarm_clock_3d.png',
+      gift:BASE_ICON+'Wrapped%20gift/3D/wrapped_gift_3d.png',
+      bookmark:BASE_ICON+'Bookmark%20tabs/3D/bookmark_tabs_3d.png',
+      camera:BASE_ICON+'Camera/3D/camera_3d.png',
+      palette:BASE_ICON+'Artist%20palette/3D/artist_palette_3d.png'
     };
 
-    /* ===== صدا ===== */
     let isSoundEnabled = (localStorage.getItem('twoOfUs_sound') !== 'false');
     let audioCtx = null;
     function getAudioContext() {
-      if (!audioCtx) {
-        const AC = window.AudioContext || window.webkitAudioContext;
-        if (AC) audioCtx = new AC();
-      }
+      if (!audioCtx) { const AC = window.AudioContext || window.webkitAudioContext; if (AC) audioCtx = new AC(); }
       if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
       return audioCtx;
     }
@@ -968,20 +753,15 @@
       isSoundEnabled = !isSoundEnabled;
       localStorage.setItem('twoOfUs_sound', isSoundEnabled);
       const btn = document.getElementById('soundToggleBtn');
-      btn.innerHTML = isSoundEnabled
-        ? '<i class="fa-solid fa-volume-high text-xs"></i>'
-        : '<i class="fa-solid fa-volume-xmark text-xs text-rose-500"></i>';
+      btn.innerHTML = isSoundEnabled ? '<i class="fa-solid fa-volume-high text-xs"></i>' : '<i class="fa-solid fa-volume-xmark text-xs text-rose-500"></i>';
       if (isSoundEnabled) playTone(600, 'sine', 0.1);
     }
     function playTone(freq, type = 'sine', duration = 0.15, volume = 0.12) {
       if (!isSoundEnabled) return;
       try {
-        const ctx = getAudioContext();
-        if (!ctx) return;
-        const osc = ctx.createOscillator();
-        const gain = ctx.createGain();
-        osc.type = type;
-        osc.frequency.setValueAtTime(freq, ctx.currentTime);
+        const ctx = getAudioContext(); if (!ctx) return;
+        const osc = ctx.createOscillator(), gain = ctx.createGain();
+        osc.type = type; osc.frequency.setValueAtTime(freq, ctx.currentTime);
         gain.gain.setValueAtTime(volume, ctx.currentTime);
         gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + duration);
         osc.connect(gain); gain.connect(ctx.destination);
@@ -995,7 +775,7 @@
       setTimeout(() => playTone(783.99, 'sine', 0.25), 200);
     }
 
-    /* ===== اعداد فارسی — همه‌جا استفاده کن! ===== */
+    /* ===== اعداد فارسی ===== */
     function toFa(input) {
       if (input === null || input === undefined) return '';
       return String(input).replace(/\d/g, d => '۰۱۲۳۴۵۶۷۸۹'[parseInt(d, 10)]);
@@ -1005,126 +785,111 @@
       return Number(num).toLocaleString('fa-IR');
     }
 
-    /* ===== تعطیلات رسمی ===== */
     const EMBEDDED_HOLIDAYS = {
-      "01-01": "نوروز (تعطیل رسمی)",
-      "01-02": "عید نوروز (تعطیل رسمی)",
-      "01-03": "عید نوروز (تعطیل رسمی)",
-      "01-04": "عید نوروز (تعطیل رسمی)",
-      "01-12": "روز جمهوری اسلامی (تعطیل رسمی)",
-      "01-13": "روز طبیعت (تعطیل رسمی)",
-      "03-14": "رحلت امام خمینی (تعطیل رسمی)",
-      "03-15": "قیام ۱۵ خرداد (تعطیل رسمی)",
-      "11-22": "پیروزی انقلاب (تعطیل رسمی)",
-      "12-29": "ملی شدن صنعت نفت (تعطیل رسمی)"
+      "01-01":"نوروز (تعطیل رسمی)","01-02":"عید نوروز (تعطیل رسمی)","01-03":"عید نوروز (تعطیل رسمی)",
+      "01-04":"عید نوروز (تعطیل رسمی)","01-12":"روز جمهوری اسلامی (تعطیل رسمی)","01-13":"روز طبیعت (تعطیل رسمی)",
+      "03-14":"رحلت امام خمینی (تعطیل رسمی)","03-15":"قیام ۱۵ خرداد (تعطیل رسمی)",
+      "11-22":"پیروزی انقلاب (تعطیل رسمی)","12-29":"ملی شدن صنعت نفت (تعطیل رسمی)"
     };
-
     const GIFT_EVENTS = {
-      "11-25": { title: 'ولنتاین', icon: 'anniversary' },
-      "11-29": { title: 'سپندارمذگان', icon: 'anniversary' },
-      "09-30": { title: 'شب یلدا', icon: 'celebration' }
+      "11-25":{title:'ولنتاین',icon:'anniversary'},
+      "11-29":{title:'سپندارمذگان',icon:'anniversary'},
+      "09-30":{title:'شب یلدا',icon:'celebration'}
     };
-
     const DEFAULT_PERSONAL_DATES = [
-      { id: 'pd-birth-amir',   title: 'تولد امیرمحمد', md: '10-24', year: 1385, icon: 'birthday' },
-      { id: 'pd-birth-armita', title: 'تولد آرمیتا',   md: '06-14', year: 1386, icon: 'birthday' },
-      { id: 'pd-meet',         title: 'سالگرد آشنایی', md: '07-15', year: 1403, icon: 'anniversary' },
-      { id: 'pd-bleh',         title: 'بله‌برون',      md: '11-02', year: 1404, icon: 'celebration' },
-      { id: 'pd-mahram',       title: 'محرم شدن',      md: '01-04', year: 1405, icon: 'anniversary' },
-      { id: 'pd-first',        title: 'اولین بار',     md: '05-19', year: 1405, icon: 'anniversary' },
-      { id: 'pd-aghd',         title: 'عقد',           md: '06-29', year: 1405, icon: 'celebration' }
+      { id:'pd-birth-amir', title:'تولد امیرمحمد', md:'10-24', year:1385, icon:'birthday' },
+      { id:'pd-birth-armita', title:'تولد آرمیتا', md:'06-14', year:1386, icon:'birthday' },
+      { id:'pd-meet', title:'سالگرد آشنایی', md:'07-15', year:1403, icon:'anniversary' },
+      { id:'pd-bleh', title:'بله‌برون', md:'11-02', year:1404, icon:'celebration' },
+      { id:'pd-mahram', title:'محرم شدن', md:'01-04', year:1405, icon:'anniversary' },
+      { id:'pd-first', title:'اولین بار', md:'05-19', year:1405, icon:'anniversary' },
+      { id:'pd-aghd', title:'عقد', md:'06-29', year:1405, icon:'celebration' }
     ];
 
-    /* ===== تبدیل تاریخ ===== */
     function gregorianToJalali(gy, gm, gd) {
       const g_d_m = [0,31,59,90,120,151,181,212,243,273,304,334];
       let gy2 = (gm > 2) ? (gy + 1) : gy;
-      let days = 355666 + (365 * gy) + Math.floor((gy2 + 3) / 4) - Math.floor((gy2 + 99) / 100) + Math.floor((gy2 + 399) / 400) + gd + g_d_m[gm - 1];
-      let jy = -1595 + (33 * Math.floor(days / 12053));
-      days %= 12053;
-      jy += 4 * Math.floor(days / 1461);
-      days %= 1461;
-      if (days > 365) { jy += Math.floor((days - 1) / 365); days = (days - 1) % 365; }
+      let days = 355666 + (365*gy) + Math.floor((gy2+3)/4) - Math.floor((gy2+99)/100) + Math.floor((gy2+399)/400) + gd + g_d_m[gm-1];
+      let jy = -1595 + (33 * Math.floor(days/12053)); days %= 12053;
+      jy += 4 * Math.floor(days/1461); days %= 1461;
+      if (days > 365) { jy += Math.floor((days-1)/365); days = (days-1)%365; }
       let jm, jd;
-      if (days < 186) { jm = 1 + Math.floor(days / 31); jd = 1 + (days % 31); }
-      else { jm = 7 + Math.floor((days - 186) / 30); jd = 1 + ((days - 186) % 30); }
+      if (days < 186) { jm = 1 + Math.floor(days/31); jd = 1 + (days%31); }
+      else { jm = 7 + Math.floor((days-186)/30); jd = 1 + ((days-186)%30); }
       return [jy, jm, jd];
     }
     function jalaliToGregorian(jy, jm, jd) {
       let gy = (jy <= 979) ? 621 : 1600;
       jy -= (jy <= 979) ? 0 : 979;
-      let days = (365 * jy) + ((Math.floor(jy / 33)) * 8) + (Math.floor(((jy % 33) + 3) / 4)) + 78 + jd + ((jm < 7) ? (jm - 1) * 31 : ((jm - 7) * 30) + 186);
-      gy += 400 * Math.floor(days / 146097); days %= 146097;
-      if (days > 36524) { gy += 100 * Math.floor(--days / 36524); days %= 36524; if (days >= 365) days++; }
-      gy += 4 * Math.floor(days / 1461); days %= 1461;
-      if (days > 365) { gy += Math.floor((days - 1) / 365); days = (days - 1) % 365; }
+      let days = (365*jy) + ((Math.floor(jy/33))*8) + (Math.floor(((jy%33)+3)/4)) + 78 + jd + ((jm < 7) ? (jm-1)*31 : ((jm-7)*30)+186);
+      gy += 400 * Math.floor(days/146097); days %= 146097;
+      if (days > 36524) { gy += 100 * Math.floor(--days/36524); days %= 36524; if (days >= 365) days++; }
+      gy += 4 * Math.floor(days/1461); days %= 1461;
+      if (days > 365) { gy += Math.floor((days-1)/365); days = (days-1)%365; }
       const g_d_m = [0,31,59,90,120,151,181,212,243,273,304,334];
       let gm = 0;
-      while (gm < 12 && days >= g_d_m[gm] + (gm === 1 && ((gy % 4 === 0 && gy % 100 !== 0) || (gy % 400 === 0)) ? 1 : 0)) gm++;
-      let gd = days - g_d_m[gm - 1] + 1;
+      while (gm < 12 && days >= g_d_m[gm] + (gm === 1 && ((gy%4===0 && gy%100!==0) || (gy%400===0)) ? 1 : 0)) gm++;
+      let gd = days - g_d_m[gm-1] + 1;
       return [gy, gm, gd];
     }
     const JALALI_MONTHS = ["فروردین","اردیبهشت","خرداد","تیر","مرداد","شهریور","مهر","آبان","آذر","دی","بهمن","اسفند"];
     function getNowJalaliString() {
       const now = new Date();
-      const [jy, jm, jd] = gregorianToJalali(now.getFullYear(), now.getMonth() + 1, now.getDate());
-      const hours = String(now.getHours()).padStart(2, '0');
-      const mins = String(now.getMinutes()).padStart(2, '0');
-      return { jy, jm, jd, dateStr: `${jd} ${JALALI_MONTHS[jm - 1]} ${jy}`, timeStr: `${hours}:${mins}`, fullTimestamp: `${jd} ${JALALI_MONTHS[jm - 1]} - ساعت ${hours}:${mins}` };
+      const [jy, jm, jd] = gregorianToJalali(now.getFullYear(), now.getMonth()+1, now.getDate());
+      const hours = String(now.getHours()).padStart(2,'0');
+      const mins = String(now.getMinutes()).padStart(2,'0');
+      return { jy, jm, jd, dateStr: `${jd} ${JALALI_MONTHS[jm-1]} ${jy}`, timeStr: `${hours}:${mins}`, fullTimestamp: `${jd} ${JALALI_MONTHS[jm-1]} - ساعت ${hours}:${mins}` };
     }
     function getTodayKey() {
       const now = new Date();
-      const [jy, jm, jd] = gregorianToJalali(now.getFullYear(), now.getMonth() + 1, now.getDate());
-      return `${jy}-${String(jm).padStart(2, '0')}-${String(jd).padStart(2, '0')}`;
+      const [jy, jm, jd] = gregorianToJalali(now.getFullYear(), now.getMonth()+1, now.getDate());
+      return `${jy}-${String(jm).padStart(2,'0')}-${String(jd).padStart(2,'0')}`;
     }
     function standardizeJalaliDateKey(str) {
       if (!str) return '';
       const s = String(str).replace(/[۰-۹]/g, c => String(c.charCodeAt(0) - 1776));
       const parts = s.split(/[\/\-\.]/).map(p => p.trim()).filter(Boolean);
       if (parts.length !== 3) return '';
-      return `${parts[0]}-${String(parts[1]).padStart(2, '0')}-${String(parts[2]).padStart(2, '0')}`;
+      return `${parts[0]}-${String(parts[1]).padStart(2,'0')}-${String(parts[2]).padStart(2,'0')}`;
     }
 
-    /* ===== دسته‌بندی‌ها ===== */
     const BUDGET_CATEGORIES = [
-      { id: 'supermarket', name: 'سوپرمارکت', icon: 'fa-basket-shopping', color: '#f43f6e' },
-      { id: 'home', name: 'خانه و قبوض', icon: 'fa-house', color: '#8b5cf6' },
-      { id: 'fun', name: 'تفریح و رستوران', icon: 'fa-mug-hot', color: '#f59e0b' },
-      { id: 'car', name: 'خودرو', icon: 'fa-car', color: '#06b6d4' },
-      { id: 'health', name: 'سلامت', icon: 'fa-heart-pulse', color: '#10b981' },
-      { id: 'other', name: 'سایر', icon: 'fa-bag-shopping', color: '#64748b' }
+      { id:'supermarket', name:'سوپرمارکت', icon:'fa-basket-shopping', color:'#f43f6e' },
+      { id:'home', name:'خانه و قبوض', icon:'fa-house', color:'#8b5cf6' },
+      { id:'fun', name:'تفریح و رستوران', icon:'fa-mug-hot', color:'#f59e0b' },
+      { id:'car', name:'خودرو', icon:'fa-car', color:'#06b6d4' },
+      { id:'health', name:'سلامت', icon:'fa-heart-pulse', color:'#10b981' },
+      { id:'other', name:'سایر', icon:'fa-bag-shopping', color:'#64748b' }
     ];
     const EVENT_CATEGORIES = [
-      { id: 'anniversary', name: 'مناسبت دونفره', dot: 'bg-rose-500' },
-      { id: 'medical', name: 'پزشکی', dot: 'bg-emerald-500' },
-      { id: 'finance', name: 'مالی', dot: 'bg-amber-500' },
-      { id: 'trip', name: 'سفر', dot: 'bg-cyan-500' }
+      { id:'anniversary', name:'مناسبت دونفره', dot:'bg-rose-500' },
+      { id:'medical', name:'پزشکی', dot:'bg-emerald-500' },
+      { id:'finance', name:'مالی', dot:'bg-amber-500' },
+      { id:'trip', name:'سفر', dot:'bg-cyan-500' }
     ];
     const WATCH_STATUSES = [
-      { id: 'queued', name: 'خواهم دید', icon: 'hourglass', color: '#f59e0b' },
-      { id: 'watching', name: 'در حال دیدن', icon: 'play', color: '#06b6d4' },
-      { id: 'watched', name: 'دیده شد', icon: 'checkBtn', color: '#10b981' }
+      { id:'queued', name:'خواهم دید', icon:'hourglass', color:'#f59e0b' },
+      { id:'watching', name:'در حال دیدن', icon:'play', color:'#06b6d4' },
+      { id:'watched', name:'دیده شد', icon:'checkBtn', color:'#10b981' }
     ];
+    /* === ۴ نوع === */
     const WATCH_TYPES = [
-      { id: 'movie', name: 'فیلم', icon: 'clapper' },
-      { id: 'series', name: 'سریال', icon: 'tv' },
-      { id: 'anime', name: 'انیمه', icon: 'blossom' }
+      { id:'movie', name:'فیلم', icon:'clapper' },
+      { id:'series', name:'سریال', icon:'tv' },
+      { id:'anime', name:'انیمه', icon:'blossom' },
+      { id:'animation', name:'انیمیشن', icon:'palette' }
     ];
     const GAME_STATUSES = [
-      { id: 'queued', name: 'خواهم بازی کرد', icon: 'hourglass', color: '#f59e0b' },
-      { id: 'playing', name: 'در حال بازی', icon: 'play', color: '#06b6d4' },
-      { id: 'played', name: 'تمام شد', icon: 'checkBtn', color: '#10b981' }
+      { id:'queued', name:'خواهم بازی کرد', icon:'hourglass', color:'#f59e0b' },
+      { id:'playing', name:'در حال بازی', icon:'play', color:'#06b6d4' },
+      { id:'played', name:'تمام شد', icon:'checkBtn', color:'#10b981' }
     ];
     const GAME_PLATFORMS = [
-      { id: 'ps5', name: 'PS5' }, { id: 'ps4', name: 'PS4' },
-      { id: 'xbox', name: 'Xbox' }, { id: 'pc', name: 'PC' },
-      { id: 'mobile', name: 'موبایل' }, { id: 'switch', name: 'Nintendo' },
-      { id: 'board', name: 'بردگیم' },
-      { id: 'other', name: 'سایر' }
+      { id:'ps5', name:'PS5' }, { id:'ps4', name:'PS4' }, { id:'xbox', name:'Xbox' },
+      { id:'pc', name:'PC' }, { id:'mobile', name:'موبایل' }, { id:'switch', name:'Nintendo' },
+      { id:'board', name:'بردگیم' }, { id:'other', name:'سایر' }
     ];
-    const MOOD_KEYS = ['love', 'smile', 'sleepy', 'pleading', 'coffee', 'pizza'];
 
-    /* ===== State ===== */
     let currentPersona = 'p1';
     let currentTab = 'tasks';
     let currentChoreFilter = 'all';
@@ -1135,69 +900,34 @@
     let calMonth = 7;
     let selectedCalDay = null;
     let editingDiaryId = null;
+    let _pendingDiaryImage = null;
 
     const DEFAULT_DATE_IDEAS = [
-      "پختن یه غذای جدید که هیچ‌وقت نخوردیم",
-      "رفتن به یه کافه دنج که تاحالا نرفتیم",
-      "یه روز کامل بدون موبایل، فقط ما دوتا",
-      "عکاسی از همدیگه با لباس مورد علاقه",
-      "بازی بردگیم (منچ، شطرنج، تخت نرد)",
-      "تماشای طلوع از یه جای بلند",
-      "شب‌پیمایی توی شهر",
-      "کیک‌پزی دونفره",
-      "یه دورهمی بردگیم با هم",
-      "آشپزی یه دسر خونگی",
-      "نوشتن نامه برای هم و خوندن با صدای بلند",
-      "ساخت پلی‌لیست مشترک",
-      "پیک‌نیک تو پارک نزدیک",
-      "قدم زدن دست تو دست",
-      "دیدن یه فیلم کلاسیک",
-      "خرید گل و چیدن در گلدان",
-      "بازی مافیا دونفره",
-      "بازی حقیقت یا جرات",
-      "ساخت آلبوم عکس مشترک",
-      "کافه‌گردی تو خیابون اصلی شهر",
-      "تماشای غروب پشت‌بام",
-      "خرید از بازار محلی",
-      "رفتن به کتاب‌فروشی و انتخاب کتاب برای هم",
-      "پختن پیتزای خونگی",
-      "یه شام رسمی در خانه",
-      "یه بازی کارتی دونفره",
-      "پختن آش یا سوپ خونگی",
-      "رفتن به یه رستوران که هیچ‌وقت نرفتیم",
-      "ساخت یه آهنگ یا شعر مشترک",
-      "تمرین رقص تو خونه",
-      "پیاده‌روی صبحگاهی و صبحانه بیرون",
-      "خرید میوه و آبمیوه تازه",
-      "تماشای یه مستند جالب",
-      "رفتن به بازار سنتی",
-      "بازی اسم فامیل",
-      "ساختن کاردستی با هم",
-      "ورزش صبحگاهی با هم",
-      "تزئین اتاق برای مناسبت",
-      "ساخت کپسول زمان",
-      "رفتن به شهربازی یا پارک بازی"
+      "پختن یه غذای جدید که هیچ‌وقت نخوردیم","رفتن به یه کافه دنج که تاحالا نرفتیم",
+      "یه روز کامل بدون موبایل، فقط ما دوتا","عکاسی از همدیگه با لباس مورد علاقه",
+      "بازی بردگیم (منچ، شطرنج، تخت نرد)","تماشای طلوع از یه جای بلند",
+      "شب‌پیمایی توی شهر","کیک‌پزی دونفره","یه دورهمی بردگیم با هم","آشپزی یه دسر خونگی",
+      "نوشتن نامه برای هم و خوندن با صدای بلند","ساخت پلی‌لیست مشترک","پیک‌نیک تو پارک نزدیک",
+      "قدم زدن دست تو دست","دیدن یه فیلم کلاسیک","خرید گل و چیدن در گلدان",
+      "بازی مافیا دونفره","بازی حقیقت یا جرات","ساخت آلبوم عکس مشترک",
+      "کافه‌گردی تو خیابون اصلی شهر","تماشای غروب پشت‌بام","خرید از بازار محلی",
+      "رفتن به کتاب‌فروشی و انتخاب کتاب برای هم","پختن پیتزای خونگی","یه شام رسمی در خانه",
+      "یه بازی کارتی دونفره","پختن آش یا سوپ خونگی","رفتن به یه رستوران که هیچ‌وقت نرفتیم",
+      "ساخت یه آهنگ یا شعر مشترک","تمرین رقص تو خونه","پیاده‌روی صبحگاهی و صبحانه بیرون",
+      "خرید میوه و آبمیوه تازه","تماشای یه مستند جالب","رفتن به بازار سنتی",
+      "بازی اسم فامیل","ساختن کاردستی با هم","ورزش صبحگاهی با هم",
+      "تزئین اتاق برای مناسبت","ساخت کپسول زمان","رفتن به شهربازی یا پارک بازی"
     ];
 
     let appState = {
       stateVersion: STATE_VERSION,
-      groceries: [],
-      chores: [],
-      expenses: [],
-      monthlyBudgetLimit: 0,
-      coupleEvents: [],
-      watchList: [],
-      gameList: [],
-      bucketList: [],
-      dateIdeas: [...DEFAULT_DATE_IDEAS],
-      notes: [],
-      diary: [],
-      personalDates: [...DEFAULT_PERSONAL_DATES],
-      customDays: {},
-      moodHistory: {},
+      groceries: [], chores: [], expenses: [], monthlyBudgetLimit: 0,
+      coupleEvents: [], watchList: [], gameList: [], bucketList: [],
+      dateIdeas: [...DEFAULT_DATE_IDEAS], notes: [], diary: [],
+      personalDates: [...DEFAULT_PERSONAL_DATES], customDays: {}, moodHistory: {},
       moods: {
-        p1: { key: 'smile', text: 'عالی و پرانرژی' },
-        p2: { key: 'love', text: 'خوشحال و شاد' }
+        p1: { key:'smile', text:'عالی و پرانرژی' },
+        p2: { key:'love', text:'خوشحال و شاد' }
       }
     };
 
@@ -1211,7 +941,7 @@
       initBgParticles();
       loadLocalState();
       initSupabaseSync();
-      showInAppBannerForUpcomingEvent();
+      setTimeout(() => { if (getReminderEnabled()) showInAppBannerForUpcomingEvent(); }, 1500);
 
       const now = new Date();
       const [jy, jm, jd] = gregorianToJalali(now.getFullYear(), now.getMonth() + 1, now.getDate());
@@ -1253,13 +983,6 @@
       if (!amirBtn || !armitaBtn) return;
       if (p === 'p1') { amirBtn.className = activeCls; armitaBtn.className = idleCls; }
       else { armitaBtn.className = activeCls; amirBtn.className = idleCls; }
-      // آپدیت رنگ بنر در صورت تغییر شخص
-      const banner = document.getElementById('inAppBanner');
-      if (banner) {
-        banner.style.background = p === 'p1'
-          ? 'linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%)'
-          : 'linear-gradient(135deg, #fff 0%, #fff5f7 100%)';
-      }
     }
 
     function initBgParticles() {
@@ -1270,8 +993,7 @@
         const p = document.createElement('div');
         p.className = 'bg-particle';
         const size = 5 + Math.random() * 12;
-        p.style.width = size + 'px';
-        p.style.height = size + 'px';
+        p.style.width = size + 'px'; p.style.height = size + 'px';
         p.style.left = (Math.random() * 100) + '%';
         p.style.bottom = '-30px';
         p.style.animationDuration = (16 + Math.random() * 14) + 's';
@@ -1301,19 +1023,21 @@
     }
 
     /* ============================================================
-       IN-APP BANNER
+       IN-APP BANNER (کوچیک، پایین، قابل بستن)
        ============================================================ */
     function showInAppBanner(title, text, iconKey = 'heart') {
+      if (!getReminderEnabled()) return;
       const banner = document.getElementById('inAppBanner');
       const iconEl = document.getElementById('inAppBannerIcon');
       const titleEl = document.getElementById('inAppBannerTitle');
-      const textEl = document.getElementById('inAppBannerText');
-      if (!banner || !iconEl || !titleEl || !textEl) return;
+      const bodyEl = document.getElementById('inAppBannerBody');
+      if (!banner || !iconEl || !titleEl || !bodyEl) return;
       iconEl.src = ICONS_3D[iconKey] || ICONS_3D.heart;
       titleEl.innerText = title;
-      textEl.innerText = text;
+      bodyEl.innerText = text;
       banner.classList.add('show');
-      setTimeout(hideInAppBanner, 8000);
+      clearTimeout(window.__bannerTimer);
+      window.__bannerTimer = setTimeout(hideInAppBanner, 8000);
     }
 
     function hideInAppBanner() {
@@ -1330,22 +1054,12 @@
 
       for (const p of (appState.personalDates || [])) {
         const thisYearKey = `${now.jy}-${p.md}`;
-        if (thisYearKey === todayKey) {
-          showInAppBanner('امروز!', `${p.title} مبارک`, p.icon || 'birthday');
-          return;
-        }
-        if (thisYearKey === tomorrowKey) {
-          showInAppBanner('یادآور فردا', `${p.title} فردا`, p.icon || 'birthday');
-          return;
-        }
+        if (thisYearKey === todayKey) { showInAppBanner('امروز!', `${p.title} مبارک`, p.icon || 'birthday'); return; }
+        if (thisYearKey === tomorrowKey) { showInAppBanner('یادآور فردا', `${p.title} فردا`, p.icon || 'birthday'); return; }
       }
-      // چک کردن مناسبت‌های کادویی
       for (const [md, info] of Object.entries(GIFT_EVENTS)) {
         const thisYearKey = `${now.jy}-${md}`;
-        if (thisYearKey === todayKey) {
-          showInAppBanner('امروز!', `${info.title} مبارک`, info.icon);
-          return;
-        }
+        if (thisYearKey === todayKey) { showInAppBanner('امروز!', `${info.title} مبارک`, info.icon); return; }
       }
     }
 
@@ -1415,8 +1129,7 @@
         try {
           const parsed = JSON.parse(local);
           appState = { ...appState, ...parsed };
-          if (!Array.isArray(appState.dateIdeas) || appState.dateIdeas.length < 10 ||
-              (parsed.stateVersion || 0) < STATE_VERSION) {
+          if (!Array.isArray(appState.dateIdeas) || appState.dateIdeas.length < 10 || (parsed.stateVersion || 0) < STATE_VERSION) {
             appState.dateIdeas = [...DEFAULT_DATE_IDEAS];
           }
           if (Array.isArray(appState.watchList)) {
@@ -1425,7 +1138,10 @@
               const st = (w.status === 'watching' || w.status === 'watched' || w.status === 'queued') ? w.status : 'queued';
               return {
                 ...w, status: st,
+                currentSeason: Number(w.currentSeason) || 1,
+                totalSeasons: Number(w.totalSeasons) || 1,
                 currentEpisode: Number(w.currentEpisode) || 0,
+                episodesPerSeason: Number(w.episodesPerSeason) || 0,
                 totalEpisodes: Number(w.totalEpisodes) || 0,
                 lastWatched: w.lastWatched || null,
                 posterUrl: w.posterUrl || '',
@@ -1438,27 +1154,15 @@
             appState.gameList = appState.gameList.map(g => {
               if (!g) return null;
               const st = (g.status === 'playing' || g.status === 'played' || g.status === 'queued') ? g.status : 'queued';
-              return {
-                ...g, status: st,
-                hours: Number(g.hours) || 0,
-                posterUrl: g.posterUrl || '',
-                platform: g.platform || 'pc',
-                overview: g.overview || ''
-              };
+              return { ...g, status: st, hours: Number(g.hours) || 0, posterUrl: g.posterUrl || '', platform: g.platform || 'pc', overview: g.overview || '' };
             }).filter(Boolean);
           }
           if (!Array.isArray(appState.personalDates) || appState.personalDates.length === 0) {
             appState.personalDates = [...DEFAULT_PERSONAL_DATES];
           }
-          if (!appState.customDays || typeof appState.customDays !== 'object') {
-            appState.customDays = {};
-          }
-          if (!appState.moodHistory || typeof appState.moodHistory !== 'object') {
-            appState.moodHistory = {};
-          }
-          if (!Array.isArray(appState.diary)) {
-            appState.diary = [];
-          }
+          if (!appState.customDays || typeof appState.customDays !== 'object') appState.customDays = {};
+          if (!appState.moodHistory || typeof appState.moodHistory !== 'object') appState.moodHistory = {};
+          if (!Array.isArray(appState.diary)) appState.diary = [];
           appState.stateVersion = STATE_VERSION;
         } catch (e) {}
       }
@@ -1480,22 +1184,15 @@
       const { data } = await supabaseClient.from('couple_rooms').select('state').eq('room_code', ROOM_CODE).maybeSingle();
       if (data && data.state) {
         appState = { ...appState, ...data.state };
-        if (!Array.isArray(appState.dateIdeas) || appState.dateIdeas.length < 10 ||
-            (data.state.stateVersion || 0) < STATE_VERSION) {
+        if (!Array.isArray(appState.dateIdeas) || appState.dateIdeas.length < 10 || (data.state.stateVersion || 0) < STATE_VERSION) {
           appState.dateIdeas = [...DEFAULT_DATE_IDEAS];
         }
         if (!Array.isArray(appState.personalDates) || appState.personalDates.length === 0) {
           appState.personalDates = [...DEFAULT_PERSONAL_DATES];
         }
-        if (!appState.customDays || typeof appState.customDays !== 'object') {
-          appState.customDays = {};
-        }
-        if (!appState.moodHistory || typeof appState.moodHistory !== 'object') {
-          appState.moodHistory = {};
-        }
-        if (!Array.isArray(appState.diary)) {
-          appState.diary = [];
-        }
+        if (!appState.customDays || typeof appState.customDays !== 'object') appState.customDays = {};
+        if (!appState.moodHistory || typeof appState.moodHistory !== 'object') appState.moodHistory = {};
+        if (!Array.isArray(appState.diary)) appState.diary = [];
         appState.stateVersion = STATE_VERSION;
         localStorage.setItem(`twoOfUs_state_${ROOM_CODE}`, JSON.stringify(appState));
         renderAll();
@@ -1527,7 +1224,6 @@
       renderDateIdeasDrawer();
       renderNotes();
       renderDiary();
-      renderMoodHistory();
       updateUpcomingEventTeaser();
       updateAnniversaryDays();
     }
@@ -1546,7 +1242,6 @@
 
     /* ---------- MOOD HISTORY ---------- */
     function openMoodHistoryModal() {
-      const now = getNowJalaliString();
       const days = [];
       for (let i = 29; i >= 0; i--) {
         const d = new Date(); d.setDate(d.getDate() - i);
@@ -1554,7 +1249,6 @@
         days.push({ key: `${jy}-${String(jm).padStart(2, '0')}-${String(jd).padStart(2, '0')}`, jy, jm, jd });
       }
       const history = appState.moodHistory || {};
-
       openModalWithContent('تاریخچه حال و هوا — ۳۰ روز اخیر', `
         <div class="grid grid-cols-7 gap-1.5 mb-4">
           <div class="text-[10px] font-bold text-slate-400 text-center">ش</div>
@@ -1567,15 +1261,14 @@
           ${days.map(d => {
             const m1 = history[`${d.key}_p1`];
             const m2 = history[`${d.key}_p2`];
-            const hasBoth = m1 && m2;
             return `<div class="mood-history-cell" title="${toFa(d.jd)} ${JALALI_MONTHS[d.jm - 1]}">
-              <div class="absolute top-0.5 right-0.5 w-3 h-3 rounded-full overflow-hidden">
-                ${m1 ? `<img src="${ICONS_3D[m1.key] || ICONS_3D.smile}" class="w-full h-full object-contain" />` : `<div class="w-full h-full bg-slate-100"></div>`}
+              <div class="absolute top-0.5 right-0.5 w-3.5 h-3.5 rounded-full overflow-hidden bg-blue-50">
+                ${m1 ? `<img src="${ICONS_3D[m1.key] || ICONS_3D.smile}" class="w-full h-full object-contain" />` : `<div class="w-full h-full"></div>`}
               </div>
-              <div class="absolute top-0.5 left-0.5 w-3 h-3 rounded-full overflow-hidden">
-                ${m2 ? `<img src="${ICONS_3D[m2.key] || ICONS_3D.smile}" class="w-full h-full object-contain" />` : `<div class="w-full h-full bg-slate-100"></div>`}
+              <div class="absolute top-0.5 left-0.5 w-3.5 h-3.5 rounded-full overflow-hidden bg-rose-50">
+                ${m2 ? `<img src="${ICONS_3D[m2.key] || ICONS_3D.smile}" class="w-full h-full object-contain" />` : `<div class="w-full h-full"></div>`}
               </div>
-              <span class="text-[9px] font-bold text-slate-500 mt-2">${toFa(d.jd)}</span>
+              <span class="text-[9px] font-bold text-slate-500 mt-3">${toFa(d.jd)}</span>
             </div>`;
           }).join('')}
         </div>
@@ -1586,10 +1279,6 @@
       `);
     }
 
-    function renderMoodHistory() {
-      // این تابع فقط برای رندر است — modal خودش رندر می‌شود
-    }
-
     /* ---------- GROCERIES ---------- */
     function renderGroceries() {
       const c = document.getElementById('groceryList');
@@ -1598,17 +1287,13 @@
       const badge = document.getElementById('groceryCountBadge');
       if (badge) badge.innerText = `${toFaNum(list.length)} قلم کالا`;
       if (list.length === 0) {
-        c.innerHTML = `<div class="text-center py-8 text-slate-400 text-xs">
-          <img src="${ICONS_3D.cart}" class="w-10 h-10 mx-auto mb-2 opacity-40" alt="" />
-          <p>سبد خرید خالیه</p></div>`;
+        c.innerHTML = `<div class="text-center py-8 text-slate-400 text-xs"><img src="${ICONS_3D.cart}" class="w-10 h-10 mx-auto mb-2 opacity-40" alt="" /><p>سبد خرید خالیه</p></div>`;
         return;
       }
       c.innerHTML = list.map(item => `
         <div class="flex items-center justify-between p-3 rounded-2xl ${item.done ? 'bg-slate-50/70 border border-slate-200/50' : 'bg-white border border-rose-100/80 shadow-sm'}">
           <div class="flex items-center gap-2.5 min-w-0 flex-1">
-            <button onclick="toggleGrocery('${item.id}')" class="w-6 h-6 rounded-lg border-2 ${item.done ? 'bg-rose-500 border-rose-500 text-white' : 'border-slate-300'} flex items-center justify-center text-[10px] flex-shrink-0">
-              ${item.done ? '<i class="fa-solid fa-check"></i>' : ''}
-            </button>
+            <button onclick="toggleGrocery('${item.id}')" class="w-6 h-6 rounded-lg border-2 ${item.done ? 'bg-rose-500 border-rose-500 text-white' : 'border-slate-300'} flex items-center justify-center text-[10px] flex-shrink-0">${item.done ? '<i class="fa-solid fa-check"></i>' : ''}</button>
             <div class="min-w-0 flex-1">
               <p class="text-xs font-bold ${item.done ? 'line-through text-slate-400' : 'text-slate-800'} break-words">${escapeHtml(item.name)}</p>
               <div class="flex items-center gap-1.5 mt-0.5 flex-wrap">
@@ -1617,9 +1302,7 @@
               </div>
             </div>
           </div>
-          <button onclick="deleteGrocery('${item.id}')" class="w-7 h-7 rounded-xl text-slate-300 hover:text-rose-500 hover:bg-rose-50 flex items-center justify-center flex-shrink-0">
-            <i class="fa-solid fa-trash-can text-[10px]"></i>
-          </button>
+          <button onclick="deleteGrocery('${item.id}')" class="w-7 h-7 rounded-xl text-slate-300 hover:text-rose-500 hover:bg-rose-50 flex items-center justify-center flex-shrink-0"><i class="fa-solid fa-trash-can text-[10px]"></i></button>
         </div>`).join('');
     }
 
@@ -1633,15 +1316,14 @@
       const box = document.getElementById('choreFilters');
       if (!box) return;
       const opts = [
-        { id: 'all', label: 'همه' },
-        { id: 'both', label: 'دونفره', icon: ICONS_3D.handshake },
-        { id: 'p1', label: 'امیرمحمد', icon: ICONS_3D.manTech },
-        { id: 'p2', label: 'آرمیتا', icon: ICONS_3D.womanTech }
+        { id:'all', label:'همه' },
+        { id:'both', label:'دونفره', icon:ICONS_3D.handshake },
+        { id:'p1', label:'امیرمحمد', icon:ICONS_3D.manTech },
+        { id:'p2', label:'آرمیتا', icon:ICONS_3D.womanTech }
       ];
       box.innerHTML = opts.map(o => `
         <button onclick="filterChores('${o.id}')" id="choreFilter-${o.id}" class="shrink-0 px-2.5 py-1 rounded-xl ${currentChoreFilter === o.id ? 'bg-indigo-500 text-white' : 'bg-white text-slate-600 border border-slate-200'} font-bold flex items-center gap-1 whitespace-nowrap transition">
-          ${o.icon ? `<img src="${o.icon}" class="w-3.5 h-3.5" alt="" />` : ''}
-          <span>${o.label}</span>
+          ${o.icon ? `<img src="${o.icon}" class="w-3.5 h-3.5" alt="" />` : ''}<span>${o.label}</span>
         </button>`).join('');
     }
 
@@ -1651,17 +1333,13 @@
       let list = appState.chores || [];
       if (currentChoreFilter !== 'all') list = list.filter(x => x.assignee === currentChoreFilter);
       if (list.length === 0) {
-        c.innerHTML = `<div class="text-center py-8 text-slate-400 text-xs">
-          <img src="${ICONS_3D.broom}" class="w-10 h-10 mx-auto mb-2 opacity-40" alt="" />
-          <p>همه کارها انجام شده</p></div>`;
+        c.innerHTML = `<div class="text-center py-8 text-slate-400 text-xs"><img src="${ICONS_3D.broom}" class="w-10 h-10 mx-auto mb-2 opacity-40" alt="" /><p>همه کارها انجام شده</p></div>`;
         return;
       }
       c.innerHTML = list.map(x => `
         <div class="flex items-center justify-between p-3 rounded-2xl ${x.done ? 'bg-slate-50/70 border border-slate-200/50' : 'bg-white border border-indigo-100/80 shadow-sm'}">
           <div class="flex items-center gap-2.5 min-w-0 flex-1">
-            <button onclick="toggleChore('${x.id}')" class="w-6 h-6 rounded-lg border-2 ${x.done ? 'bg-indigo-500 border-indigo-500 text-white' : 'border-slate-300'} flex items-center justify-center text-[10px] flex-shrink-0">
-              ${x.done ? '<i class="fa-solid fa-check"></i>' : ''}
-            </button>
+            <button onclick="toggleChore('${x.id}')" class="w-6 h-6 rounded-lg border-2 ${x.done ? 'bg-indigo-500 border-indigo-500 text-white' : 'border-slate-300'} flex items-center justify-center text-[10px] flex-shrink-0">${x.done ? '<i class="fa-solid fa-check"></i>' : ''}</button>
             <div class="min-w-0 flex-1">
               <p class="text-xs font-bold ${x.done ? 'line-through text-slate-400' : 'text-slate-800'} break-words">${escapeHtml(x.title)}</p>
               <div class="flex items-center gap-1.5 mt-0.5 flex-wrap">
@@ -1670,17 +1348,11 @@
               </div>
             </div>
           </div>
-          <button onclick="deleteChore('${x.id}')" class="w-7 h-7 rounded-xl text-slate-300 hover:text-rose-500 hover:bg-rose-50 flex items-center justify-center flex-shrink-0">
-            <i class="fa-solid fa-trash-can text-[10px]"></i>
-          </button>
+          <button onclick="deleteChore('${x.id}')" class="w-7 h-7 rounded-xl text-slate-300 hover:text-rose-500 hover:bg-rose-50 flex items-center justify-center flex-shrink-0"><i class="fa-solid fa-trash-can text-[10px]"></i></button>
         </div>`).join('');
     }
 
-    function filterChores(id) {
-      currentChoreFilter = id;
-      renderChoreFilters();
-      renderChores();
-    }
+    function filterChores(id) { currentChoreFilter = id; renderChoreFilters(); renderChores(); }
 
     /* ---------- BUDGET ---------- */
     function renderBudgetChart() {
@@ -1785,40 +1457,34 @@
       const box = document.getElementById('calendarLegend');
       if (!box) return;
       const items = [
-        { key: 'birthday',    icon: ICONS_CAL.birthday,    label: 'تولد' },
-        { key: 'anniversary', icon: ICONS_CAL.anniversary, label: 'سالگرد' },
-        { key: 'celebration', icon: ICONS_CAL.celebration, label: 'جشن' },
-        { key: 'travel',      icon: ICONS_CAL.travel,      label: 'سفر' },
-        { key: 'work',        icon: ICONS_CAL.work,        label: 'کار' },
-        { key: 'rest',        icon: ICONS_CAL.rest,        label: 'استراحت' }
+        { key:'birthday', icon:ICONS_CAL.birthday, label:'تولد' },
+        { key:'anniversary', icon:ICONS_CAL.anniversary, label:'سالگرد' },
+        { key:'celebration', icon:ICONS_CAL.celebration, label:'جشن' },
+        { key:'travel', icon:ICONS_CAL.travel, label:'سفر' },
+        { key:'work', icon:ICONS_CAL.work, label:'کار' },
+        { key:'rest', icon:ICONS_CAL.rest, label:'استراحت' }
       ];
       box.innerHTML = `<span class="font-bold text-slate-400">راهنما:</span>` +
         items.map(i => `
           <span class="flex items-center gap-1 px-1.5 py-0.5 rounded-lg bg-rose-50/60 border border-rose-100/60">
-            <img src="${i.icon}" data-cal-icon="${i.key}" class="w-3.5 h-3.5 rounded" alt="" />
-            <span>${i.label}</span>
+            <img src="${i.icon}" data-cal-icon="${i.key}" class="w-3.5 h-3.5 rounded" alt="" /><span>${i.label}</span>
           </span>`).join('');
     }
 
     function renderCalendar() {
       const titleEl = document.getElementById('calendarMonthTitle');
       if (titleEl) titleEl.innerText = `${JALALI_MONTHS[calMonth - 1]} ${toFa(calYear)}`;
-
       renderCalendarLegend();
-
       const grid = document.getElementById('calendarGrid');
       if (!grid) return;
       grid.innerHTML = '';
       const dim = (calMonth <= 6) ? 31 : (calMonth <= 11) ? 30 : 29;
       const [gy, gm, gd] = jalaliToGregorian(calYear, calMonth, 1);
       const startDOW = (new Date(gy, gm - 1, gd).getDay() + 1) % 7;
-
       const now = new Date();
       const [tjy, tjm, tjd] = gregorianToJalali(now.getFullYear(), now.getMonth() + 1, now.getDate());
       const isCurrentMonth = (tjy === calYear && tjm === calMonth);
-
       for (let i = 0; i < startDOW; i++) grid.innerHTML += `<div class="aspect-square"></div>`;
-
       for (let day = 1; day <= dim; day++) {
         const mp = String(calMonth).padStart(2, '0');
         const dp = String(day).padStart(2, '0');
@@ -1827,24 +1493,18 @@
         const cat = getDayCategory(md);
         const isSel = (selectedCalDay === day);
         const isToday = isCurrentMonth && (day === tjd);
-
         const custom = (appState.customDays || {})[fullKey];
         const iconKey = custom?.icon || (cat.type === 'personal' ? cat.data.icon : (cat.type === 'gift' ? 'celebration' : null));
         const hasIcon = !!iconKey;
         const iconStyle = CAL_ICON_STYLE[iconKey] || { zoom: 120 };
-
         let cellBgCls = 'cal-day-normal';
         if (cat.type === 'personal') cellBgCls = 'cal-day-personal';
         else if (cat.type === 'gift') cellBgCls = 'cal-day-gift';
         else if (cat.type === 'holiday') cellBgCls = 'cal-day-holiday';
         if (custom?.bgColor) cellBgCls = '';
-
         const numColor = (cat.type === 'personal' && !custom?.bgColor) ? '#fff' : '#1e293b';
         const inlineBg = custom?.bgColor ? `background:${custom.bgColor};` : '';
-        const iconEl = hasIcon
-          ? `<div class="cal-day-bg" style="background-image:url('${ICONS_CAL[iconKey]}');background-size:${iconStyle.zoom}%;"></div>`
-          : '';
-
+        const iconEl = hasIcon ? `<div class="cal-day-bg" style="background-image:url('${ICONS_CAL[iconKey]}');background-size:${iconStyle.zoom}%;"></div>` : '';
         grid.innerHTML += `
           <button onclick="selectCalendarDay(${day})" class="cal-day aspect-square rounded-2xl flex items-center justify-center relative transition-all ${cellBgCls} ${isSel ? 'sel' : ''} ${isToday && !isSel ? 'cal-day-today' : ''}" style="${inlineBg}">
             ${iconEl}
@@ -1865,37 +1525,30 @@
       const md = `${mp}-${dp}`;
       const cat = getDayCategory(md);
       const custom = (appState.customDays || {})[fullKey];
-
       const labelEl = document.getElementById('selectedDayLabel');
       if (labelEl) labelEl.innerText = `${toFa(selectedCalDay)} ${JALALI_MONTHS[calMonth - 1]}`;
       const box = document.getElementById('selectedDayEventsList');
       if (!box) return;
       let html = '';
-
       if (cat.type === 'holiday') {
         html += `<div class="p-3 rounded-2xl bg-rose-100/70 text-rose-700 font-bold flex items-center gap-2.5 text-xs">
-          <img src="${ICONS_CAL.celebration}" data-cal-icon="celebration" class="w-5 h-5 rounded" alt="" />
-          <span>${cat.data.title}</span>
+          <img src="${ICONS_CAL.celebration}" data-cal-icon="celebration" class="w-5 h-5 rounded" alt="" /><span>${cat.data.title}</span>
         </div>`;
       } else if (cat.type === 'gift') {
         html += `<div class="p-3 rounded-2xl bg-gradient-to-l from-rose-50 to-pink-100 text-rose-700 font-bold flex items-center gap-2.5 text-xs border border-rose-200">
-          <img src="${ICONS_CAL.anniversary}" data-cal-icon="anniversary" class="w-5 h-5 rounded" alt="" />
-          <span>${cat.data.title} — روز کادو!</span>
+          <img src="${ICONS_CAL.anniversary}" data-cal-icon="anniversary" class="w-5 h-5 rounded" alt="" /><span>${cat.data.title} — روز کادو!</span>
         </div>`;
       } else if (cat.type === 'personal') {
         html += `<div class="p-3 rounded-2xl bg-gradient-to-l from-rose-100 to-pink-200 text-rose-800 font-bold flex items-center gap-2.5 text-xs border border-rose-300">
-          <img src="${ICONS_CAL[cat.data.icon] || ICONS_CAL.anniversary}" data-cal-icon="${cat.data.icon || 'anniversary'}" class="w-5 h-5 rounded" alt="" />
-          <span>${cat.data.title} (شروع از سال ${toFa(cat.data.year)})</span>
+          <img src="${ICONS_CAL[cat.data.icon] || ICONS_CAL.anniversary}" data-cal-icon="${cat.data.icon || 'anniversary'}" class="w-5 h-5 rounded" alt="" /><span>${cat.data.title} (شروع از سال ${toFa(cat.data.year)})</span>
         </div>`;
       }
-
       if (custom?.icon) {
         html += `<div class="p-2.5 rounded-xl bg-amber-50 border border-amber-200 text-amber-700 text-[11px] font-bold flex items-center justify-between gap-2">
           <span class="flex items-center gap-1.5"><i class="fa-solid fa-thumbtack text-[10px]"></i> آیکون دستی ست شده</span>
           <button onclick="clearCustomDay('${fullKey}')" class="text-rose-500 text-[10px]">حذف</button>
         </div>`;
       }
-
       const dEvs = (appState.coupleEvents || []).filter(e => e.jalaliDate === full);
       dEvs.forEach(ev => {
         const co = EVENT_CATEGORIES.find(c => c.id === ev.category) || EVENT_CATEGORIES[0];
@@ -1910,11 +1563,9 @@
           <button onclick="deleteCoupleEvent('${ev.id}')" class="text-slate-300 hover:text-rose-500 p-1 flex-shrink-0"><i class="fa-solid fa-trash-can text-xs"></i></button>
         </div>`;
       });
-
       if (cat.type === 'normal' && dEvs.length === 0 && !custom?.icon) {
         html += `<p class="text-slate-400 text-[11px] py-1">روز عادی — با دکمه «ست کردن» می‌تونی آیکون دلخواه بذاری</p>`;
       }
-
       box.innerHTML = html;
     }
 
@@ -1935,26 +1586,20 @@
       const dp = String(selectedCalDay).padStart(2, '0');
       const fullKey = `${calYear}-${mp}-${dp}`;
       const cur = (appState.customDays || {})[fullKey] || {};
-
       const icons = [
-        { key: '', label: 'بدون' },
-        { key: 'birthday', label: 'تولد' },
-        { key: 'anniversary', label: 'سالگرد' },
-        { key: 'celebration', label: 'جشن' },
-        { key: 'travel', label: 'سفر' },
-        { key: 'work', label: 'کار' },
-        { key: 'rest', label: 'استراحت' }
+        { key:'', label:'بدون' },
+        { key:'birthday', label:'تولد' }, { key:'anniversary', label:'سالگرد' },
+        { key:'celebration', label:'جشن' }, { key:'travel', label:'سفر' },
+        { key:'work', label:'کار' }, { key:'rest', label:'استراحت' }
       ];
-
       const bgColors = [
-        { key: '', label: 'پیش‌فرض', color: '' },
-        { key: 'pink', label: 'صورتی', color: 'linear-gradient(135deg,#fecdd7 0%,#fb7193 60%,#f43f6e 100%)' },
-        { key: 'softpink', label: 'ملایم', color: 'linear-gradient(180deg,#fff5f7 0%,#ffd8e0 100%)' },
-        { key: 'cream', label: 'کرم', color: 'linear-gradient(180deg,#fff 0%,#ffe4e9 100%)' },
-        { key: 'lavender', label: 'بنفش', color: 'linear-gradient(135deg,#e9d5ff 0%,#c4b5fd 100%)' },
-        { key: 'sky', label: 'آبی', color: 'linear-gradient(135deg,#bae6fd 0%,#7dd3fc 100%)' }
+        { key:'', label:'پیش‌فرض', color:'' },
+        { key:'pink', label:'صورتی', color:'linear-gradient(135deg,#fecdd7 0%,#fb7193 60%,#f43f6e 100%)' },
+        { key:'softpink', label:'ملایم', color:'linear-gradient(180deg,#fff5f7 0%,#ffd8e0 100%)' },
+        { key:'cream', label:'کرم', color:'linear-gradient(180deg,#fff 0%,#ffe4e9 100%)' },
+        { key:'lavender', label:'بنفش', color:'linear-gradient(135deg,#e9d5ff 0%,#c4b5fd 100%)' },
+        { key:'sky', label:'آبی', color:'linear-gradient(135deg,#bae6fd 0%,#7dd3fc 100%)' }
       ];
-
       openModalWithContent(`ست کردن روز ${toFa(selectedCalDay)} ${JALALI_MONTHS[calMonth - 1]}`, `
         <form onsubmit="handleSaveCustomDay(event, '${fullKey}')" class="space-y-4">
           <div>
@@ -1993,7 +1638,6 @@
           : 'cd-icon-btn p-2 rounded-2xl border-2 border-slate-200 bg-white flex flex-col items-center gap-1';
       });
     }
-
     function pickCdBg(k) {
       window._cdBg = k;
       document.querySelectorAll('#cdBgPicker .cd-bg-btn').forEach(b => {
@@ -2002,35 +1646,26 @@
           : 'cd-bg-btn p-2 rounded-xl border-2 border-slate-200 flex items-center justify-center gap-1';
       });
     }
-
     function handleSaveCustomDay(e, key) {
       e.preventDefault();
       const bgMap = {
         '': '',
-        'pink': 'linear-gradient(135deg,#fecdd7 0%,#fb7193 60%,#f43f6e 100%)',
-        'softpink': 'linear-gradient(180deg,#fff5f7 0%,#ffd8e0 100%)',
-        'cream': 'linear-gradient(180deg,#fff 0%,#ffe4e9 100%)',
-        'lavender': 'linear-gradient(135deg,#e9d5ff 0%,#c4b5fd 100%)',
-        'sky': 'linear-gradient(135deg,#bae6fd 0%,#7dd3fc 100%)'
+        'pink':'linear-gradient(135deg,#fecdd7 0%,#fb7193 60%,#f43f6e 100%)',
+        'softpink':'linear-gradient(180deg,#fff5f7 0%,#ffd8e0 100%)',
+        'cream':'linear-gradient(180deg,#fff 0%,#ffe4e9 100%)',
+        'lavender':'linear-gradient(135deg,#e9d5ff 0%,#c4b5fd 100%)',
+        'sky':'linear-gradient(135deg,#bae6fd 0%,#7dd3fc 100%)'
       };
       if (!appState.customDays) appState.customDays = {};
       const icon = window._cdIcon || '';
       const bgKey = window._cdBg || '';
-      if (!icon && !bgKey) {
-        delete appState.customDays[key];
-      } else {
-        appState.customDays[key] = { icon, bgKey, bgColor: bgMap[bgKey] || '' };
-      }
-      saveState();
-      closeModal();
-      playTone(600, 'sine', 0.1);
+      if (!icon && !bgKey) delete appState.customDays[key];
+      else appState.customDays[key] = { icon, bgKey, bgColor: bgMap[bgKey] || '' };
+      saveState(); closeModal(); playTone(600, 'sine', 0.1);
     }
-
     function clearCustomDay(key) {
       if (appState.customDays) delete appState.customDays[key];
-      saveState();
-      closeModal();
-      playTone(450, 'sine', 0.1);
+      saveState(); closeModal(); playTone(450, 'sine', 0.1);
     }
 
     function updateUpcomingEventTeaser() {
@@ -2038,7 +1673,6 @@
       if (!t) return;
       const now = getNowJalaliString();
       const todayKey = `${now.jy}-${String(now.jm).padStart(2, '0')}-${String(now.jd).padStart(2, '0')}`;
-
       const candidates = [];
       (appState.coupleEvents || []).forEach(ev => {
         const k = standardizeJalaliDateKey(ev.jalaliDate);
@@ -2056,18 +1690,15 @@
           if (k >= todayKey) candidates.push({ title: info.title, dateKey: k, kind: 'gift', icon: info.icon });
         });
       });
-
       if (candidates.length === 0) {
         t.innerHTML = `<i class="fa-regular fa-calendar-check text-rose-400"></i> <span>قرار نزدیکی ثبت نشده</span>`;
         return;
       }
       candidates.sort((a, b) => a.dateKey.localeCompare(b.dateKey));
       const next = candidates[0];
-
       const tomorrow = new Date(); tomorrow.setDate(tomorrow.getDate() + 1);
       const [ty, tm, td] = gregorianToJalali(tomorrow.getFullYear(), tomorrow.getMonth() + 1, tomorrow.getDate());
       const tomorrowKey = `${ty}-${String(tm).padStart(2, '0')}-${String(td).padStart(2, '0')}`;
-
       let label;
       if (next.dateKey === todayKey) label = 'امروز';
       else if (next.dateKey === tomorrowKey) label = 'فردا';
@@ -2075,33 +1706,30 @@
         const [, mm, dd] = next.dateKey.split('-');
         label = `${toFa(parseInt(dd))} ${JALALI_MONTHS[parseInt(mm) - 1]}`;
       }
-
       const icon = (next.icon && ICONS_CAL[next.icon])
         ? `<img src="${ICONS_CAL[next.icon]}" data-cal-icon="${next.icon}" class="w-4 h-4 inline-block rounded" alt="" />`
         : `<img src="${ICONS_3D.heart}" class="w-3.5 h-3.5 inline-block" alt="" />`;
-
       t.innerHTML = `${icon} <span>بعدی: <strong>${escapeHtml(next.title)}</strong> <span class="text-slate-400">(${label})</span></span>`;
     }
 
     /* ============================================================
-       SEARCH APIs + ترجمه خودکار ترکیبی (گوگل + OpenRouter)
+       SEARCH APIs + ترجمه هوشمند (Alias → OpenRouter → Google)
        ============================================================ */
     let _translationCache = {};
 
     async function translateFaToEnWithOpenRouter(text) {
-      if (!text || !OPENROUTER_TRANSLATE_KEY || OPENROUTER_TRANSLATE_KEY.includes('PASTE')) return null;
+      const key = getOpenRouterKey();
+      const model = getOpenRouterModel();
+      if (!text || !key || key.includes('PASTE')) return null;
       if (_translationCache[text]) return _translationCache[text];
       try {
         const res = await fetch('https://openrouter.ai/api/v1/chat/completions', {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${OPENROUTER_TRANSLATE_KEY}`
-          },
+          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${key}` },
           body: JSON.stringify({
-            model: 'nvidia/nemotron-3-super-120b-a12b:free',
+            model,
             messages: [
-              { role: 'system', content: 'You are a translator. Translate the given Persian text to English. Return ONLY the English translation, nothing else. If it is an anime/movie/series name, use the official English title.' },
+              { role: 'system', content: 'You are a translator. Translate the given Persian text to English. Return ONLY the English translation, nothing else. If it is an anime/movie/series/game name, use the official English title.' },
               { role: 'user', content: text }
             ],
             temperature: 0.1
@@ -2112,10 +1740,7 @@
         const result = data?.choices?.[0]?.message?.content?.trim() || null;
         if (result) _translationCache[text] = result;
         return result;
-      } catch (e) {
-        console.warn('OpenRouter translate error', e);
-        return null;
-      }
+      } catch (e) { return null; }
     }
 
     async function translateFaToEnWithGoogle(text) {
@@ -2128,12 +1753,11 @@
     }
 
     async function smartTranslateFaToEn(text) {
-      // ۱. کش
       if (_translationCache[text]) return _translationCache[text];
-      // ۲. OpenRouter (کیفیت بالاتر)
+      const aliasResult = normalizeAlias(text);
+      if (aliasResult) { _translationCache[text] = aliasResult; return aliasResult; }
       const orResult = await translateFaToEnWithOpenRouter(text);
       if (orResult) return orResult;
-      // ۳. Google Translate (سریع‌تر، fallback)
       const gResult = await translateFaToEnWithGoogle(text);
       if (gResult) _translationCache[text] = gResult;
       return gResult || text;
@@ -2159,9 +1783,9 @@
           originalTitle: r.original_title || r.original_name || '',
           year: (r.release_date || r.first_air_date || '').slice(0, 4),
           poster: r.poster_path ? `https://image.tmdb.org/t/p/w342${r.poster_path}` : '',
-          overview: (r.overview || '').slice(0, 180)
+          overview: (r.overview || '').slice(0, 220)
         }));
-      } catch (e) { console.warn('TMDB error', e); return []; }
+      } catch (e) { return []; }
     }
 
     async function searchJikan(query) {
@@ -2184,9 +1808,10 @@
           originalTitle: a.title || '',
           year: (a.year || (a.aired?.prop?.from?.year) || '').toString(),
           poster: a.images?.jpg?.image_url || '',
-          overview: (a.synopsis || '').slice(0, 180)
+          overview: (a.synopsis || '').slice(0, 220),
+          episodes: a.episodes || 0
         }));
-      } catch (e) { console.warn('Jikan error', e); return []; }
+      } catch (e) { return []; }
     }
 
     async function searchCheapShark(query) {
@@ -2215,16 +1840,18 @@
           poster: g.thumb || '',
           overview: ''
         }));
-      } catch (e) { console.warn('CheapShark error', e); return []; }
+      } catch (e) { return []; }
     }
 
-    /* ---------- WATCHLIST RENDER ---------- */
+    /* ============================================================
+       WATCHLIST (فیلم، سریال، انیمه، انیمیشن — یکجا)
+       ============================================================ */
     function renderWatchStatusFilters() {
       const box = document.getElementById('watchStatusFilters');
       if (!box) return;
       const opts = [
-        { id: 'all', label: 'همه', icon: ICONS_3D.eyes },
-        ...WATCH_STATUSES.map(s => ({ id: s.id, label: s.name, icon: ICONS_3D[s.icon] }))
+        { id:'all', label:'همه', icon:ICONS_3D.eyes },
+        ...WATCH_STATUSES.map(s => ({ id:s.id, label:s.name, icon:ICONS_3D[s.icon] }))
       ];
       box.innerHTML = opts.map(o => `
         <button onclick="filterWatchStatus('${o.id}')" class="shrink-0 px-3 py-1.5 rounded-xl text-[11px] font-bold flex items-center gap-1.5 whitespace-nowrap transition ${currentWatchStatusFilter === o.id ? 'bg-rose-600 text-white shadow-sm' : 'bg-white text-slate-600 border border-slate-200'}">
@@ -2237,8 +1864,8 @@
       const box = document.getElementById('watchTypeFilters');
       if (!box) return;
       const opts = [
-        { id: 'all', label: 'همه', icon: null },
-        ...WATCH_TYPES.map(t => ({ id: t.id, label: t.name, icon: ICONS_3D[t.icon] }))
+        { id:'all', label:'همه', icon:null },
+        ...WATCH_TYPES.map(t => ({ id:t.id, label:t.name, icon:ICONS_3D[t.icon] }))
       ];
       box.innerHTML = opts.map(o => `
         <button onclick="filterWatchType('${o.id}')" class="shrink-0 px-3 py-1.5 rounded-xl text-[11px] font-bold flex items-center gap-1.5 whitespace-nowrap transition ${currentWatchFilter === o.id ? 'bg-purple-600 text-white shadow-sm' : 'bg-white text-slate-600 border border-slate-200'}">
@@ -2256,92 +1883,99 @@
 
       if (list.length === 0) {
         c.innerHTML = `<div class="col-span-full text-center py-8 text-slate-400 text-xs">
-          <img src="${ICONS_3D.clapper}" class="w-10 h-10 mx-auto mb-2 opacity-40" alt="" />
-          <p>موردی با این فیلترها پیدا نشد</p></div>`;
+          <img src="${ICONS_3D.clapper}" class="w-10 h-10 mx-auto mb-2 opacity-40" alt="" /><p>موردی پیدا نشد</p></div>`;
         return;
       }
+      c.innerHTML = list.map(item => renderMediaCard(item)).join('');
+    }
 
-      const typeIcons = { movie: ICONS_3D.clapper, series: ICONS_3D.tv, anime: ICONS_3D.blossom };
-      const typeLabels = { movie: 'فیلم', series: 'سریال', anime: 'انیمه' };
+    /* کارت مشترک برای همه انواع */
+    function renderMediaCard(item) {
+      const statusObj = WATCH_STATUSES.find(s => s.id === item.status) || WATCH_STATUSES[0];
+      const typeObj = WATCH_TYPES.find(t => t.id === item.type) || WATCH_TYPES[0];
+      const cur = Number(item.currentEpisode) || 0;
+      const curSeason = Number(item.currentSeason) || 1;
+      const totalSeasons = Number(item.totalSeasons) || 1;
+      const epsPerSeason = Number(item.episodesPerSeason) || 0;
+      const totalEps = epsPerSeason > 0 ? (epsPerSeason * totalSeasons) : (Number(item.totalEpisodes) || 0);
+      const watchedTotal = (curSeason - 1) * epsPerSeason + cur;
+      const pct = totalEps > 0 ? Math.min(100, Math.round((watchedTotal / totalEps) * 100)) : 0;
+      const isSerial = (item.type === 'series' || item.type === 'anime');
+      const showProgress = isSerial && totalEps > 0;
 
-      c.innerHTML = list.map(item => {
-        const statusObj = WATCH_STATUSES.find(s => s.id === item.status) || WATCH_STATUSES[0];
-        const cur = Number(item.currentEpisode) || 0;
-        const total = Number(item.totalEpisodes) || 0;
-        const pct = total > 0 ? Math.min(100, Math.round((cur / total) * 100)) : 0;
-        const isSerial = (item.type === 'series' || item.type === 'anime');
-        const showProgress = isSerial && total > 0;
+      // رنگ اختصاصی هر نوع
+      const typeColor = item.type === 'anime' ? 'text-pink-600' : item.type === 'animation' ? 'text-cyan-600' : 'text-purple-600';
+      const typeBgGrad = item.type === 'anime' ? 'from-pink-400 to-rose-400' : item.type === 'animation' ? 'from-cyan-400 to-blue-400' : 'from-purple-400 to-rose-400';
 
-        const poster = item.posterUrl
-          ? `<img src="${item.posterUrl}" class="media-poster" alt="" onerror="this.style.display='none'" />`
-          : `<div class="media-poster-empty"><img src="${typeIcons[item.type]}" class="w-9 h-9" alt="" /></div>`;
+      const poster = item.posterUrl
+        ? `<img src="${item.posterUrl}" class="media-poster" alt="" onerror="this.style.display='none'" />`
+        : `<div class="media-poster-empty"><img src="${ICONS_3D[typeObj.icon]}" class="w-9 h-9" alt="" /></div>`;
 
-        return `
-          <div class="flex flex-col p-3 rounded-2xl bg-white border border-slate-200/70 shadow-sm gap-2">
-            <div class="flex items-start gap-3">
-              ${poster}
-              <div class="min-w-0 flex-1">
-                <p class="text-sm font-bold ${item.status === 'watched' ? 'line-through text-slate-400' : 'text-slate-800'} break-words leading-tight">${escapeHtml(item.title)}</p>
-                ${item.originalTitle && item.originalTitle !== item.title ? `<p class="text-[9px] text-slate-400 mt-0.5" dir="ltr">${escapeHtml(item.originalTitle)}</p>` : ''}
-                <div class="flex items-center gap-1.5 mt-1.5 text-[10px] text-slate-500 flex-wrap">
-                  <span class="text-purple-600 font-semibold flex items-center gap-0.5">
-                    <img src="${typeIcons[item.type]}" class="w-3 h-3" alt="" /> ${typeLabels[item.type] || ''}
-                  </span>
-                  <span>•</span>
-                  <span class="font-bold" style="color:${statusObj.color}">${statusObj.name}</span>
-                  ${item.rating ? `<span class="flex items-center gap-0.5">• <img src="${ICONS_3D.star}" class="w-3 h-3" alt="" /> ${toFa(item.rating)}/۵</span>` : ''}
-                </div>
-                ${item.overview ? `<p class="media-overview mt-1.5">${escapeHtml(item.overview)}</p>` : ''}
-                <div class="flex items-center gap-1 mt-2">
-                  <button onclick="cycleWatchStatus('${item.id}')" class="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0" style="background:${statusObj.color}22;">
-                    <img src="${ICONS_3D[statusObj.icon]}" class="w-4 h-4" alt="" />
-                  </button>
-                  <button onclick="openWatchEditModal('${item.id}')" class="w-7 h-7 rounded-lg text-slate-400 hover:text-purple-600 hover:bg-purple-50 flex items-center justify-center">
-                    <i class="fa-solid fa-pen text-[10px]"></i>
-                  </button>
-                  <button onclick="deleteWatchItem('${item.id}')" class="w-7 h-7 rounded-lg text-slate-300 hover:text-rose-500 hover:bg-rose-50 flex items-center justify-center">
-                    <i class="fa-solid fa-trash-can text-[10px]"></i>
-                  </button>
-                </div>
+      return `
+        <div class="flex flex-col p-3 rounded-2xl bg-white border border-slate-200/70 shadow-sm gap-2">
+          <div class="flex items-start gap-3">
+            ${poster}
+            <div class="min-w-0 flex-1">
+              <p class="text-sm font-bold ${item.status === 'watched' ? 'line-through text-slate-400' : 'text-slate-800'} break-words leading-tight">${escapeHtml(item.title)}</p>
+              ${item.originalTitle && item.originalTitle !== item.title ? `<p class="text-[9px] text-slate-400 mt-0.5" dir="ltr">${escapeHtml(item.originalTitle)}</p>` : ''}
+              <div class="flex items-center gap-1.5 mt-1.5 text-[10px] text-slate-500 flex-wrap">
+                <span class="${typeColor} font-semibold flex items-center gap-0.5">
+                  <img src="${ICONS_3D[typeObj.icon]}" class="w-3 h-3" alt="" /> ${typeObj.name}
+                </span>
+                <span>•</span>
+                <span class="font-bold" style="color:${statusObj.color}">${statusObj.name}</span>
+                ${item.rating ? `<span class="flex items-center gap-0.5">• <img src="${ICONS_3D.star}" class="w-3 h-3" alt="" /> ${toFa(item.rating)}/۵</span>` : ''}
               </div>
-            </div>
-            ${showProgress ? `
-              <div class="space-y-1.5 pt-1.5 border-t border-slate-100">
-                <div class="flex items-center justify-between text-[10px] font-bold">
-                  <span class="text-slate-500">پیشرفت</span>
-                  <span class="text-purple-600">${toFaNum(cur)} از ${toFaNum(total)} (${toFa(pct)}٪)</span>
-                </div>
-                <div class="w-full h-2 rounded-full bg-slate-100 overflow-hidden">
-                  <div class="h-full rounded-full bg-gradient-to-r from-purple-400 to-rose-400" style="width:${pct}%"></div>
-                </div>
-                <div class="flex items-center gap-1.5 pt-1">
-                  <button onclick="incrementWatchEpisode('${item.id}')" class="flex-1 py-1.5 rounded-lg bg-purple-100 hover:bg-purple-200 text-purple-700 text-[10px] font-bold flex items-center justify-center gap-1">
-                    <i class="fa-solid fa-plus text-[9px]"></i> قسمت بعد
-                  </button>
-                  ${cur > 0 ? `<button onclick="decrementWatchEpisode('${item.id}')" class="px-2.5 py-1.5 rounded-lg bg-slate-100 text-slate-600 text-[10px] font-bold"><i class="fa-solid fa-minus text-[9px]"></i></button>` : ''}
-                </div>
-              </div>
-            ` : isSerial ? `
-              <div class="pt-1.5 border-t border-slate-100">
-                <button onclick="openWatchEditModal('${item.id}')" class="text-[10px] font-bold text-purple-600 flex items-center gap-1">
-                  <i class="fa-solid fa-plus text-[9px]"></i> افزودن تعداد قسمت‌ها
+              ${item.overview ? `<p class="media-overview mt-1.5">${escapeHtml(item.overview)}</p>` : ''}
+              <div class="flex items-center gap-1 mt-2">
+                <button onclick="cycleWatchStatus('${item.id}')" class="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0" style="background:${statusObj.color}22;">
+                  <img src="${ICONS_3D[statusObj.icon]}" class="w-4 h-4" alt="" />
+                </button>
+                <button onclick="openWatchEditModal('${item.id}')" class="w-7 h-7 rounded-lg text-slate-400 hover:text-purple-600 hover:bg-purple-50 flex items-center justify-center">
+                  <i class="fa-solid fa-pen text-[10px]"></i>
+                </button>
+                <button onclick="deleteWatchItem('${item.id}')" class="w-7 h-7 rounded-lg text-slate-300 hover:text-rose-500 hover:bg-rose-50 flex items-center justify-center">
+                  <i class="fa-solid fa-trash-can text-[10px]"></i>
                 </button>
               </div>
-            ` : ''}
-          </div>`;
-      }).join('');
+            </div>
+          </div>
+          ${showProgress ? `
+            <div class="space-y-1.5 pt-1.5 border-t border-slate-100">
+              <div class="flex items-center justify-between text-[10px] font-bold">
+                <span class="text-slate-500">فصل ${toFa(curSeason)} — قسمت ${toFa(cur)}${epsPerSeason > 0 ? ` از ${toFa(epsPerSeason)}` : ''}</span>
+                <span class="${typeColor}">${toFa(pct)}٪</span>
+              </div>
+              <div class="w-full h-2 rounded-full bg-slate-100 overflow-hidden">
+                <div class="h-full rounded-full bg-gradient-to-r ${typeBgGrad}" style="width:${pct}%"></div>
+              </div>
+              <div class="flex items-center gap-1.5 pt-1">
+                <button onclick="incrementEpisode('${item.id}')" class="flex-1 py-1.5 rounded-lg ${item.type === 'anime' ? 'bg-pink-100 hover:bg-pink-200 text-pink-700' : 'bg-purple-100 hover:bg-purple-200 text-purple-700'} text-[10px] font-bold flex items-center justify-center gap-1">
+                  <i class="fa-solid fa-plus text-[9px]"></i> قسمت بعد
+                </button>
+                ${(cur > 1 || curSeason > 1) ? `<button onclick="decrementEpisode('${item.id}')" class="px-2.5 py-1.5 rounded-lg bg-slate-100 text-slate-600 text-[10px] font-bold"><i class="fa-solid fa-minus text-[9px]"></i></button>` : ''}
+              </div>
+            </div>
+          ` : isSerial ? `
+            <div class="pt-1.5 border-t border-slate-100">
+              <button onclick="openWatchEditModal('${item.id}')" class="text-[10px] font-bold ${typeColor} flex items-center gap-1">
+                <i class="fa-solid fa-plus text-[9px]"></i> افزودن فصل و قسمت
+              </button>
+            </div>
+          ` : ''}
+        </div>`;
     }
 
     function filterWatchStatus(id) { currentWatchStatusFilter = id; renderWatchStatusFilters(); renderWatchlist(); }
     function filterWatchType(id) { currentWatchFilter = id; renderWatchTypeFilters(); renderWatchlist(); }
 
-    /* ---------- GAMES RENDER ---------- */
+    /* ---------- GAMES ---------- */
     function renderGameStatusFilters() {
       const box = document.getElementById('gameStatusFilters');
       if (!box) return;
       const opts = [
-        { id: 'all', label: 'همه', icon: ICONS_3D.eyes },
-        ...GAME_STATUSES.map(s => ({ id: s.id, label: s.name, icon: ICONS_3D[s.icon] }))
+        { id:'all', label:'همه', icon:ICONS_3D.eyes },
+        ...GAME_STATUSES.map(s => ({ id:s.id, label:s.name, icon:ICONS_3D[s.icon] }))
       ];
       box.innerHTML = opts.map(o => `
         <button onclick="filterGameStatus('${o.id}')" class="shrink-0 px-3 py-1.5 rounded-xl text-[11px] font-bold flex items-center gap-1.5 whitespace-nowrap transition ${currentGameStatusFilter === o.id ? 'bg-indigo-600 text-white shadow-sm' : 'bg-white text-slate-600 border border-slate-200'}">
@@ -2358,18 +1992,15 @@
 
       if (list.length === 0) {
         c.innerHTML = `<div class="col-span-full text-center py-8 text-slate-400 text-xs">
-          <img src="${ICONS_3D.videoGame}" class="w-10 h-10 mx-auto mb-2 opacity-40" alt="" />
-          <p>هنوز بازی‌ای اضافه نشده</p></div>`;
+          <img src="${ICONS_3D.videoGame}" class="w-10 h-10 mx-auto mb-2 opacity-40" alt="" /><p>هنوز بازی‌ای اضافه نشده</p></div>`;
         return;
       }
-
       c.innerHTML = list.map(g => {
         const statusObj = GAME_STATUSES.find(s => s.id === g.status) || GAME_STATUSES[0];
         const platformName = GAME_PLATFORMS.find(p => p.id === g.platform)?.name || g.platform;
         const poster = g.posterUrl
           ? `<img src="${g.posterUrl}" class="media-poster" alt="" onerror="this.style.display='none'" />`
           : `<div class="media-poster-empty"><img src="${ICONS_3D.videoGame}" class="w-9 h-9" alt="" /></div>`;
-
         return `
           <div class="flex flex-col p-3 rounded-2xl bg-white border border-slate-200/70 shadow-sm gap-2">
             <div class="flex items-start gap-3">
@@ -2473,7 +2104,6 @@
       const c = document.getElementById('diaryContainer');
       if (!c) return;
       const diary = appState.diary || [];
-      // گروه‌بندی بر اساس تاریخ
       const grouped = {};
       diary.forEach(d => {
         if (!grouped[d.dateKey]) grouped[d.dateKey] = [];
@@ -2519,62 +2149,38 @@
     function deleteDiaryPost(id) {
       requestConfirm('حذف خاطره', 'مطمئنی می‌خوای این خاطره رو حذف کنی؟', () => {
         appState.diary = (appState.diary || []).filter(d => d.id !== id);
-        saveState();
-        renderDiary();
-        playTone(400, 'sine', 0.1);
+        saveState(); renderDiary(); playTone(400, 'sine', 0.1);
       });
     }
 
-    function handleSaveDiaryPost(e, editId) {
-      e.preventDefault();
-      const text = document.getElementById('diaryText').value.trim();
-      if (!text) return;
-      const now = getNowJalaliString();
-      const todayKey = getTodayKey();
-      const timeStr = `${String(new Date().getHours()).padStart(2, '0')}:${String(new Date().getMinutes()).padStart(2, '0')}`;
-
-      if (editId) {
-        const post = (appState.diary || []).find(d => d.id === editId);
-        if (post) { post.text = text; }
-        editingDiaryId = null;
-      } else {
-        appState.diary.push({
-          id: 'd_' + Date.now(),
-          text,
-          author: currentPersona,
-          dateKey: todayKey,
-          time: toFa(timeStr),
-          imageUrl: '',
-          createdAt: new Date().toISOString()
-        });
-      }
-      saveState();
-      closeModal();
-      renderDiary();
-      playTone(600, 'sine', 0.1);
-    }
-
-    function openDiaryPostModal(editId) {
-      const post = editId ? (appState.diary || []).find(d => d.id === editId) : null;
-      const now = getNowJalaliString();
-      const todayLabel = `${toFa(now.jd)} ${JALALI_MONTHS[now.jm - 1]}`;
-      openModalWithContent(editId ? 'ویرایش خاطره' : `خاطره جدید — ${todayLabel}`, `
-        <form onsubmit="handleSaveDiaryPost(event, ${editId ? `'${editId}'` : 'null'})" class="space-y-4">
-          <div>
-            <label class="block text-xs font-semibold text-slate-700 mb-1.5">متن خاطره</label>
-            <textarea id="diaryText" required rows="5" placeholder="امروز چه خبر بود؟..." class="w-full px-4 py-3 rounded-2xl border border-slate-200 focus:outline-none focus:border-rose-500 text-sm leading-relaxed">${post ? escapeHtml(post.text) : ''}</textarea>
-          </div>
-          <button type="submit" class="w-full py-3.5 rounded-2xl bg-rose-500 text-white font-bold text-xs active:scale-95 transition">${editId ? 'ذخیره تغییر' : 'ثبت خاطره'}</button>
-        </form>`);
-      setTimeout(() => document.getElementById('diaryText')?.focus(), 100);
+    /* فشرده‌سازی عکس */
+    async function compressImage(file, maxWidth = 800, quality = 0.7) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = function (e) {
+          const img = new Image();
+          img.onload = function () {
+            const canvas = document.createElement('canvas');
+            let w = img.width, h = img.height;
+            if (w > maxWidth) { h = Math.round((maxWidth / w) * h); w = maxWidth; }
+            canvas.width = w; canvas.height = h;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0, w, h);
+            try { resolve(canvas.toDataURL('image/jpeg', quality)); }
+            catch (err) { reject(err); }
+          };
+          img.onerror = reject;
+          img.src = e.target.result;
+        };
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
     }
 
     /* ---------- UTILS ---------- */
     function escapeHtml(str) {
       if (str === null || str === undefined) return '';
-      return String(str)
-        .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;').replace(/'/g, '&#039;');
+      return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;');
     }
 
     /* ==================== END OF PART 2 ==================== */
@@ -2601,10 +2207,10 @@
 
     function buildWheelPalette() {
       const pinkPairs = [
-        ['#FFE4E9', '#FDA4B8'], ['#F43F6E', '#BE1248'],
-        ['#FFC9D4', '#FB7193'], ['#E11D59', '#9F1240'],
-        ['#FECDD7', '#F43F6E'], ['#FB7193', '#BE1248'],
-        ['#FFB8C6', '#E11D59'], ['#FDA4B8', '#9F1240']
+        ['#FFE4E9','#FDA4B8'], ['#F43F6E','#BE1248'],
+        ['#FFC9D4','#FB7193'], ['#E11D59','#9F1240'],
+        ['#FECDD7','#F43F6E'], ['#FB7193','#BE1248'],
+        ['#FFB8C6','#E11D59'], ['#FDA4B8','#9F1240']
       ];
       const items = (appState.dateIdeas && appState.dateIdeas.length > 0) ? appState.dateIdeas : ["ایده ۱"];
       wheelPalette = items.map((_, i) => pinkPairs[i % pinkPairs.length]);
@@ -2614,21 +2220,16 @@
       const mainCanvas = document.getElementById('rouletteCanvas');
       if (!mainCanvas) return;
       const W = mainCanvas.width, H = mainCanvas.height;
-
       if (!wheelCache || wheelCacheSize !== W) {
         wheelCache = document.createElement('canvas');
-        wheelCache.width = W;
-        wheelCache.height = H;
+        wheelCache.width = W; wheelCache.height = H;
         wheelCacheSize = W;
       }
-
       const ctx = wheelCache.getContext('2d');
       const cx = W / 2, cy = H / 2;
-
       const items = (Array.isArray(appState.dateIdeas) && appState.dateIdeas.length > 0)
         ? appState.dateIdeas : ["ایده ۱", "ایده ۲"];
       if (wheelPalette.length !== items.length) buildWheelPalette();
-
       const numSegments = items.length;
       const arcSize = (2 * Math.PI) / numSegments;
       const outerR = Math.min(cx, cy) - 22;
@@ -2636,7 +2237,7 @@
 
       ctx.clearRect(0, 0, W, H);
 
-      // هاله بیرونی
+      // هاله
       const bgGrad = ctx.createRadialGradient(cx, cy, outerR * 0.9, cx, cy, outerR + 24);
       bgGrad.addColorStop(0, 'rgba(244, 63, 110, 0)');
       bgGrad.addColorStop(0.7, 'rgba(244, 63, 110, 0.08)');
@@ -2674,7 +2275,6 @@
         const grad = ctx.createRadialGradient(0, 0, innerR, 0, 0, outerR);
         grad.addColorStop(0, colors[0]);
         grad.addColorStop(1, colors[1]);
-
         ctx.beginPath();
         ctx.moveTo(0, 0);
         ctx.arc(0, 0, outerR, start, end);
@@ -2705,7 +2305,7 @@
         ctx.lineWidth = 1.5;
         ctx.stroke();
 
-        // شماره
+        // شماره فارسی
         ctx.save();
         ctx.rotate(start + arcSize / 2);
         ctx.textAlign = 'right';
@@ -2715,7 +2315,6 @@
         const textX = outerR - 34;
         const circleR = numSegments > 40 ? 12 : 15;
         const circleX = textX + (numSegments > 30 ? 12 : 15);
-
         ctx.beginPath();
         ctx.arc(circleX, 0, circleR, 0, 2 * Math.PI);
         ctx.fillStyle = 'rgba(255,255,255,0.92)';
@@ -2723,7 +2322,6 @@
         ctx.strokeStyle = 'rgba(244,63,110,0.4)';
         ctx.lineWidth = 1;
         ctx.stroke();
-
         ctx.fillStyle = colors[1] || '#BE1248';
         ctx.font = `900 ${fontSize}px Vazirmatn, Vazir, Tahoma, sans-serif`;
         ctx.shadowColor = 'rgba(255,255,255,0.6)';
@@ -2929,29 +2527,70 @@
       playTone(item.status === 'watched' ? 700 : item.status === 'watching' ? 600 : 500, 'sine', 0.1);
       saveState();
     }
-    function incrementWatchEpisode(id) {
+
+    /* افزایش یک قسمت — اگه آخرین قسمت فصل بود، خودکار می‌ره فصل بعد */
+    function incrementEpisode(id) {
       const item = (appState.watchList || []).find(w => w.id === id);
       if (!item) return;
-      const total = Number(item.totalEpisodes) || 0;
-      const cur = Number(item.currentEpisode) || 0;
-      if (total > 0 && cur >= total) { item.status = 'watched'; saveState(); return; }
-      item.currentEpisode = cur + 1;
+      const epsPerSeason = Number(item.episodesPerSeason) || 0;
+      const totalSeasons = Number(item.totalSeasons) || 1;
+      let cur = Number(item.currentEpisode) || 0;
+      let curSeason = Number(item.currentSeason) || 1;
+
+      if (epsPerSeason > 0) {
+        cur++;
+        if (cur > epsPerSeason) {
+          if (curSeason < totalSeasons) {
+            curSeason++;
+            cur = 1;
+          } else {
+            cur = epsPerSeason; // آخرین قسمت فصل آخر
+            item.status = 'watched';
+          }
+        }
+      } else {
+        cur++;
+      }
+
+      item.currentEpisode = cur;
+      item.currentSeason = curSeason;
       item.lastWatched = new Date().toLocaleDateString('fa-IR');
-      if (total > 0 && item.currentEpisode >= total) item.status = 'watched';
-      else if (item.status === 'queued') item.status = 'watching';
+
+      const totalEps = epsPerSeason > 0 ? (epsPerSeason * totalSeasons) : (Number(item.totalEpisodes) || 0);
+      const watchedTotal = (curSeason - 1) * epsPerSeason + cur;
+      if (totalEps > 0 && watchedTotal >= totalEps) {
+        item.status = 'watched';
+      } else if (item.status === 'queued') {
+        item.status = 'watching';
+      }
       playTone(650, 'sine', 0.08);
       saveState();
     }
-    function decrementWatchEpisode(id) {
+
+    function decrementEpisode(id) {
       const item = (appState.watchList || []).find(w => w.id === id);
       if (!item) return;
-      const cur = Number(item.currentEpisode) || 0;
-      if (cur <= 0) return;
-      item.currentEpisode = cur - 1;
-      if (item.currentEpisode === 0) item.status = 'queued';
+      const epsPerSeason = Number(item.episodesPerSeason) || 0;
+      let cur = Number(item.currentEpisode) || 0;
+      let curSeason = Number(item.currentSeason) || 1;
+
+      if (epsPerSeason > 0 && cur <= 1 && curSeason > 1) {
+        curSeason--;
+        cur = epsPerSeason;
+      } else if (cur > 1) {
+        cur--;
+      } else {
+        return;
+      }
+
+      item.currentEpisode = cur;
+      item.currentSeason = curSeason;
+      if (curSeason === 1 && cur === 0) item.status = 'queued';
+      else if (item.status === 'watched') item.status = 'watching';
       playTone(400, 'sine', 0.08);
       saveState();
     }
+
     function deleteWatchItem(id) { appState.watchList = (appState.watchList || []).filter(w => w.id !== id); saveState(); }
 
     function cycleGameStatus(id) {
@@ -2996,6 +2635,7 @@
       const bd = document.getElementById('modalBackdrop');
       bd.classList.add('hidden');
       bd.classList.remove('flex');
+      _pendingDiaryImage = null;
     }
 
     function requestConfirm(title, message, onConfirm) {
@@ -3164,13 +2804,15 @@
       closeModal();
     }
 
-    /* ---------- WATCHLIST ADD ---------- */
+    /* ============================================================
+       WATCHLIST ADD (4 types: movie, series, anime, animation)
+       ============================================================ */
     function openWatchlistModal() {
       openModalWithContent('افزودن به لیست تماشا', `
         <form onsubmit="handleSaveWatchlist(event)" class="space-y-4">
           <div>
             <label class="block text-xs font-semibold text-slate-700 mb-1.5">نام اثر</label>
-            <input id="inputWatchTitle" type="text" required placeholder="مثلاً: Interstellar یا فرین" class="w-full px-4 py-3 rounded-2xl border border-slate-200 focus:outline-none focus:border-purple-500 text-sm">
+            <input id="inputWatchTitle" type="text" required placeholder="مثلاً: Interstellar یا موشوکو تنسی" class="w-full px-4 py-3 rounded-2xl border border-slate-200 focus:outline-none focus:border-purple-500 text-sm">
           </div>
           <div>
             <label class="block text-xs font-semibold text-slate-700 mb-1.5">نوع</label>
@@ -3191,7 +2833,7 @@
           </div>
           <div>
             <label class="block text-xs font-semibold text-slate-700 mb-1.5">خلاصه (اختیاری)</label>
-            <textarea id="inputWatchOverview" rows="2" placeholder="۲-۳ خط توضیح..." class="w-full px-4 py-3 rounded-2xl border border-slate-200 text-xs leading-relaxed"></textarea>
+            <textarea id="inputWatchOverview" rows="3" placeholder="۲-۳ خط توضیح..." class="w-full px-4 py-3 rounded-2xl border border-slate-200 text-xs leading-relaxed"></textarea>
           </div>
           <div class="grid grid-cols-2 gap-3">
             <div>
@@ -3205,17 +2847,26 @@
               <input id="inputWatchRating" type="number" min="1" max="5" value="5" class="w-full px-4 py-3 rounded-2xl border border-slate-200 text-sm">
             </div>
           </div>
-          <div id="watchTotalWrapper" style="display:none;">
-            <label class="block text-xs font-semibold text-slate-700 mb-1.5">تعداد کل قسمت‌ها</label>
-            <input id="inputWatchTotal" type="number" min="0" placeholder="12" class="w-full px-4 py-3 rounded-2xl border border-slate-200 text-sm">
+          <div id="watchSeasonWrapper" style="display:none;" class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="block text-xs font-semibold text-slate-700 mb-1.5">تعداد فصل‌ها</label>
+              <input id="inputWatchTotalSeasons" type="number" min="1" value="1" class="w-full px-4 py-3 rounded-2xl border border-slate-200 text-sm">
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-slate-700 mb-1.5">قسمت هر فصل</label>
+              <input id="inputWatchEpsPerSeason" type="number" min="0" placeholder="12" class="w-full px-4 py-3 rounded-2xl border border-slate-200 text-sm">
+            </div>
           </div>
           <button type="submit" class="w-full py-3.5 rounded-2xl bg-purple-600 text-white font-bold text-xs active:scale-95 transition">افزودن</button>
         </form>`);
       setTimeout(() => {
         const typeSel = document.getElementById('selectWatchType');
-        const totalWrap = document.getElementById('watchTotalWrapper');
-        if (typeSel && totalWrap) {
-          const toggle = () => { totalWrap.style.display = (typeSel.value === 'series' || typeSel.value === 'anime') ? 'block' : 'none'; };
+        const seasonWrap = document.getElementById('watchSeasonWrapper');
+        if (typeSel && seasonWrap) {
+          const toggle = () => {
+            const v = typeSel.value;
+            seasonWrap.style.display = (v === 'series' || v === 'anime') ? 'grid' : 'none';
+          };
           typeSel.addEventListener('change', toggle);
           toggle();
         }
@@ -3230,13 +2881,17 @@
       const btn = document.getElementById('watchSearchBtn');
       if (!title) { results.innerHTML = `<p class="text-xs text-rose-500 text-center py-2">اول نام اثر رو بنویس</p>`; return; }
 
-      results.innerHTML = `<div class="text-center py-3 text-xs text-slate-400"><i class="fa-solid fa-spinner fa-spin"></i> جستجو...</div>`;
+      const aliasHit = normalizeAlias(title);
+      results.innerHTML = `<div class="text-center py-3 text-xs text-slate-400">
+        <i class="fa-solid fa-spinner fa-spin"></i> جستجو...${aliasHit ? `<br><span class="text-[10px] text-emerald-600 mt-1 inline-block">تشخیص داده شد: ${escapeHtml(aliasHit)}</span>` : ''}
+      </div>`;
       if (btn) btn.disabled = true;
 
       let items = [];
       if (type === 'movie') items = await searchTMDB(title, 'movie');
       else if (type === 'series') items = await searchTMDB(title, 'tv');
       else if (type === 'anime') items = await searchJikan(title);
+      else if (type === 'animation') items = await searchTMDB(title, 'movie'); // انیمیشن هم از TMDB
 
       if (btn) btn.disabled = false;
 
@@ -3265,6 +2920,10 @@
       document.getElementById('inputWatchPoster').value = it.poster;
       const overviewEl = document.getElementById('inputWatchOverview');
       if (overviewEl && it.overview) overviewEl.value = it.overview;
+      if (it.episodes && it.episodes > 0) {
+        const epsInput = document.getElementById('inputWatchEpsPerSeason');
+        if (epsInput && !epsInput.value) epsInput.value = it.episodes;
+      }
       document.querySelectorAll('#watchSearchResults .search-result-item').forEach((el, idx) => {
         el.style.borderColor = idx === i ? '#f43f6e' : '#e2e8f0';
         el.style.background = idx === i ? '#fff5f7' : '#fff';
@@ -3278,9 +2937,11 @@
       const type = document.getElementById('selectWatchType').value;
       const status = document.getElementById('selectWatchStatus').value;
       const rating = document.getElementById('inputWatchRating').value;
-      const totalEpisodes = Number(document.getElementById('inputWatchTotal')?.value) || 0;
       const posterUrl = document.getElementById('inputWatchPoster').value.trim();
       const overview = document.getElementById('inputWatchOverview').value.trim();
+      const totalSeasons = Number(document.getElementById('inputWatchTotalSeasons')?.value) || 1;
+      const epsPerSeason = Number(document.getElementById('inputWatchEpsPerSeason')?.value) || 0;
+      const totalEpisodes = epsPerSeason * totalSeasons;
       if (!title) return;
       if (!appState.watchList) appState.watchList = [];
       appState.watchList.push({
@@ -3289,7 +2950,10 @@
         originalTitle: _watchSearchSelection?.originalTitle || '',
         posterUrl,
         overview: overview || (_watchSearchSelection?.overview || ''),
+        currentSeason: 1,
+        totalSeasons,
         currentEpisode: 0,
+        episodesPerSeason: epsPerSeason,
         totalEpisodes,
         lastWatched: null,
         createdAt: new Date().toISOString()
@@ -3313,8 +2977,18 @@
           ${isSerial ? `
           <div class="grid grid-cols-2 gap-3">
             <div>
-              <label class="block text-xs font-semibold text-slate-700 mb-1.5">کل قسمت‌ها</label>
-              <input id="editWatchTotal" type="number" min="0" value="${item.totalEpisodes || ''}" class="w-full px-4 py-3 rounded-2xl border border-slate-200 text-sm">
+              <label class="block text-xs font-semibold text-slate-700 mb-1.5">تعداد فصل‌ها</label>
+              <input id="editWatchTotalSeasons" type="number" min="1" value="${item.totalSeasons || 1}" class="w-full px-4 py-3 rounded-2xl border border-slate-200 text-sm">
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-slate-700 mb-1.5">قسمت هر فصل</label>
+              <input id="editWatchEpsPerSeason" type="number" min="0" value="${item.episodesPerSeason || ''}" class="w-full px-4 py-3 rounded-2xl border border-slate-200 text-sm">
+            </div>
+          </div>
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="block text-xs font-semibold text-slate-700 mb-1.5">فصل فعلی</label>
+              <input id="editWatchCurrentSeason" type="number" min="1" value="${item.currentSeason || 1}" class="w-full px-4 py-3 rounded-2xl border border-slate-200 text-sm">
             </div>
             <div>
               <label class="block text-xs font-semibold text-slate-700 mb-1.5">قسمت فعلی</label>
@@ -3353,15 +3027,22 @@
       if (!item) return;
       const newTitle = document.getElementById('editWatchTitle').value.trim();
       if (newTitle) item.title = newTitle;
-      const totalEl = document.getElementById('editWatchTotal');
+      const totalSeasonsEl = document.getElementById('editWatchTotalSeasons');
+      const epsPerSeasonEl = document.getElementById('editWatchEpsPerSeason');
+      const curSeasonEl = document.getElementById('editWatchCurrentSeason');
       const curEl = document.getElementById('editWatchCurrent');
-      if (totalEl) item.totalEpisodes = Math.max(0, Number(totalEl.value) || 0);
+      if (totalSeasonsEl) item.totalSeasons = Math.max(1, Number(totalSeasonsEl.value) || 1);
+      if (epsPerSeasonEl) item.episodesPerSeason = Math.max(0, Number(epsPerSeasonEl.value) || 0);
+      if (curSeasonEl) item.currentSeason = Math.max(1, Number(curSeasonEl.value) || 1);
       if (curEl) item.currentEpisode = Math.max(0, Number(curEl.value) || 0);
+      item.totalEpisodes = (item.episodesPerSeason || 0) * (item.totalSeasons || 1);
       item.status = document.getElementById('editWatchStatus').value;
       item.rating = document.getElementById('editWatchRating').value;
       item.posterUrl = document.getElementById('editWatchPoster').value.trim();
       item.overview = document.getElementById('editWatchOverview').value.trim();
-      if (item.totalEpisodes > 0 && item.currentEpisode >= item.totalEpisodes) item.status = 'watched';
+      const totalEps = item.totalEpisodes;
+      const watchedTotal = (item.currentSeason - 1) * item.episodesPerSeason + item.currentEpisode;
+      if (totalEps > 0 && watchedTotal >= totalEps) item.status = 'watched';
       if (item.currentEpisode > 0 && item.status === 'queued') item.status = 'watching';
       playTone(600, 'sine', 0.1);
       saveState();
@@ -3421,10 +3102,8 @@
       if (!title) { results.innerHTML = `<p class="text-xs text-rose-500 text-center py-2">اول نام بازی رو بنویس</p>`; return; }
       results.innerHTML = `<div class="text-center py-3 text-xs text-slate-400"><i class="fa-solid fa-spinner fa-spin"></i> جستجو...</div>`;
       if (btn) btn.disabled = true;
-
       const items = await searchCheapShark(title);
       if (btn) btn.disabled = false;
-
       if (items.length === 0) {
         results.innerHTML = `<p class="text-xs text-slate-400 text-center py-2">چیزی پیدا نشد — خودت پوستر رو پیست کن</p>`;
         return;
@@ -3540,12 +3219,12 @@
     function openMoodModal(targetPersona) {
       tempMoodKey = (appState.moods && appState.moods[targetPersona]?.key) || 'smile';
       const moods = [
-        { key: 'love', text: 'غرق در عشق', icon: ICONS_3D.love },
-        { key: 'smile', text: 'خوشحال و پرانرژی', icon: ICONS_3D.smile },
-        { key: 'sleepy', text: 'خسته ولی راضی', icon: ICONS_3D.sleepy },
-        { key: 'pleading', text: 'نیاز به توجه', icon: ICONS_3D.pleading },
-        { key: 'coffee', text: 'در حال کار', icon: ICONS_3D.coffee },
-        { key: 'pizza', text: 'گرسنه', icon: ICONS_3D.pizza }
+        { key:'love', text:'غرق در عشق', icon:ICONS_3D.love },
+        { key:'smile', text:'خوشحال و پرانرژی', icon:ICONS_3D.smile },
+        { key:'sleepy', text:'خسته ولی راضی', icon:ICONS_3D.sleepy },
+        { key:'pleading', text:'نیاز به توجه', icon:ICONS_3D.pleading },
+        { key:'coffee', text:'در حال کار', icon:ICONS_3D.coffee },
+        { key:'pizza', text:'گرسنه', icon:ICONS_3D.pizza }
       ];
       const cur = (appState.moods && appState.moods[targetPersona]?.text) || '';
       openModalWithContent(`احوال امروزِ ${targetPersona === 'p1' ? 'امیرمحمد' : 'آرمیتا'}`, `
@@ -3578,7 +3257,6 @@
       const txt = document.getElementById('inputCustomMoodText').value.trim() || 'خوب';
       if (!appState.moods) appState.moods = {};
       appState.moods[targetPersona] = { key: tempMoodKey || 'smile', text: txt };
-      // ذخیره در تاریخچه
       if (!appState.moodHistory) appState.moodHistory = {};
       const todayKey = getTodayKey();
       appState.moodHistory[`${todayKey}_${targetPersona}`] = { key: tempMoodKey || 'smile', text: txt };
@@ -3634,7 +3312,7 @@
       closeModal();
     }
 
-    /* ---------- NOTE (نامه) ---------- */
+    /* ---------- NOTE ---------- */
     function openNoteModal() {
       openModalWithContent('نوشتن نامه عاشقانه', `
         <form onsubmit="handleSaveNote(event)" class="space-y-4">
@@ -3658,18 +3336,140 @@
     }
 
     /* ============================================================
+       DIARY POST MODAL — با آپلود عکس
+       ============================================================ */
+    function openDiaryPostModal(editId) {
+      const post = editId ? (appState.diary || []).find(d => d.id === editId) : null;
+      const now = getNowJalaliString();
+      const todayLabel = `${toFa(now.jd)} ${JALALI_MONTHS[now.jm - 1]}`;
+      _pendingDiaryImage = post?.imageUrl || null;
+      editingDiaryId = editId || null;
+
+      openModalWithContent(editId ? 'ویرایش خاطره' : `خاطره جدید — ${todayLabel}`, `
+        <form onsubmit="handleSaveDiaryPost(event, ${editId ? `'${editId}'` : 'null'})" class="space-y-4">
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1.5">متن خاطره</label>
+            <textarea id="diaryText" required rows="4" placeholder="امروز چه خبر بود؟..." class="w-full px-4 py-3 rounded-2xl border border-slate-200 focus:outline-none focus:border-rose-500 text-sm leading-relaxed">${post ? escapeHtml(post.text) : ''}</textarea>
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1.5">عکس (اختیاری)</label>
+            <div class="flex items-center gap-2">
+              <label class="flex-1 py-2.5 rounded-2xl bg-rose-50 hover:bg-rose-100 text-rose-600 text-xs font-bold flex items-center justify-center gap-2 cursor-pointer border border-rose-200">
+                <img src="${ICONS_3D.camera}" class="w-4 h-4" alt="" />
+                <span>انتخاب عکس</span>
+                <input type="file" accept="image/*" onchange="handleDiaryImageSelect(event)" class="hidden" />
+              </label>
+              <button type="button" onclick="removeDiaryImage()" id="diaryRemoveBtn" class="px-3 py-2.5 rounded-2xl bg-slate-100 text-slate-600 text-xs font-bold ${post?.imageUrl ? '' : 'hidden'}">حذف</button>
+            </div>
+            <div id="diaryImagePreviewWrap" class="mt-2 ${post?.imageUrl ? '' : 'hidden'}">
+              <img id="diaryImagePreview" src="${post?.imageUrl || ''}" class="diary-img" alt="" />
+            </div>
+          </div>
+          <button type="submit" class="w-full py-3.5 rounded-2xl bg-rose-500 text-white font-bold text-xs active:scale-95 transition">${editId ? 'ذخیره تغییر' : 'ثبت خاطره'}</button>
+        </form>`);
+      setTimeout(() => document.getElementById('diaryText')?.focus(), 100);
+    }
+
+    async function handleDiaryImageSelect(e) {
+      const file = e.target.files?.[0];
+      if (!file) return;
+      try {
+        const compressed = await compressImage(file, 800, 0.7);
+        _pendingDiaryImage = compressed;
+        const preview = document.getElementById('diaryImagePreview');
+        const wrap = document.getElementById('diaryImagePreviewWrap');
+        const removeBtn = document.getElementById('diaryRemoveBtn');
+        if (preview) preview.src = compressed;
+        if (wrap) wrap.classList.remove('hidden');
+        if (removeBtn) removeBtn.classList.remove('hidden');
+      } catch (err) {
+        alert('خطا در خواندن عکس');
+      }
+    }
+
+    function removeDiaryImage() {
+      _pendingDiaryImage = null;
+      const wrap = document.getElementById('diaryImagePreviewWrap');
+      const removeBtn = document.getElementById('diaryRemoveBtn');
+      if (wrap) wrap.classList.add('hidden');
+      if (removeBtn) removeBtn.classList.add('hidden');
+    }
+
+    function handleSaveDiaryPost(e, editId) {
+      e.preventDefault();
+      const text = document.getElementById('diaryText').value.trim();
+      if (!text) return;
+      const now = getNowJalaliString();
+      const todayKey = getTodayKey();
+      const timeStr = `${String(new Date().getHours()).padStart(2, '0')}:${String(new Date().getMinutes()).padStart(2, '0')}`;
+
+      if (editId) {
+        const post = (appState.diary || []).find(d => d.id === editId);
+        if (post) { post.text = text; post.imageUrl = _pendingDiaryImage || ''; }
+        editingDiaryId = null;
+      } else {
+        appState.diary.push({
+          id: 'd_' + Date.now(),
+          text,
+          author: currentPersona,
+          dateKey: todayKey,
+          time: toFa(timeStr),
+          imageUrl: _pendingDiaryImage || '',
+          createdAt: new Date().toISOString()
+        });
+      }
+      _pendingDiaryImage = null;
+      saveState();
+      closeModal();
+      renderDiary();
+      playTone(600, 'sine', 0.1);
+    }
+
+    /* ============================================================
        SETTINGS
        ============================================================ */
     function openSettingsModal() {
+      const currentKey = getOpenRouterKey();
+      const currentModel = getOpenRouterModel();
+      const reminderOn = getReminderEnabled();
+      const keyPreview = currentKey ? `••••••${currentKey.slice(-6)}` : 'ثبت نشده';
+
       openModalWithContent('تنظیمات', `
         <div class="space-y-4 text-xs">
-          <div>
+
+          <!-- OpenRouter API Key -->
+          <div class="p-3 bg-purple-50/60 border border-purple-200 rounded-2xl space-y-2">
+            <p class="font-bold text-purple-900 flex items-center gap-1.5">
+              <i class="fa-solid fa-key text-purple-500"></i>
+              <span>کلید OpenRouter (برای ترجمه هوشمند)</span>
+            </p>
+            <p class="text-[10px] text-purple-700">کلید فعلی: <span dir="ltr" class="font-mono">${keyPreview}</span></p>
+            <input id="inputOpenRouterKey" type="password" placeholder="sk-or-v1-..." class="w-full px-3 py-2 rounded-xl bg-white border border-purple-200 text-[11px]" dir="ltr">
+            <input id="inputOpenRouterModel" type="text" value="${escapeHtml(currentModel)}" placeholder="meta-llama/llama-3.3-70b-instruct:free" class="w-full px-3 py-2 rounded-xl bg-white border border-purple-200 text-[11px]" dir="ltr">
+            <button onclick="saveOpenRouterKey()" class="w-full py-2 rounded-xl bg-purple-500 text-white font-bold text-[11px]">ذخیره کلید و مدل</button>
+          </div>
+
+          <!-- Toggle یادآور -->
+          <div class="flex items-center justify-between p-3 bg-rose-50/60 border border-rose-200 rounded-2xl">
+            <div>
+              <p class="font-bold text-rose-900">یادآور بنر</p>
+              <p class="text-[10px] text-rose-600 mt-0.5">نمایش بنر برای مناسبت‌های نزدیک</p>
+            </div>
+            <button onclick="toggleReminderSetting()" id="reminderToggleBtn" class="w-12 h-6 rounded-full p-0.5 flex items-center transition ${reminderOn ? 'bg-rose-500 justify-end' : 'bg-slate-300 justify-start'}">
+              <span class="bg-white w-5 h-5 rounded-full shadow"></span>
+            </button>
+          </div>
+
+          <!-- مناسبت‌های شخصی -->
+          <div class="pt-3 border-t border-slate-100">
             <p class="font-bold text-slate-700 mb-2">مناسبت‌های شخصی سالانه</p>
             <div id="personalDatesList" class="space-y-1.5 mb-2"></div>
             <button onclick="openAddPersonalDateModal()" class="w-full py-2.5 rounded-2xl bg-rose-100 text-rose-700 font-bold flex items-center justify-center gap-2">
               <i class="fa-solid fa-plus"></i> افزودن مناسبت
             </button>
           </div>
+
+          <!-- پشتیبان‌گیری -->
           <div class="pt-3 border-t border-slate-100 space-y-2">
             <button onclick="downloadBackupJson()" class="w-full py-2.5 rounded-2xl bg-slate-800 text-white font-bold flex items-center justify-center gap-2">
               <i class="fa-solid fa-download"></i> دانلود پشتیبان
@@ -3679,8 +3479,27 @@
               <input type="file" accept=".json" onchange="restoreBackupJson(event)" class="hidden" />
             </label>
           </div>
+
         </div>`);
       setTimeout(renderPersonalDatesSettings, 80);
+    }
+
+    function saveOpenRouterKey() {
+      const keyVal = document.getElementById('inputOpenRouterKey').value.trim();
+      const modelVal = document.getElementById('inputOpenRouterModel').value.trim();
+      if (keyVal) localStorage.setItem('twoOfUs_openrouter_key', keyVal);
+      if (modelVal) localStorage.setItem('twoOfUs_openrouter_model', modelVal);
+      playTone(600, 'sine', 0.1);
+      showInAppBanner('ذخیره شد', 'کلید و مدل OpenRouter به‌روزرسانی شد', 'checkBtn');
+      closeModal();
+    }
+
+    function toggleReminderSetting() {
+      const newVal = !getReminderEnabled();
+      localStorage.setItem('twoOfUs_reminder_enabled', newVal ? 'true' : 'false');
+      const btn = document.getElementById('reminderToggleBtn');
+      if (btn) btn.className = `w-12 h-6 rounded-full p-0.5 flex items-center transition ${newVal ? 'bg-rose-500 justify-end' : 'bg-slate-300 justify-start'}`;
+      playTone(newVal ? 700 : 400, 'sine', 0.1);
     }
 
     function renderPersonalDatesSettings() {
@@ -3708,12 +3527,12 @@
 
     function openAddPersonalDateModal() {
       const icons = [
-        { key: 'birthday', label: 'تولد' },
-        { key: 'anniversary', label: 'سالگرد' },
-        { key: 'celebration', label: 'جشن' },
-        { key: 'travel', label: 'سفر' },
-        { key: 'work', label: 'کار' },
-        { key: 'rest', label: 'استراحت' }
+        { key:'birthday', label:'تولد' },
+        { key:'anniversary', label:'سالگرد' },
+        { key:'celebration', label:'جشن' },
+        { key:'travel', label:'سفر' },
+        { key:'work', label:'کار' },
+        { key:'rest', label:'استراحت' }
       ];
       openModalWithContent('افزودن مناسبت شخصی', `
         <form onsubmit="handleSavePersonalDate(event)" class="space-y-4">
