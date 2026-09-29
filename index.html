@@ -66,7 +66,6 @@
     .bg-particle { position: absolute; border-radius: 50%; background: radial-gradient(circle, rgba(244,63,110,0.3), rgba(244,63,110,0.05)); animation: floatUp linear infinite; pointer-events: none; }
     @keyframes floatUp { 0% { transform: translateY(0) scale(1); opacity: 0; } 20% { opacity: 0.6; } 80% { opacity: 0.3; } 100% { transform: translateY(-100vh) scale(0.4); opacity: 0; } }
 
-    /* ========== BOTTOM NAV ========== */
     .bottom-nav { position: fixed; bottom: max(0.6rem, calc(var(--sab) + 0.4rem)); left: 50%; transform: translateX(-50%); width: calc(100% - 0.75rem); max-width: 580px; z-index: 40; pointer-events: none; }
     .bottom-nav-bar { position: relative; height: var(--nav-h); background: linear-gradient(180deg, #ffffff 0%, #fff5f7 100%); border-radius: 24px; box-shadow: 0 20px 40px -14px rgba(244,63,110,0.18), 0 4px 12px rgba(244,63,110,0.06), 0 0 0 1px rgba(244,63,110,0.10), inset 0 -2px 0 rgba(244,63,110,0.06); pointer-events: auto; overflow: visible; }
     .bottom-nav-bubble { position: absolute; top: calc((var(--nav-h) - var(--bubble-size)) / -1.5); left: 0; width: var(--bubble-size); height: var(--bubble-size); border-radius: 50%; background: linear-gradient(135deg, #fb7193 0%, #f43f6e 45%, #be1248 100%); box-shadow: 0 14px 28px rgba(244,63,110,0.40), 0 6px 12px rgba(244,63,110,0.20), inset 0 3px 0 rgba(255,255,255,0.55), inset 0 -3px 6px rgba(0,0,0,0.12); transform: translateX(0); transition: transform 0.6s cubic-bezier(0.34,1.35,0.5,1); will-change: transform; pointer-events: none; z-index: 2; display: flex; align-items: center; justify-content: center; }
@@ -85,11 +84,9 @@
       .nav-item .nav-label { font-size: 11px; }
     }
 
-    /* ========== TAB TRANSITIONS ========== */
     .tab-section { animation: tabFadeIn 0.28s ease-out; }
     @keyframes tabFadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
 
-    /* ========== CALENDAR ========== */
     .cal-day { position: relative; overflow: hidden; isolation: isolate; transition: all 0.2s; }
     .cal-day-bg { position: absolute; inset: 0; background-position: center; background-repeat: no-repeat; z-index: 0; pointer-events: none; }
     .cal-day-num { position: relative; z-index: 2; font-weight: 900; text-shadow: 0 1px 3px rgba(255,255,255,0.9), 0 0 8px rgba(255,255,255,0.6); }
@@ -102,14 +99,12 @@
     .cal-day-personal { background: linear-gradient(135deg, #fecdd7 0%, #fb7193 60%, #f43f6e 100%); }
     .cal-day-today { outline: 2px solid #f43f6e; outline-offset: 1px; }
 
-    /* ========== MEDIA ========== */
     .media-poster { width: 82px; height: 118px; object-fit: cover; border-radius: 12px; flex-shrink: 0; background: #f3f4f6; box-shadow: 0 4px 10px rgba(0,0,0,0.08); }
     .media-poster-empty { width: 82px; height: 118px; display: flex; align-items: center; justify-content: center; border-radius: 12px; flex-shrink: 0; background: linear-gradient(135deg, #fff5f7, #fecdd7); }
     .media-overview { font-size: 10px; line-height: 1.45; color: #64748b; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; text-align: justify; }
     .search-result-item { display: flex; gap: 10px; padding: 8px; border-radius: 14px; border: 1px solid #e2e8f0; cursor: pointer; transition: all 0.2s; background: #fff; align-items: center; }
     .search-result-item:hover { border-color: #f43f6e; background: #fff5f7; }
 
-    /* ========== PERSONA MODAL ========== */
     .persona-modal-overlay { position: fixed; inset: 0; z-index: 100; background: linear-gradient(135deg, #fef2f5 0%, #fff5f7 100%); display: flex; align-items: center; justify-content: center; padding: 1rem; animation: personaFadeIn 0.5s ease-out; }
     @keyframes personaFadeIn { from { opacity: 0; } to { opacity: 1; } }
     .persona-card { width: 100%; max-width: 420px; background: #fff; border-radius: 32px; padding: 2rem 1.5rem; box-shadow: 0 30px 60px -20px rgba(244,63,110,0.25), 0 0 0 1px rgba(244,63,110,0.08); text-align: center; animation: personaPop 0.55s cubic-bezier(0.34,1.35,0.5,1); }
@@ -118,44 +113,16 @@
     .persona-avatar-btn:hover { border-color: #fda4b8; background: #ffe4e9; transform: translateY(-2px); }
     .persona-avatar-btn:active { transform: scale(0.95); }
 
-    /* ========== DIARY ========== */
     .diary-post { background: #fff; border-radius: 20px; padding: 12px; border: 1px solid #fce7f3; box-shadow: 0 4px 12px rgba(244,63,110,0.04); margin-bottom: 8px; }
     .diary-post.editing { border-color: #f43f6e; box-shadow: 0 0 0 3px rgba(244,63,110,0.15); }
     .diary-img { width: 100%; max-height: 280px; object-fit: cover; border-radius: 12px; margin-top: 8px; }
 
-    /* ========== MOOD HISTORY ========== */
     .mood-history-cell { aspect-ratio: 1; border-radius: 12px; display: flex; align-items: center; justify-content: center; background: #fff5f7; border: 1px solid #fce7f3; position: relative; overflow: hidden; }
     .mood-history-cell img { width: 70%; height: 70%; object-fit: contain; }
-
-    /* ========== IN-APP BANNER ========== */
-    #inAppBanner {
-      position: fixed;
-      bottom: calc(var(--sab) + var(--nav-h) + 0.75rem);
-      left: 50%;
-      transform: translateX(-50%) translateY(200%);
-      width: auto; max-width: 340px; min-width: 240px;
-      z-index: 45;
-      background: linear-gradient(135deg, #fff 0%, #fff5f7 100%);
-      border-radius: 16px;
-      padding: 8px 10px;
-      box-shadow: 0 12px 24px -8px rgba(244,63,110,0.32), 0 0 0 1px rgba(244,63,110,0.14);
-      transition: transform 0.5s cubic-bezier(0.34,1.35,0.5,1);
-      pointer-events: auto;
-      display: flex; align-items: center; gap: 8px;
-    }
-    #inAppBanner.show { transform: translateX(-50%) translateY(0); }
-    #inAppBanner .banner-icon { width: 32px; height: 32px; border-radius: 12px; background: #fff5f7; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-    #inAppBanner .banner-icon img { width: 22px; height: 22px; object-fit: contain; }
-    #inAppBanner .banner-text { flex: 1; min-width: 0; }
-    #inAppBanner .banner-title { font-size: 10.5px; font-weight: 800; color: #be1248; line-height: 1.2; }
-    #inAppBanner .banner-body { font-size: 10px; color: #64748b; line-height: 1.3; margin-top: 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    #inAppBanner .banner-close { width: 24px; height: 24px; border-radius: 8px; background: transparent; border: none; color: #94a3b8; display: flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0; transition: all 0.15s; -webkit-tap-highlight-color: transparent; font-size: 12px; }
-    #inAppBanner .banner-close:hover { background: #fee2e2; color: #e11d59; }
   </style>
 </head>
 <body class="text-slate-800 min-h-screen font-sans antialiased">
 
-  <!-- ============ PERSONA MODAL ============ -->
   <div id="personaModal" class="persona-modal-overlay">
     <div class="persona-card">
       <div class="w-16 h-16 mx-auto mb-3 rounded-3xl bg-gradient-to-tr from-rose-100 to-pink-50 flex items-center justify-center shadow-md border border-rose-100">
@@ -179,20 +146,6 @@
       </div>
       <p class="text-[10px] text-slate-400 mt-5 leading-relaxed">هر بار که اپ رو باز می‌کنی این سؤال پرسیده می‌شه</p>
     </div>
-  </div>
-
-  <!-- ============ بنر یادآور کوچیک ============ -->
-  <div id="inAppBanner">
-    <div class="banner-icon">
-      <img id="inAppBannerIcon" src="https://cdn.jsdelivr.net/gh/microsoft/fluentui-emoji@main/assets/Red%20heart/3D/red_heart_3d.png" alt="" />
-    </div>
-    <div class="banner-text">
-      <p id="inAppBannerTitle" class="banner-title">یادآور</p>
-      <p id="inAppBannerBody" class="banner-body">متن یادآور</p>
-    </div>
-    <button class="banner-close" onclick="hideInAppBanner()" aria-label="بستن">
-      <i class="fa-solid fa-xmark"></i>
-    </button>
   </div>
 
   <div id="bgParticles"></div>
@@ -559,7 +512,6 @@
             <i class="fa-solid fa-pen-fancy"></i> نامه
           </button>
         </div>
-
         <div class="pt-3 border-t border-slate-100 space-y-3">
           <div class="flex items-center justify-between">
             <h4 class="text-sm font-black text-slate-800 flex items-center gap-2">
@@ -572,7 +524,6 @@
           </div>
           <div id="diaryContainer" class="space-y-2"></div>
         </div>
-
         <div class="pt-3 border-t border-slate-100 space-y-3">
           <h4 class="text-sm font-black text-slate-800 flex items-center gap-2">
             <img src="https://cdn.jsdelivr.net/gh/microsoft/fluentui-emoji@main/assets/Love%20letter/3D/love_letter_3d.png" class="w-5 h-5" alt="" />
@@ -638,7 +589,7 @@
     const SUPABASE_KEY = "sb_publishable_b8-BEd1e8CWNkVdVvU4c-Q_Ir-isgoz";
     const ROOM_CODE = "amir-armita-us";
     const ANNIVERSARY_DATE = "2024-10-06";
-    const STATE_VERSION = 13;
+    const STATE_VERSION = 14;
     const TMDB_API_KEY = "29fb5c7e087065a22b71f28c6b1db7e8";
 
     function getOpenRouterKey() {
@@ -647,14 +598,11 @@
     function getOpenRouterModel() {
       try { return localStorage.getItem('twoOfUs_openrouter_model') || 'meta-llama/llama-3.3-70b-instruct:free'; } catch (e) { return 'meta-llama/llama-3.3-70b-instruct:free'; }
     }
-    function getReminderEnabled() {
-      try { return localStorage.getItem('twoOfUs_reminder_enabled') !== 'false'; } catch (e) { return true; }
-    }
 
     let supabaseClient = null;
     try { supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY); } catch (e) {}
 
-    /* Aliases for popular anime/movies — حل مشکل ترجمه */
+    /* Aliases for popular anime/movies */
     const ALIAS_MAP = {
       'موشوکو تنسی': 'Mushoku Tensei','موشوکو': 'Mushoku Tensei','تناسخ یک بیکار': 'Mushoku Tensei',
       'اتک آن تایتان': 'Attack on Titan','حمله به تایتان': 'Attack on Titan','شینگکی نو کیوجین': 'Attack on Titan',
@@ -679,7 +627,10 @@
       'گیم آو ترونز': 'Game of Thrones','شرلوک': 'Sherlock','منچستر بای د سی': 'Manchester by the Sea',
       'کازابلانکا': 'Casablanca','پدرخوانده': 'The Godfather','شهر خدا': 'City of God',
       'الدن رینگ': 'Elden Ring','لست آو آس': 'The Last of Us','رد دد ریدمپشن': 'Red Dead Redemption',
-      'جی تی ای': 'Grand Theft Auto','فورتنایت': 'Fortnite','ماینکرفت': 'Minecraft'
+      'جی تی ای': 'Grand Theft Auto','فورتنایت': 'Fortnite','ماینکرفت': 'Minecraft',
+      'طلسم شدگان': 'Spirited Away','شهر اشباح': 'Spirited Away','همسایه من توتورو': 'My Neighbor Totoro',
+      'پرنسس مونونوکه': 'Princess Mononoke','قلعه متحرک هاول': 'Howls Moving Castle',
+      'پونیو': 'Ponyo','باد برمی‌خیزد': 'The Wind Rises','شهر گمشده': 'The Lost City'
     };
 
     function normalizeAlias(str) {
@@ -692,7 +643,6 @@
       return '';
     }
 
-    /* ===== آیکون‌های تقویم ===== */
     const ICONS_CAL = { birthday:'icons/birthday.png', anniversary:'icons/anniversary.png', celebration:'icons/celebration.png', travel:'icons/travel.png', work:'icons/work.png', rest:'icons/rest.png' };
     const ICONS_CAL_FALLBACK = {
       birthday:'https://cdn.jsdelivr.net/gh/microsoft/fluentui-emoji@main/assets/Birthday%20cake/3D/birthday_cake_3d.png',
@@ -775,7 +725,6 @@
       setTimeout(() => playTone(783.99, 'sine', 0.25), 200);
     }
 
-    /* ===== اعداد فارسی ===== */
     function toFa(input) {
       if (input === null || input === undefined) return '';
       return String(input).replace(/\d/g, d => '۰۱۲۳۴۵۶۷۸۹'[parseInt(d, 10)]);
@@ -872,7 +821,6 @@
       { id:'watching', name:'در حال دیدن', icon:'play', color:'#06b6d4' },
       { id:'watched', name:'دیده شد', icon:'checkBtn', color:'#10b981' }
     ];
-    /* === ۴ نوع === */
     const WATCH_TYPES = [
       { id:'movie', name:'فیلم', icon:'clapper' },
       { id:'series', name:'سریال', icon:'tv' },
@@ -941,7 +889,6 @@
       initBgParticles();
       loadLocalState();
       initSupabaseSync();
-      setTimeout(() => { if (getReminderEnabled()) showInAppBannerForUpcomingEvent(); }, 1500);
 
       const now = new Date();
       const [jy, jm, jd] = gregorianToJalali(now.getFullYear(), now.getMonth() + 1, now.getDate());
@@ -959,9 +906,6 @@
       window.addEventListener('load', () => positionNavBubble(currentTab, false));
     });
 
-    /* ============================================================
-       PERSONA MODAL
-       ============================================================ */
     function pickPersonaStart(p) {
       setPersona(p);
       const modal = document.getElementById('personaModal');
@@ -1020,47 +964,6 @@
       const diffDays = Math.ceil(Math.abs(now - start) / 86400000);
       const el = document.getElementById('daysCount');
       if (el) el.innerText = toFaNum(diffDays);
-    }
-
-    /* ============================================================
-       IN-APP BANNER (کوچیک، پایین، قابل بستن)
-       ============================================================ */
-    function showInAppBanner(title, text, iconKey = 'heart') {
-      if (!getReminderEnabled()) return;
-      const banner = document.getElementById('inAppBanner');
-      const iconEl = document.getElementById('inAppBannerIcon');
-      const titleEl = document.getElementById('inAppBannerTitle');
-      const bodyEl = document.getElementById('inAppBannerBody');
-      if (!banner || !iconEl || !titleEl || !bodyEl) return;
-      iconEl.src = ICONS_3D[iconKey] || ICONS_3D.heart;
-      titleEl.innerText = title;
-      bodyEl.innerText = text;
-      banner.classList.add('show');
-      clearTimeout(window.__bannerTimer);
-      window.__bannerTimer = setTimeout(hideInAppBanner, 8000);
-    }
-
-    function hideInAppBanner() {
-      const banner = document.getElementById('inAppBanner');
-      if (banner) banner.classList.remove('show');
-    }
-
-    function showInAppBannerForUpcomingEvent() {
-      const now = getNowJalaliString();
-      const todayKey = `${now.jy}-${String(now.jm).padStart(2, '0')}-${String(now.jd).padStart(2, '0')}`;
-      const tomorrow = new Date(); tomorrow.setDate(tomorrow.getDate() + 1);
-      const [ty, tm, td] = gregorianToJalali(tomorrow.getFullYear(), tomorrow.getMonth() + 1, tomorrow.getDate());
-      const tomorrowKey = `${ty}-${String(tm).padStart(2, '0')}-${String(td).padStart(2, '0')}`;
-
-      for (const p of (appState.personalDates || [])) {
-        const thisYearKey = `${now.jy}-${p.md}`;
-        if (thisYearKey === todayKey) { showInAppBanner('امروز!', `${p.title} مبارک`, p.icon || 'birthday'); return; }
-        if (thisYearKey === tomorrowKey) { showInAppBanner('یادآور فردا', `${p.title} فردا`, p.icon || 'birthday'); return; }
-      }
-      for (const [md, info] of Object.entries(GIFT_EVENTS)) {
-        const thisYearKey = `${now.jy}-${md}`;
-        if (thisYearKey === todayKey) { showInAppBanner('امروز!', `${info.title} مبارک`, info.icon); return; }
-      }
     }
 
     /* ============================================================
@@ -1136,8 +1039,9 @@
             appState.watchList = appState.watchList.map(w => {
               if (!w) return null;
               const st = (w.status === 'watching' || w.status === 'watched' || w.status === 'queued') ? w.status : 'queued';
+              const type = ['movie','series','anime','animation'].includes(w.type) ? w.type : 'movie';
               return {
-                ...w, status: st,
+                ...w, status: st, type,
                 currentSeason: Number(w.currentSeason) || 1,
                 totalSeasons: Number(w.totalSeasons) || 1,
                 currentEpisode: Number(w.currentEpisode) || 0,
@@ -1240,7 +1144,6 @@
       if (t2) t2.innerText = appState.moods.p2?.text || 'شاد';
     }
 
-    /* ---------- MOOD HISTORY ---------- */
     function openMoodHistoryModal() {
       const days = [];
       for (let i = 29; i >= 0; i--) {
@@ -1279,7 +1182,6 @@
       `);
     }
 
-    /* ---------- GROCERIES ---------- */
     function renderGroceries() {
       const c = document.getElementById('groceryList');
       if (!c) return;
@@ -1311,7 +1213,6 @@
       saveState(); playTone(450);
     }
 
-    /* ---------- CHORES ---------- */
     function renderChoreFilters() {
       const box = document.getElementById('choreFilters');
       if (!box) return;
@@ -1354,7 +1255,6 @@
 
     function filterChores(id) { currentChoreFilter = id; renderChoreFilters(); renderChores(); }
 
-    /* ---------- BUDGET ---------- */
     function renderBudgetChart() {
       const expenses = appState.expenses || [];
       const total = expenses.reduce((s, x) => s + (Number(x.amount) || 0), 0);
@@ -1822,7 +1722,7 @@
         let data = await res.json();
         if (!Array.isArray(data) || data.length === 0) {
           const enQ = await smartTranslateFaToEn(query);
-          url = `https://www.cheapshark.com/api/1.0/games?title=${encodeURIComponent(enQ)}&limit=8`;
+          url = `https://www.cheapshark.com/api/1.0/games?title=${encodeURIComponent(enq)}&limit=8`;
           res = await fetch(url);
           data = await res.json();
         }
@@ -1844,7 +1744,7 @@
     }
 
     /* ============================================================
-       WATCHLIST (فیلم، سریال، انیمه، انیمیشن — یکجا)
+       WATCHLIST
        ============================================================ */
     function renderWatchStatusFilters() {
       const box = document.getElementById('watchStatusFilters');
@@ -1889,7 +1789,6 @@
       c.innerHTML = list.map(item => renderMediaCard(item)).join('');
     }
 
-    /* کارت مشترک برای همه انواع */
     function renderMediaCard(item) {
       const statusObj = WATCH_STATUSES.find(s => s.id === item.status) || WATCH_STATUSES[0];
       const typeObj = WATCH_TYPES.find(t => t.id === item.type) || WATCH_TYPES[0];
@@ -1903,7 +1802,6 @@
       const isSerial = (item.type === 'series' || item.type === 'anime');
       const showProgress = isSerial && totalEps > 0;
 
-      // رنگ اختصاصی هر نوع
       const typeColor = item.type === 'anime' ? 'text-pink-600' : item.type === 'animation' ? 'text-cyan-600' : 'text-purple-600';
       const typeBgGrad = item.type === 'anime' ? 'from-pink-400 to-rose-400' : item.type === 'animation' ? 'from-cyan-400 to-blue-400' : 'from-purple-400 to-rose-400';
 
@@ -2153,8 +2051,7 @@
       });
     }
 
-    /* فشرده‌سازی عکس */
-    async function compressImage(file, maxWidth = 800, quality = 0.7) {
+    async function compressImage(file, maxDim = 700, quality = 0.55) {
       return new Promise((resolve, reject) => {
         const reader = new FileReader();
         reader.onload = function (e) {
@@ -2162,7 +2059,12 @@
           img.onload = function () {
             const canvas = document.createElement('canvas');
             let w = img.width, h = img.height;
-            if (w > maxWidth) { h = Math.round((maxWidth / w) * h); w = maxWidth; }
+            const maxSide = Math.max(w, h);
+            if (maxSide > maxDim) {
+              const scale = maxDim / maxSide;
+              w = Math.round(w * scale);
+              h = Math.round(h * scale);
+            }
             canvas.width = w; canvas.height = h;
             const ctx = canvas.getContext('2d');
             ctx.drawImage(img, 0, 0, w, h);
@@ -2177,7 +2079,6 @@
       });
     }
 
-    /* ---------- UTILS ---------- */
     function escapeHtml(str) {
       if (str === null || str === undefined) return '';
       return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;');
@@ -2237,7 +2138,6 @@
 
       ctx.clearRect(0, 0, W, H);
 
-      // هاله
       const bgGrad = ctx.createRadialGradient(cx, cy, outerR * 0.9, cx, cy, outerR + 24);
       bgGrad.addColorStop(0, 'rgba(244, 63, 110, 0)');
       bgGrad.addColorStop(0.7, 'rgba(244, 63, 110, 0.08)');
@@ -2247,7 +2147,6 @@
       ctx.fillStyle = bgGrad;
       ctx.fill();
 
-      // رینگ صورتی
       const rimGrad = ctx.createLinearGradient(cx - outerR, cy - outerR, cx + outerR, cy + outerR);
       rimGrad.addColorStop(0, '#FECDD7');
       rimGrad.addColorStop(0.25, '#FB7193');
@@ -2264,7 +2163,6 @@
       ctx.lineWidth = 2;
       ctx.stroke();
 
-      // سگمنت‌ها
       ctx.save();
       ctx.translate(cx, cy);
       for (let i = 0; i < numSegments; i++) {
@@ -2282,7 +2180,6 @@
         ctx.fillStyle = grad;
         ctx.fill();
 
-        // براقیت
         ctx.save();
         ctx.globalCompositeOperation = 'overlay';
         const shine = ctx.createRadialGradient(0, -outerR * 0.55, outerR * 0.05, 0, 0, outerR);
@@ -2297,7 +2194,6 @@
         ctx.fill();
         ctx.restore();
 
-        // خط جداکننده
         ctx.beginPath();
         ctx.moveTo(0, 0);
         ctx.lineTo(Math.cos(start) * outerR, Math.sin(start) * outerR);
@@ -2305,7 +2201,6 @@
         ctx.lineWidth = 1.5;
         ctx.stroke();
 
-        // شماره فارسی
         ctx.save();
         ctx.rotate(start + arcSize / 2);
         ctx.textAlign = 'right';
@@ -2331,7 +2226,6 @@
       }
       ctx.restore();
 
-      // هاب مرکزی
       ctx.beginPath();
       ctx.arc(cx, cy + 4, innerR + 4, 0, 2 * Math.PI);
       ctx.fillStyle = 'rgba(190, 18, 72, 0.15)';
@@ -2528,7 +2422,6 @@
       saveState();
     }
 
-    /* افزایش یک قسمت — اگه آخرین قسمت فصل بود، خودکار می‌ره فصل بعد */
     function incrementEpisode(id) {
       const item = (appState.watchList || []).find(w => w.id === id);
       if (!item) return;
@@ -2544,7 +2437,7 @@
             curSeason++;
             cur = 1;
           } else {
-            cur = epsPerSeason; // آخرین قسمت فصل آخر
+            cur = epsPerSeason;
             item.status = 'watched';
           }
         }
@@ -2805,7 +2698,7 @@
     }
 
     /* ============================================================
-       WATCHLIST ADD (4 types: movie, series, anime, animation)
+       WATCHLIST ADD
        ============================================================ */
     function openWatchlistModal() {
       openModalWithContent('افزودن به لیست تماشا', `
@@ -2891,7 +2784,7 @@
       if (type === 'movie') items = await searchTMDB(title, 'movie');
       else if (type === 'series') items = await searchTMDB(title, 'tv');
       else if (type === 'anime') items = await searchJikan(title);
-      else if (type === 'animation') items = await searchTMDB(title, 'movie'); // انیمیشن هم از TMDB
+      else if (type === 'animation') items = await searchTMDB(title, 'movie');
 
       if (btn) btn.disabled = false;
 
@@ -2964,18 +2857,40 @@
       closeModal();
     }
 
+    /* ============================================================
+       WATCHLIST EDIT — با تغییر نوع + جستجوی دوباره
+       ============================================================ */
+    let _watchEditSelection = null;
+
     function openWatchEditModal(id) {
       const item = (appState.watchList || []).find(w => w.id === id);
       if (!item) return;
       const isSerial = item.type === 'series' || item.type === 'anime';
+      _watchEditSelection = null;
       openModalWithContent(`ویرایش «${escapeHtml(item.title)}»`, `
         <form onsubmit="handleSaveWatchEdit(event, '${id}')" class="space-y-4">
           <div>
             <label class="block text-xs font-semibold text-slate-700 mb-1.5">نام</label>
             <input id="editWatchTitle" type="text" required value="${escapeHtml(item.title)}" class="w-full px-4 py-3 rounded-2xl border border-slate-200 text-sm">
           </div>
-          ${isSerial ? `
-          <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1.5">نوع</label>
+            <select id="editWatchType" class="w-full px-4 py-3 rounded-2xl border border-slate-200 text-sm">
+              ${WATCH_TYPES.map(t => `<option value="${t.id}" ${t.id === item.type ? 'selected' : ''}>${t.name}</option>`).join('')}
+            </select>
+          </div>
+          <div>
+            <button type="button" onclick="doEditWatchSearch('${id}')" id="editWatchSearchBtn" class="w-full py-2.5 rounded-2xl bg-purple-100 hover:bg-purple-200 text-purple-700 font-bold text-xs flex items-center justify-center gap-2">
+              <i class="fa-solid fa-magnifying-glass"></i>
+              <span>جستجوی دوباره پوستر</span>
+            </button>
+          </div>
+          <div id="editWatchSearchResults" class="space-y-2 max-h-56 overflow-y-auto"></div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1.5">لینک پوستر</label>
+            <input id="editWatchPoster" type="url" value="${item.posterUrl || ''}" class="w-full px-4 py-3 rounded-2xl border border-slate-200 text-xs" dir="ltr">
+          </div>
+          <div id="editWatchSeasonWrap" class="grid grid-cols-2 gap-3 ${isSerial ? '' : 'hidden'}">
             <div>
               <label class="block text-xs font-semibold text-slate-700 mb-1.5">تعداد فصل‌ها</label>
               <input id="editWatchTotalSeasons" type="number" min="1" value="${item.totalSeasons || 1}" class="w-full px-4 py-3 rounded-2xl border border-slate-200 text-sm">
@@ -2985,7 +2900,7 @@
               <input id="editWatchEpsPerSeason" type="number" min="0" value="${item.episodesPerSeason || ''}" class="w-full px-4 py-3 rounded-2xl border border-slate-200 text-sm">
             </div>
           </div>
-          <div class="grid grid-cols-2 gap-3">
+          <div id="editWatchCurWrap" class="grid grid-cols-2 gap-3 ${isSerial ? '' : 'hidden'}">
             <div>
               <label class="block text-xs font-semibold text-slate-700 mb-1.5">فصل فعلی</label>
               <input id="editWatchCurrentSeason" type="number" min="1" value="${item.currentSeason || 1}" class="w-full px-4 py-3 rounded-2xl border border-slate-200 text-sm">
@@ -2994,7 +2909,7 @@
               <label class="block text-xs font-semibold text-slate-700 mb-1.5">قسمت فعلی</label>
               <input id="editWatchCurrent" type="number" min="0" value="${item.currentEpisode || 0}" class="w-full px-4 py-3 rounded-2xl border border-slate-200 text-sm">
             </div>
-          </div>` : ''}
+          </div>
           <div class="grid grid-cols-2 gap-3">
             <div>
               <label class="block text-xs font-semibold text-slate-700 mb-1.5">وضعیت</label>
@@ -3008,10 +2923,6 @@
             </div>
           </div>
           <div>
-            <label class="block text-xs font-semibold text-slate-700 mb-1.5">لینک پوستر</label>
-            <input id="editWatchPoster" type="url" value="${item.posterUrl || ''}" class="w-full px-4 py-3 rounded-2xl border border-slate-200 text-xs" dir="ltr">
-          </div>
-          <div>
             <label class="block text-xs font-semibold text-slate-700 mb-1.5">خلاصه</label>
             <textarea id="editWatchOverview" rows="3" class="w-full px-4 py-3 rounded-2xl border border-slate-200 text-xs leading-relaxed">${escapeHtml(item.overview || '')}</textarea>
           </div>
@@ -3020,13 +2931,72 @@
             <button type="button" onclick="closeModal()" class="px-4 py-3.5 rounded-2xl bg-slate-100 text-slate-600 font-bold text-xs">انصراف</button>
           </div>
         </form>`);
+      setTimeout(() => {
+        const typeSel = document.getElementById('editWatchType');
+        const seasonWrap = document.getElementById('editWatchSeasonWrap');
+        const curWrap = document.getElementById('editWatchCurWrap');
+        if (typeSel && seasonWrap && curWrap) {
+          const toggle = () => {
+            const isSer = (typeSel.value === 'series' || typeSel.value === 'anime');
+            seasonWrap.classList.toggle('hidden', !isSer);
+            curWrap.classList.toggle('hidden', !isSer);
+          };
+          typeSel.addEventListener('change', toggle);
+        }
+      }, 80);
     }
+
+    async function doEditWatchSearch(id) {
+      const title = document.getElementById('editWatchTitle').value.trim();
+      const type = document.getElementById('editWatchType').value;
+      const results = document.getElementById('editWatchSearchResults');
+      const btn = document.getElementById('editWatchSearchBtn');
+      if (!title) { results.innerHTML = `<p class="text-xs text-rose-500 text-center py-2">اول نام رو بنویس</p>`; return; }
+      results.innerHTML = `<div class="text-center py-3 text-xs text-slate-400"><i class="fa-solid fa-spinner fa-spin"></i> جستجو...</div>`;
+      if (btn) btn.disabled = true;
+      let items = [];
+      if (type === 'movie' || type === 'animation') items = await searchTMDB(title, 'movie');
+      else if (type === 'series') items = await searchTMDB(title, 'tv');
+      else if (type === 'anime') items = await searchJikan(title);
+      if (btn) btn.disabled = false;
+      if (!items.length) {
+        results.innerHTML = `<p class="text-xs text-slate-400 text-center py-2">چیزی پیدا نشد</p>`;
+        return;
+      }
+      results.innerHTML = items.map((it, i) => `
+        <div class="search-result-item" onclick="selectEditWatchResult(${i})" data-idx="${i}">
+          <img src="${it.poster || ''}" class="w-12 h-16 object-cover rounded-lg flex-shrink-0" alt="" onerror="this.style.background='#f0f0f0'" />
+          <div class="flex-1 min-w-0">
+            <p class="text-xs font-bold text-slate-800 truncate">${escapeHtml(it.title)}</p>
+            ${it.year ? `<p class="text-[10px] text-slate-400">${toFa(it.year)}</p>` : ''}
+          </div>
+        </div>`).join('');
+      window._editWatchSearchItems = items;
+    }
+
+    function selectEditWatchResult(i) {
+      const items = window._editWatchSearchItems || [];
+      const it = items[i];
+      if (!it) return;
+      _watchEditSelection = it;
+      document.getElementById('editWatchTitle').value = it.title;
+      document.getElementById('editWatchPoster').value = it.poster;
+      const ov = document.getElementById('editWatchOverview');
+      if (ov && it.overview) ov.value = it.overview;
+      document.querySelectorAll('#editWatchSearchResults .search-result-item').forEach((el, idx) => {
+        el.style.borderColor = idx === i ? '#f43f6e' : '#e2e8f0';
+        el.style.background = idx === i ? '#fff5f7' : '#fff';
+      });
+      playTone(600, 'sine', 0.08);
+    }
+
     function handleSaveWatchEdit(e, id) {
       e.preventDefault();
       const item = (appState.watchList || []).find(w => w.id === id);
       if (!item) return;
       const newTitle = document.getElementById('editWatchTitle').value.trim();
       if (newTitle) item.title = newTitle;
+      item.type = document.getElementById('editWatchType').value;
       const totalSeasonsEl = document.getElementById('editWatchTotalSeasons');
       const epsPerSeasonEl = document.getElementById('editWatchEpsPerSeason');
       const curSeasonEl = document.getElementById('editWatchCurrentSeason');
@@ -3040,6 +3010,10 @@
       item.rating = document.getElementById('editWatchRating').value;
       item.posterUrl = document.getElementById('editWatchPoster').value.trim();
       item.overview = document.getElementById('editWatchOverview').value.trim();
+      if (_watchEditSelection?.originalTitle && !item.originalTitle) {
+        item.originalTitle = _watchEditSelection.originalTitle;
+      }
+      _watchEditSelection = null;
       const totalEps = item.totalEpisodes;
       const watchedTotal = (item.currentSeason - 1) * item.episodesPerSeason + item.currentEpisode;
       if (totalEps > 0 && watchedTotal >= totalEps) item.status = 'watched';
@@ -3049,7 +3023,9 @@
       closeModal();
     }
 
-    /* ---------- GAME ADD/EDIT ---------- */
+    /* ============================================================
+       GAME ADD/EDIT
+       ============================================================ */
     function openGameModal() {
       openModalWithContent('افزودن بازی', `
         <form onsubmit="handleSaveGame(event)" class="space-y-4">
@@ -3156,15 +3132,24 @@
       closeModal();
     }
 
+    let _gameEditSelection = null;
     function openGameEditModal(id) {
       const g = (appState.gameList || []).find(x => x.id === id);
       if (!g) return;
+      _gameEditSelection = null;
       openModalWithContent(`ویرایش «${escapeHtml(g.title)}»`, `
         <form onsubmit="handleSaveGameEdit(event, '${id}')" class="space-y-4">
           <div>
             <label class="block text-xs font-semibold text-slate-700 mb-1.5">نام</label>
             <input id="editGameTitle" type="text" required value="${escapeHtml(g.title)}" class="w-full px-4 py-3 rounded-2xl border border-slate-200 text-sm">
           </div>
+          <div>
+            <button type="button" onclick="doEditGameSearch('${id}')" id="editGameSearchBtn" class="w-full py-2.5 rounded-2xl bg-indigo-100 hover:bg-indigo-200 text-indigo-700 font-bold text-xs flex items-center justify-center gap-2">
+              <i class="fa-solid fa-magnifying-glass"></i>
+              <span>جستجوی دوباره پوستر</span>
+            </button>
+          </div>
+          <div id="editGameSearchResults" class="space-y-2 max-h-56 overflow-y-auto"></div>
           <div class="grid grid-cols-2 gap-3">
             <div>
               <label class="block text-xs font-semibold text-slate-700 mb-1.5">پلتفرم</label>
@@ -3199,6 +3184,44 @@
           </div>
         </form>`);
     }
+
+    async function doEditGameSearch(id) {
+      const title = document.getElementById('editGameTitle').value.trim();
+      const results = document.getElementById('editGameSearchResults');
+      const btn = document.getElementById('editGameSearchBtn');
+      if (!title) { results.innerHTML = `<p class="text-xs text-rose-500 text-center py-2">اول نام رو بنویس</p>`; return; }
+      results.innerHTML = `<div class="text-center py-3 text-xs text-slate-400"><i class="fa-solid fa-spinner fa-spin"></i> جستجو...</div>`;
+      if (btn) btn.disabled = true;
+      const items = await searchCheapShark(title);
+      if (btn) btn.disabled = false;
+      if (!items.length) {
+        results.innerHTML = `<p class="text-xs text-slate-400 text-center py-2">چیزی پیدا نشد</p>`;
+        return;
+      }
+      results.innerHTML = items.map((it, i) => `
+        <div class="search-result-item" onclick="selectEditGameResult(${i})" data-idx="${i}">
+          <img src="${it.poster || ''}" class="w-12 h-16 object-cover rounded-lg flex-shrink-0" alt="" onerror="this.style.background='#f0f0f0'" />
+          <div class="flex-1 min-w-0">
+            <p class="text-xs font-bold text-slate-800 truncate" dir="ltr">${escapeHtml(it.title)}</p>
+          </div>
+        </div>`).join('');
+      window._editGameSearchItems = items;
+    }
+
+    function selectEditGameResult(i) {
+      const items = window._editGameSearchItems || [];
+      const it = items[i];
+      if (!it) return;
+      _gameEditSelection = it;
+      document.getElementById('editGameTitle').value = it.title;
+      document.getElementById('editGamePoster').value = it.poster;
+      document.querySelectorAll('#editGameSearchResults .search-result-item').forEach((el, idx) => {
+        el.style.borderColor = idx === i ? '#6366f1' : '#e2e8f0';
+        el.style.background = idx === i ? '#eef2ff' : '#fff';
+      });
+      playTone(600, 'sine', 0.08);
+    }
+
     function handleSaveGameEdit(e, id) {
       e.preventDefault();
       const g = (appState.gameList || []).find(x => x.id === id);
@@ -3209,6 +3232,10 @@
       g.rating = document.getElementById('editGameRating').value;
       g.hours = Number(document.getElementById('editGameHours').value) || 0;
       g.posterUrl = document.getElementById('editGamePoster').value.trim();
+      if (_gameEditSelection?.originalTitle && !g.originalTitle) {
+        g.originalTitle = _gameEditSelection.originalTitle;
+      }
+      _gameEditSelection = null;
       playTone(600, 'sine', 0.1);
       saveState();
       closeModal();
@@ -3374,7 +3401,7 @@
       const file = e.target.files?.[0];
       if (!file) return;
       try {
-        const compressed = await compressImage(file, 800, 0.7);
+        const compressed = await compressImage(file, 700, 0.55);
         _pendingDiaryImage = compressed;
         const preview = document.getElementById('diaryImagePreview');
         const wrap = document.getElementById('diaryImagePreviewWrap');
@@ -3399,7 +3426,6 @@
       e.preventDefault();
       const text = document.getElementById('diaryText').value.trim();
       if (!text) return;
-      const now = getNowJalaliString();
       const todayKey = getTodayKey();
       const timeStr = `${String(new Date().getHours()).padStart(2, '0')}:${String(new Date().getMinutes()).padStart(2, '0')}`;
 
@@ -3431,7 +3457,6 @@
     function openSettingsModal() {
       const currentKey = getOpenRouterKey();
       const currentModel = getOpenRouterModel();
-      const reminderOn = getReminderEnabled();
       const keyPreview = currentKey ? `••••••${currentKey.slice(-6)}` : 'ثبت نشده';
 
       openModalWithContent('تنظیمات', `
@@ -3447,17 +3472,6 @@
             <input id="inputOpenRouterKey" type="password" placeholder="sk-or-v1-..." class="w-full px-3 py-2 rounded-xl bg-white border border-purple-200 text-[11px]" dir="ltr">
             <input id="inputOpenRouterModel" type="text" value="${escapeHtml(currentModel)}" placeholder="meta-llama/llama-3.3-70b-instruct:free" class="w-full px-3 py-2 rounded-xl bg-white border border-purple-200 text-[11px]" dir="ltr">
             <button onclick="saveOpenRouterKey()" class="w-full py-2 rounded-xl bg-purple-500 text-white font-bold text-[11px]">ذخیره کلید و مدل</button>
-          </div>
-
-          <!-- Toggle یادآور -->
-          <div class="flex items-center justify-between p-3 bg-rose-50/60 border border-rose-200 rounded-2xl">
-            <div>
-              <p class="font-bold text-rose-900">یادآور بنر</p>
-              <p class="text-[10px] text-rose-600 mt-0.5">نمایش بنر برای مناسبت‌های نزدیک</p>
-            </div>
-            <button onclick="toggleReminderSetting()" id="reminderToggleBtn" class="w-12 h-6 rounded-full p-0.5 flex items-center transition ${reminderOn ? 'bg-rose-500 justify-end' : 'bg-slate-300 justify-start'}">
-              <span class="bg-white w-5 h-5 rounded-full shadow"></span>
-            </button>
           </div>
 
           <!-- مناسبت‌های شخصی -->
@@ -3490,16 +3504,7 @@
       if (keyVal) localStorage.setItem('twoOfUs_openrouter_key', keyVal);
       if (modelVal) localStorage.setItem('twoOfUs_openrouter_model', modelVal);
       playTone(600, 'sine', 0.1);
-      showInAppBanner('ذخیره شد', 'کلید و مدل OpenRouter به‌روزرسانی شد', 'checkBtn');
       closeModal();
-    }
-
-    function toggleReminderSetting() {
-      const newVal = !getReminderEnabled();
-      localStorage.setItem('twoOfUs_reminder_enabled', newVal ? 'true' : 'false');
-      const btn = document.getElementById('reminderToggleBtn');
-      if (btn) btn.className = `w-12 h-6 rounded-full p-0.5 flex items-center transition ${newVal ? 'bg-rose-500 justify-end' : 'bg-slate-300 justify-start'}`;
-      playTone(newVal ? 700 : 400, 'sine', 0.1);
     }
 
     function renderPersonalDatesSettings() {
@@ -3601,7 +3606,6 @@
       renderPersonalDatesSettings();
     }
 
-    /* ---------- BACKUP ---------- */
     function downloadBackupJson() {
       const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(appState, null, 2));
       const a = document.createElement('a');
