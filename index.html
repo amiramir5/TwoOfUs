@@ -425,7 +425,7 @@
             </div>
             <div>
               <h3 class="font-bold text-slate-900 text-base">بازی‌های دونفره</h3>
-              <p class="text-xs text-slate-400">با پوستر خودکار (CheapShark)</p>
+              <p class="text-xs text-slate-400">با پوستر خودکار (RAWG + CheapShark)</p>
             </div>
           </div>
           <button onclick="openGameModal()" class="w-10 h-10 rounded-2xl bg-indigo-600 text-white flex items-center justify-center shadow-md flex-shrink-0">
@@ -591,6 +591,8 @@
     const ANNIVERSARY_DATE = "2024-10-06";
     const STATE_VERSION = 15;
     const TMDB_API_KEY = "29fb5c7e087065a22b71f28c6b1db7e8";
+    /* 🆕 RAWG API — لایه اول جستجوی بازی */
+    const RAWG_API_KEY = "f391fbe43ebf447caf3618ca0d4cd0a7";
 
     function getOpenRouterKey() {
       try { return localStorage.getItem('twoOfUs_openrouter_key') || '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'; } catch (e) { return ''; }
@@ -731,6 +733,29 @@
     function toFaNum(num) {
       if (num === null || num === undefined || isNaN(num)) return '۰';
       return Number(num).toLocaleString('fa-IR');
+    }
+
+    /* ============================================================
+       🆕 TOAST SYSTEM — نمایش شفاف خطاها به کاربر
+       ============================================================ */
+    function showToast(message, duration = 4000) {
+      let box = document.getElementById('twoOfUs_toast');
+      if (!box) {
+        box = document.createElement('div');
+        box.id = 'twoOfUs_toast';
+        box.style.cssText = 'position:fixed;top:calc(env(safe-area-inset-top,0px) + 70px);left:50%;transform:translateX(-50%);z-index:9999;display:flex;flex-direction:column;gap:8px;width:calc(100% - 2rem);max-width:420px;pointer-events:none;';
+        document.body.appendChild(box);
+      }
+      const item = document.createElement('div');
+      item.style.cssText = 'background:#fff;border:1px solid #fecdd7;box-shadow:0 10px 30px -10px rgba(244,63,110,0.4);color:#1e293b;padding:12px 16px;border-radius:16px;font-family:Vazirmatn,sans-serif;font-size:12px;font-weight:700;line-height:1.6;pointer-events:auto;opacity:0;transform:translateY(-8px);transition:all .3s;';
+      item.textContent = message;
+      box.appendChild(item);
+      requestAnimationFrame(() => { item.style.opacity = '1'; item.style.transform = 'translateY(0)'; });
+      setTimeout(() => {
+        item.style.opacity = '0';
+        item.style.transform = 'translateY(-8px)';
+        setTimeout(() => item.remove(), 320);
+      }, duration);
     }
 
     const EMBEDDED_HOLIDAYS = {
@@ -878,8 +903,9 @@
       }
     };
 
-    /* ==================== END OF PART 1 ==================== */
-        /* ============================================================
+/* ==================== END OF PART 1 ==================== */
+    
+    /* ============================================================
        LIFECYCLE
        ============================================================ */
     document.addEventListener("DOMContentLoaded", () => {
@@ -1023,7 +1049,7 @@
     }
 
     /* ============================================================
-       STATE PERSIST
+       STATE PERSIST — با محافظت کامل در برابر خطا
        ============================================================ */
     function loadLocalState() {
       const local = localStorage.getItem(`twoOfUs_state_${ROOM_CODE}`);
@@ -1067,49 +1093,82 @@
           if (!appState.moodHistory || typeof appState.moodHistory !== 'object') appState.moodHistory = {};
           if (!Array.isArray(appState.diary)) appState.diary = [];
           appState.stateVersion = STATE_VERSION;
-        } catch (e) {}
+        } catch (e) {
+          console.warn('[loadLocalState] failed:', e);
+        }
       }
     }
 
     function saveState(broadcast = true) {
       appState.stateVersion = STATE_VERSION;
-      localStorage.setItem(`twoOfUs_state_${ROOM_CODE}`, JSON.stringify(appState));
-      renderAll();
+      let localOk = true;
+
+      // ۱. ذخیره محلی با محافظت کامل
+      try {
+        localStorage.setItem(`twoOfUs_state_${ROOM_CODE}`, JSON.stringify(appState));
+      } catch (err) {
+        localOk = false;
+        console.error('[saveState] localStorage failed:', err);
+        if (err.name === 'QuotaExceededError' || err.code === 22) {
+          showToast('⚠️ حافظه مرورگر پر شده! لطفاً تعدادی از خاطرات با عکس قدیمی رو حذف کن.', 7000);
+        } else {
+          showToast('خطای ذخیره محلی: ' + err.message, 6000);
+        }
+      }
+
+      // ۲. رندر مجدد (جدا از خطای localStorage)
+      try { renderAll(); } catch (e) { console.error('[renderAll]', e); }
+
+      // ۳. سینک با Supabase (جدا از خطاهای دیگر)
       if (supabaseClient && broadcast) {
         supabaseClient.from('couple_rooms').upsert({
           room_code: ROOM_CODE, state: appState, updated_at: new Date().toISOString()
-        }, { onConflict: 'room_code' }).then(({ error }) => { if (error) console.error(error); });
+        }, { onConflict: 'room_code' }).then(({ error }) => {
+          if (error) {
+            console.error('[Supabase upsert]', error);
+            showToast('سینک با سرور ناموفق بود — داده‌ها روی همین دستگاه ذخیره شدن.', 5000);
+          }
+        });
       }
+      return localOk;
     }
 
     async function initSupabaseSync() {
       if (!supabaseClient) return;
-      const { data } = await supabaseClient.from('couple_rooms').select('state').eq('room_code', ROOM_CODE).maybeSingle();
-      if (data && data.state) {
-        appState = { ...appState, ...data.state };
-        if (!Array.isArray(appState.dateIdeas) || appState.dateIdeas.length < 10 || (data.state.stateVersion || 0) < STATE_VERSION) {
-          appState.dateIdeas = [...DEFAULT_DATE_IDEAS];
-        }
-        if (!Array.isArray(appState.personalDates) || appState.personalDates.length === 0) {
-          appState.personalDates = [...DEFAULT_PERSONAL_DATES];
-        }
-        if (!appState.customDays || typeof appState.customDays !== 'object') appState.customDays = {};
-        if (!appState.moodHistory || typeof appState.moodHistory !== 'object') appState.moodHistory = {};
-        if (!Array.isArray(appState.diary)) appState.diary = [];
-        appState.stateVersion = STATE_VERSION;
-        localStorage.setItem(`twoOfUs_state_${ROOM_CODE}`, JSON.stringify(appState));
-        renderAll();
-      }
-      supabaseClient.channel(`room_${ROOM_CODE}`)
-        .on('postgres_changes', { event: '*', schema: 'public', table: 'couple_rooms', filter: `room_code=eq.${ROOM_CODE}` }, payload => {
-          if (payload.new && payload.new.state) {
-            appState = { ...appState, ...payload.new.state };
-            localStorage.setItem(`twoOfUs_state_${ROOM_CODE}`, JSON.stringify(appState));
-            renderAll();
+      try {
+        const { data } = await supabaseClient.from('couple_rooms').select('state').eq('room_code', ROOM_CODE).maybeSingle();
+        if (data && data.state) {
+          appState = { ...appState, ...data.state };
+          if (!Array.isArray(appState.dateIdeas) || appState.dateIdeas.length < 10 || (data.state.stateVersion || 0) < STATE_VERSION) {
+            appState.dateIdeas = [...DEFAULT_DATE_IDEAS];
           }
-        })
-        .on('broadcast', { event: 'love_kiss' }, payload => { showKissCelebration(payload.payload.senderName); })
-        .subscribe();
+          if (!Array.isArray(appState.personalDates) || appState.personalDates.length === 0) {
+            appState.personalDates = [...DEFAULT_PERSONAL_DATES];
+          }
+          if (!appState.customDays || typeof appState.customDays !== 'object') appState.customDays = {};
+          if (!appState.moodHistory || typeof appState.moodHistory !== 'object') appState.moodHistory = {};
+          if (!Array.isArray(appState.diary)) appState.diary = [];
+          appState.stateVersion = STATE_VERSION;
+          try {
+            localStorage.setItem(`twoOfUs_state_${ROOM_CODE}`, JSON.stringify(appState));
+          } catch (e) { console.warn('[initSupabaseSync] local save failed:', e); }
+          renderAll();
+        }
+        supabaseClient.channel(`room_${ROOM_CODE}`)
+          .on('postgres_changes', { event: '*', schema: 'public', table: 'couple_rooms', filter: `room_code=eq.${ROOM_CODE}` }, payload => {
+            if (payload.new && payload.new.state) {
+              appState = { ...appState, ...payload.new.state };
+              try {
+                localStorage.setItem(`twoOfUs_state_${ROOM_CODE}`, JSON.stringify(appState));
+              } catch (e) {}
+              renderAll();
+            }
+          })
+          .on('broadcast', { event: 'love_kiss' }, payload => { showKissCelebration(payload.payload.senderName); })
+          .subscribe();
+      } catch (e) {
+        console.warn('[initSupabaseSync] failed:', e);
+      }
     }
 
     /* ============================================================
@@ -1694,19 +1753,24 @@
       } catch (e) { console.warn('TMDB', e); return []; }
     }
 
-    async function jikanFetch(url, retries = 2) {
+    /* ---------- Jikan (لایه دوم — حفظ‌شده) ---------- */
+    async function jikanFetch(url, retries = 1, timeoutMs = 4500) {
       for (let i = 0; i <= retries; i++) {
+        const ctrl = new AbortController();
+        const timer = setTimeout(() => ctrl.abort(), timeoutMs);
         try {
-          const res = await fetch(url);
+          const res = await fetch(url, { signal: ctrl.signal });
+          clearTimeout(timer);
           if (res.status === 429) {
-            await new Promise(r => setTimeout(r, 1200 + i * 800));
+            await new Promise(r => setTimeout(r, 800));
             continue;
           }
           if (!res.ok) throw new Error(`Jikan ${res.status}`);
           return await res.json();
         } catch (e) {
+          clearTimeout(timer);
           if (i === retries) throw e;
-          await new Promise(r => setTimeout(r, 800));
+          await new Promise(r => setTimeout(r, 400));
         }
       }
       throw new Error('Jikan failed');
@@ -1741,28 +1805,131 @@
       } catch (e) { console.warn('Jikan', e); return []; }
     }
 
-    async function searchAnime(query) {
+    /* ============================================================
+       🆕 AniList GraphQL API — لایه اول جستجوی انیمه
+       پایدارتر از Jikan، بدون rate limit سخت
+       ============================================================ */
+    async function searchAniList(query) {
       if (!query) return [];
-      const [jikanRes, tmdbRes] = await Promise.allSettled([
-        searchJikan(query),
-        searchTMDB(query, 'tv')
-      ]);
-      const jikanList = jikanRes.status === 'fulfilled' ? jikanRes.value : [];
-      const tmdbList = tmdbRes.status === 'fulfilled' ? tmdbRes.value : [];
-
-      const seen = new Set();
-      const merged = [];
-      jikanList.forEach(it => {
-        const k = (it.title || '').toLowerCase().trim();
-        if (k && !seen.has(k)) { seen.add(k); merged.push(it); }
-      });
-      tmdbList.forEach(it => {
-        const k = (it.title || '').toLowerCase().trim();
-        if (k && !seen.has(k)) { seen.add(k); merged.push(it); }
-      });
-      return merged.slice(0, 12);
+      const graphqlQuery = `
+        query ($search: String) {
+          Page(page: 1, perPage: 10) {
+            media(search: $search, type: ANIME, sort: SEARCH_MATCH) {
+              id
+              title { romaji english native }
+              description
+              coverImage { large }
+              episodes
+              seasonYear
+            }
+          }
+        }
+      `;
+      try {
+        const ctrl = new AbortController();
+        const timer = setTimeout(() => ctrl.abort(), 5000);
+        const res = await fetch('https://graphql.anilist.co', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+          body: JSON.stringify({ query: graphqlQuery, variables: { search: query } }),
+          signal: ctrl.signal
+        });
+        clearTimeout(timer);
+        if (!res.ok) throw new Error(`AniList ${res.status}`);
+        const data = await res.json();
+        const list = data?.data?.Page?.media || [];
+        return list.map(a => ({
+          id: a.id,
+          title: a.title?.english || a.title?.romaji || a.title?.native || '',
+          originalTitle: a.title?.native || a.title?.romaji || '',
+          year: (a.seasonYear || '').toString(),
+          poster: a.coverImage?.large || '',
+          overview: (a.description || '').replace(/<[^>]*>?/gm, '').slice(0, 240),
+          episodes: Number(a.episodes) || 0,
+          _source: 'anilist'
+        }));
+      } catch (e) { console.warn('AniList', e); return []; }
     }
 
+    /* ============================================================
+       searchAnime — بازنویسی‌شده با معماری لایه‌ای
+       اول AniList → بعد Jikan → بعد TMDB TV
+       ============================================================ */
+    async function searchAnime(query) {
+      if (!query) return [];
+
+      let items = [];
+
+      // لایه ۱: AniList
+      try {
+        items = await searchAniList(query);
+        if (items.length > 0) return items.slice(0, 12);
+      } catch (e) { console.warn('AniList layer failed', e); }
+
+      // لایه ۲: Jikan (اگر AniList خالی برگرداند)
+      try {
+        items = await searchJikan(query);
+        if (items.length > 0) return items.slice(0, 12);
+      } catch (e) { console.warn('Jikan layer failed', e); }
+
+      // لایه ۳: TMDB TV (آخرین راه‌حل)
+      try {
+        items = await searchTMDB(query, 'tv');
+        return items.slice(0, 12);
+      } catch (e) { console.warn('TMDB layer failed', e); }
+
+      return [];
+    }
+
+    /* ============================================================
+       🆕 RAWG API — لایه اول جستجوی بازی
+       نیاز به کلید رایگان دارد (۲۰,۰۰۰ درخواست در ماه)
+       ============================================================ */
+    async function searchRAWG(query) {
+      if (!query || !RAWG_API_KEY) return [];
+      try {
+        const ctrl = new AbortController();
+        const timer = setTimeout(() => ctrl.abort(), 5000);
+        const url = `https://api.rawg.io/api/games?key=${RAWG_API_KEY}&search=${encodeURIComponent(query)}&page_size=10`;
+        const res = await fetch(url, { signal: ctrl.signal });
+        clearTimeout(timer);
+        if (!res.ok) throw new Error(`RAWG ${res.status}`);
+        const data = await res.json();
+        const list = data?.results || [];
+        if (list.length === 0) {
+          const enQ = await smartTranslateFaToEn(query);
+          if (enQ && enQ !== query) {
+            const url2 = `https://api.rawg.io/api/games?key=${RAWG_API_KEY}&search=${encodeURIComponent(enQ)}&page_size=10`;
+            const res2 = await fetch(url2);
+            if (res2.ok) {
+              const data2 = await res2.json();
+              return (data2?.results || []).map(g => ({
+                id: g.id,
+                title: g.name || '',
+                originalTitle: g.name || '',
+                year: (g.released || '').slice(0, 4),
+                poster: g.background_image || '',
+                overview: '',
+                rating: g.rating || 0,
+                _source: 'rawg'
+              }));
+            }
+          }
+        }
+        return list.map(g => ({
+          id: g.id,
+          title: g.name || '',
+          originalTitle: g.name || '',
+          year: (g.released || '').slice(0, 4),
+          poster: g.background_image || '',
+          overview: '',
+          rating: g.rating || 0,
+          _source: 'rawg'
+        }));
+      } catch (e) { console.warn('RAWG', e); return []; }
+    }
+
+    /* ---------- CheapShark (لایه دوم — حفظ‌شده) ---------- */
     async function searchCheapShark(query) {
       if (!query) return [];
       try {
@@ -1795,8 +1962,66 @@
       } catch (e) { return []; }
     }
 
+    /* ============================================================
+       searchGame — بازنویسی‌شده با معماری لایه‌ای
+       اول RAWG → بعد CheapShark
+       ============================================================ */
+    async function searchGame(query) {
+      if (!query) return [];
+
+      // لایه ۱: RAWG
+      try {
+        const items = await searchRAWG(query);
+        if (items.length > 0) return items.slice(0, 12);
+      } catch (e) { console.warn('RAWG layer failed', e); }
+
+      // لایه ۲: CheapShark
+      try {
+        const items = await searchCheapShark(query);
+        return items.slice(0, 12);
+      } catch (e) { console.warn('CheapShark layer failed', e); }
+
+      return [];
+    }
+
+    /* ============================================================
+       fetchMediaDetails — پشتیبانی از anilist + jikan + tmdb
+       ============================================================ */
     async function fetchMediaDetails(item) {
       if (!item) return null;
+
+      // AniList (GraphQL)
+      if (item._source === 'anilist' && item.id) {
+        const graphqlQuery = `
+          query ($id: Int) {
+            Media(id: $id, type: ANIME) {
+              episodes
+              duration
+              description
+              coverImage { large }
+              title { english romaji native }
+            }
+          }
+        `;
+        try {
+          const res = await fetch('https://graphql.anilist.co', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+            body: JSON.stringify({ query: graphqlQuery, variables: { id: item.id } })
+          });
+          if (!res.ok) return null;
+          const data = await res.json();
+          const a = data?.data?.Media || {};
+          return {
+            totalSeasons: 1,
+            episodesPerSeason: Number(a.episodes) || 0,
+            overview: (a.description || '').replace(/<[^>]*>?/gm, '').slice(0, 240) || item.overview,
+            poster: a.coverImage?.large || item.poster
+          };
+        } catch (e) { return null; }
+      }
+
+      // Jikan
       if (item._source === 'jikan' && item.id) {
         try {
           const data = await jikanFetch(`https://api.jikan.moe/v4/anime/${item.id}/full`);
@@ -1809,6 +2034,8 @@
           };
         } catch (e) { return null; }
       }
+
+      // TMDB
       if (item._source === 'tmdb' && item.id) {
         const t = item._tmdbType || 'tv';
         try {
@@ -1830,352 +2057,13 @@
           };
         } catch (e) { return null; }
       }
+
       return null;
     }
 
+/* ==================== END OF PART 2 ==================== */
+    
     /* ============================================================
-       WATCHLIST
-       ============================================================ */
-    function renderWatchStatusFilters() {
-      const box = document.getElementById('watchStatusFilters');
-      if (!box) return;
-      const opts = [
-        { id:'all', label:'همه', icon:ICONS_3D.eyes },
-        ...WATCH_STATUSES.map(s => ({ id:s.id, label:s.name, icon:ICONS_3D[s.icon] }))
-      ];
-      box.innerHTML = opts.map(o => `
-        <button onclick="filterWatchStatus('${o.id}')" class="shrink-0 px-3 py-1.5 rounded-xl text-[11px] font-bold flex items-center gap-1.5 whitespace-nowrap transition ${currentWatchStatusFilter === o.id ? 'bg-rose-600 text-white shadow-sm' : 'bg-white text-slate-600 border border-slate-200'}">
-          ${o.icon ? `<img src="${o.icon}" class="w-4 h-4 flex-shrink-0" alt="" onerror="this.style.display='none'" />` : ''}
-          <span>${o.label}</span>
-        </button>`).join('');
-    }
-
-    function renderWatchTypeFilters() {
-      const box = document.getElementById('watchTypeFilters');
-      if (!box) return;
-      const opts = [
-        { id:'all', label:'همه', icon:null },
-        ...WATCH_TYPES.map(t => ({ id:t.id, label:t.name, icon:ICONS_3D[t.icon] }))
-      ];
-      box.innerHTML = opts.map(o => `
-        <button onclick="filterWatchType('${o.id}')" class="shrink-0 px-3 py-1.5 rounded-xl text-[11px] font-bold flex items-center gap-1.5 whitespace-nowrap transition ${currentWatchFilter === o.id ? 'bg-purple-600 text-white shadow-sm' : 'bg-white text-slate-600 border border-slate-200'}">
-          ${o.icon ? `<img src="${o.icon}" class="w-4 h-4 flex-shrink-0" alt="" onerror="this.style.display='none'" />` : ''}
-          <span>${o.label}</span>
-        </button>`).join('');
-    }
-
-    function renderWatchlist() {
-      const c = document.getElementById('watchlistContainer');
-      if (!c) return;
-      let list = appState.watchList || [];
-      if (currentWatchFilter !== 'all') list = list.filter(x => x.type === currentWatchFilter);
-      if (currentWatchStatusFilter !== 'all') list = list.filter(x => x.status === currentWatchStatusFilter);
-
-      if (list.length === 0) {
-        c.innerHTML = `<div class="col-span-full text-center py-8 text-slate-400 text-xs">
-          <img src="${ICONS_3D.clapper}" class="w-10 h-10 mx-auto mb-2 opacity-40" alt="" /><p>موردی پیدا نشد</p></div>`;
-        return;
-      }
-      c.innerHTML = list.map(item => renderMediaCard(item)).join('');
-    }
-
-    function renderMediaCard(item) {
-      const statusObj = WATCH_STATUSES.find(s => s.id === item.status) || WATCH_STATUSES[0];
-      const typeObj = WATCH_TYPES.find(t => t.id === item.type) || WATCH_TYPES[0];
-      const cur = Number(item.currentEpisode) || 0;
-      const curSeason = Number(item.currentSeason) || 1;
-      const totalSeasons = Number(item.totalSeasons) || 1;
-      const epsPerSeason = Number(item.episodesPerSeason) || 0;
-      const totalEps = epsPerSeason > 0 ? (epsPerSeason * totalSeasons) : (Number(item.totalEpisodes) || 0);
-      const watchedTotal = (curSeason - 1) * epsPerSeason + cur;
-      const pct = totalEps > 0 ? Math.min(100, Math.round((watchedTotal / totalEps) * 100)) : 0;
-      const isSerial = (item.type === 'series' || item.type === 'anime');
-      const showProgress = isSerial && totalEps > 0;
-
-      const typeColor = item.type === 'anime' ? 'text-pink-600' : item.type === 'animation' ? 'text-cyan-600' : 'text-purple-600';
-      const typeBgGrad = item.type === 'anime' ? 'from-pink-400 to-rose-400' : item.type === 'animation' ? 'from-cyan-400 to-blue-400' : 'from-purple-400 to-rose-400';
-
-      const poster = item.posterUrl
-        ? `<img src="${item.posterUrl}" class="media-poster" alt="" onerror="this.style.display='none'" />`
-        : `<div class="media-poster-empty"><img src="${ICONS_3D[typeObj.icon]}" class="w-9 h-9" alt="" /></div>`;
-
-      return `
-        <div class="flex flex-col p-3 rounded-2xl bg-white border border-slate-200/70 shadow-sm gap-2">
-          <div class="flex items-start gap-3">
-            ${poster}
-            <div class="min-w-0 flex-1">
-              <p class="text-sm font-bold ${item.status === 'watched' ? 'line-through text-slate-400' : 'text-slate-800'} break-words leading-tight">${escapeHtml(item.title)}</p>
-              ${item.originalTitle && item.originalTitle !== item.title ? `<p class="text-[9px] text-slate-400 mt-0.5" dir="ltr">${escapeHtml(item.originalTitle)}</p>` : ''}
-              <div class="flex items-center gap-1.5 mt-1.5 text-[10px] text-slate-500 flex-wrap">
-                <span class="${typeColor} font-semibold flex items-center gap-0.5">
-                  <img src="${ICONS_3D[typeObj.icon]}" class="w-3 h-3" alt="" /> ${typeObj.name}
-                </span>
-                <span>•</span>
-                <span class="font-bold" style="color:${statusObj.color}">${statusObj.name}</span>
-                ${item.rating ? `<span class="flex items-center gap-0.5">• <img src="${ICONS_3D.star}" class="w-3 h-3" alt="" /> ${toFa(item.rating)}/۵</span>` : ''}
-              </div>
-              ${item.overview ? `<p class="media-overview mt-1.5">${escapeHtml(item.overview)}</p>` : ''}
-              <div class="flex items-center gap-1 mt-2">
-                <button onclick="cycleWatchStatus('${item.id}')" class="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0" style="background:${statusObj.color}22;">
-                  <img src="${ICONS_3D[statusObj.icon]}" class="w-4 h-4" alt="" />
-                </button>
-                <button onclick="openWatchEditModal('${item.id}')" class="w-7 h-7 rounded-lg text-slate-400 hover:text-purple-600 hover:bg-purple-50 flex items-center justify-center">
-                  <i class="fa-solid fa-pen text-[10px]"></i>
-                </button>
-                <button onclick="deleteWatchItem('${item.id}')" class="w-7 h-7 rounded-lg text-slate-300 hover:text-rose-500 hover:bg-rose-50 flex items-center justify-center">
-                  <i class="fa-solid fa-trash-can text-[10px]"></i>
-                </button>
-              </div>
-            </div>
-          </div>
-          ${showProgress ? `
-            <div class="space-y-1.5 pt-1.5 border-t border-slate-100">
-              <div class="flex items-center justify-between text-[10px] font-bold">
-                <span class="text-slate-500">فصل ${toFa(curSeason)} — قسمت ${toFa(cur)}${epsPerSeason > 0 ? ` از ${toFa(epsPerSeason)}` : ''}</span>
-                <span class="${typeColor}">${toFa(pct)}٪</span>
-              </div>
-              <div class="w-full h-2 rounded-full bg-slate-100 overflow-hidden">
-                <div class="h-full rounded-full bg-gradient-to-r ${typeBgGrad}" style="width:${pct}%"></div>
-              </div>
-              <div class="flex items-center gap-1.5 pt-1">
-                <button onclick="incrementEpisode('${item.id}')" class="flex-1 py-1.5 rounded-lg ${item.type === 'anime' ? 'bg-pink-100 hover:bg-pink-200 text-pink-700' : 'bg-purple-100 hover:bg-purple-200 text-purple-700'} text-[10px] font-bold flex items-center justify-center gap-1">
-                  <i class="fa-solid fa-plus text-[9px]"></i> قسمت بعد
-                </button>
-                ${(cur > 1 || curSeason > 1) ? `<button onclick="decrementEpisode('${item.id}')" class="px-2.5 py-1.5 rounded-lg bg-slate-100 text-slate-600 text-[10px] font-bold"><i class="fa-solid fa-minus text-[9px]"></i></button>` : ''}
-              </div>
-            </div>
-          ` : isSerial ? `
-            <div class="pt-1.5 border-t border-slate-100">
-              <button onclick="openWatchEditModal('${item.id}')" class="text-[10px] font-bold ${typeColor} flex items-center gap-1">
-                <i class="fa-solid fa-plus text-[9px]"></i> افزودن فصل و قسمت
-              </button>
-            </div>
-          ` : ''}
-        </div>`;
-    }
-
-    function filterWatchStatus(id) { currentWatchStatusFilter = id; renderWatchStatusFilters(); renderWatchlist(); }
-    function filterWatchType(id) { currentWatchFilter = id; renderWatchTypeFilters(); renderWatchlist(); }
-
-    /* ---------- GAMES ---------- */
-    function renderGameStatusFilters() {
-      const box = document.getElementById('gameStatusFilters');
-      if (!box) return;
-      const opts = [
-        { id:'all', label:'همه', icon:ICONS_3D.eyes },
-        ...GAME_STATUSES.map(s => ({ id:s.id, label:s.name, icon:ICONS_3D[s.icon] }))
-      ];
-      box.innerHTML = opts.map(o => `
-        <button onclick="filterGameStatus('${o.id}')" class="shrink-0 px-3 py-1.5 rounded-xl text-[11px] font-bold flex items-center gap-1.5 whitespace-nowrap transition ${currentGameStatusFilter === o.id ? 'bg-indigo-600 text-white shadow-sm' : 'bg-white text-slate-600 border border-slate-200'}">
-          ${o.icon ? `<img src="${o.icon}" class="w-4 h-4 flex-shrink-0" alt="" onerror="this.style.display='none'" />` : ''}
-          <span>${o.label}</span>
-        </button>`).join('');
-    }
-
-    function renderGameList() {
-      const c = document.getElementById('gameListContainer');
-      if (!c) return;
-      let list = appState.gameList || [];
-      if (currentGameStatusFilter !== 'all') list = list.filter(x => x.status === currentGameStatusFilter);
-
-      if (list.length === 0) {
-        c.innerHTML = `<div class="col-span-full text-center py-8 text-slate-400 text-xs">
-          <img src="${ICONS_3D.videoGame}" class="w-10 h-10 mx-auto mb-2 opacity-40" alt="" /><p>هنوز بازی‌ای اضافه نشده</p></div>`;
-        return;
-      }
-      c.innerHTML = list.map(g => {
-        const statusObj = GAME_STATUSES.find(s => s.id === g.status) || GAME_STATUSES[0];
-        const platformName = GAME_PLATFORMS.find(p => p.id === g.platform)?.name || g.platform;
-        const poster = g.posterUrl
-          ? `<img src="${g.posterUrl}" class="media-poster" alt="" onerror="this.style.display='none'" />`
-          : `<div class="media-poster-empty"><img src="${ICONS_3D.videoGame}" class="w-9 h-9" alt="" /></div>`;
-        return `
-          <div class="flex flex-col p-3 rounded-2xl bg-white border border-slate-200/70 shadow-sm gap-2">
-            <div class="flex items-start gap-3">
-              ${poster}
-              <div class="min-w-0 flex-1">
-                <p class="text-sm font-bold ${g.status === 'played' ? 'line-through text-slate-400' : 'text-slate-800'} break-words leading-tight">${escapeHtml(g.title)}</p>
-                <div class="flex items-center gap-1.5 mt-1.5 text-[10px] text-slate-500 flex-wrap">
-                  <span class="px-1.5 py-0.5 rounded-md bg-indigo-50 text-indigo-600 font-semibold">${platformName}</span>
-                  <span class="font-bold" style="color:${statusObj.color}">${statusObj.name}</span>
-                  ${g.hours > 0 ? `<span class="flex items-center gap-0.5"><i class="fa-regular fa-clock text-[9px]"></i> ${toFa(g.hours)}س</span>` : ''}
-                  ${g.rating ? `<span class="flex items-center gap-0.5"><img src="${ICONS_3D.star}" class="w-3 h-3" alt="" /> ${toFa(g.rating)}/۵</span>` : ''}
-                </div>
-                <div class="flex items-center gap-1 mt-2">
-                  <button onclick="cycleGameStatus('${g.id}')" class="w-7 h-7 rounded-lg flex items-center justify-center" style="background:${statusObj.color}22;">
-                    <img src="${ICONS_3D[statusObj.icon]}" class="w-4 h-4" alt="" />
-                  </button>
-                  <button onclick="openGameEditModal('${g.id}')" class="w-7 h-7 rounded-lg text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 flex items-center justify-center">
-                    <i class="fa-solid fa-pen text-[10px]"></i>
-                  </button>
-                  <button onclick="deleteGame('${g.id}')" class="w-7 h-7 rounded-lg text-slate-300 hover:text-rose-500 hover:bg-rose-50 flex items-center justify-center">
-                    <i class="fa-solid fa-trash-can text-[10px]"></i>
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>`;
-      }).join('');
-    }
-
-    function filterGameStatus(id) { currentGameStatusFilter = id; renderGameStatusFilters(); renderGameList(); }
-
-    /* ---------- BUCKET ---------- */
-    function renderBucketList() {
-      const c = document.getElementById('bucketList');
-      if (!c) return;
-      const list = appState.bucketList || [];
-      if (list.length === 0) {
-        c.innerHTML = `<p class="text-center py-6 text-slate-400 text-xs">هنوز آرزویی ننوشتیم</p>`;
-        return;
-      }
-      c.innerHTML = list.map(item => `
-        <div class="flex items-center justify-between p-3 rounded-2xl ${item.done ? 'bg-slate-50 border border-slate-200/60' : 'bg-white border border-rose-100'} shadow-sm gap-2">
-          <div class="flex items-center gap-2.5 min-w-0 flex-1">
-            <button onclick="toggleBucket('${item.id}')" class="w-5 h-5 rounded-lg border-2 ${item.done ? 'bg-amber-400 border-amber-400 text-white' : 'border-slate-300'} flex items-center justify-center text-[10px] flex-shrink-0">
-              ${item.done ? '<i class="fa-solid fa-check"></i>' : ''}
-            </button>
-            <span class="text-xs font-bold ${item.done ? 'line-through text-slate-400' : 'text-slate-700'} break-words">${escapeHtml(item.title)}</span>
-          </div>
-          <button onclick="deleteBucket('${item.id}')" class="text-slate-300 hover:text-rose-500 p-1 flex-shrink-0"><i class="fa-solid fa-trash-can text-xs"></i></button>
-        </div>`).join('');
-    }
-
-    /* ---------- IDEAS ---------- */
-    function renderDateIdeasDrawer() {
-      const d = document.getElementById('ideasDrawer');
-      if (!d) return;
-      const list = appState.dateIdeas || [];
-      d.innerHTML = list.map((idea, i) => `
-        <div class="flex items-center justify-between p-2 rounded-xl bg-slate-100 text-[11px] text-slate-700 gap-2">
-          <span class="flex-1 flex items-center gap-2 min-w-0">
-            <span class="w-6 h-6 rounded-md bg-rose-100 text-rose-700 font-bold flex items-center justify-center flex-shrink-0 text-[10px]">${toFa(i + 1)}</span>
-            <span class="truncate">${escapeHtml(idea)}</span>
-          </span>
-          <button onclick="deleteCustomIdea(${i})" class="text-slate-400 hover:text-rose-500 flex-shrink-0"><i class="fa-solid fa-xmark text-xs"></i></button>
-        </div>`).join('');
-    }
-
-    function toggleIdeasDrawer() {
-      const d = document.getElementById('ideasDrawer');
-      if (d) d.classList.toggle('hidden');
-    }
-
-    /* ---------- NOTES ---------- */
-    function renderNotes() {
-      const c = document.getElementById('notesContainer');
-      if (!c) return;
-      const notes = appState.notes || [];
-      if (notes.length === 0) {
-        c.innerHTML = `<div class="col-span-full text-center py-8 text-slate-400 text-xs">دیوار نامه‌ها خالیه</div>`;
-        return;
-      }
-      const grad = [
-        'from-pink-50 to-rose-100 border-rose-200',
-        'from-amber-50 to-orange-100 border-amber-200',
-        'from-purple-50 to-fuchsia-100 border-purple-200',
-        'from-teal-50 to-emerald-100 border-teal-200'
-      ];
-      c.innerHTML = [...notes].reverse().map((n, i) => `
-        <div class="p-4 rounded-3xl bg-gradient-to-br ${grad[i % grad.length]} border shadow-sm space-y-2 relative">
-          <p class="text-xs font-semibold text-slate-800 leading-relaxed break-words">${escapeHtml(n.content)}</p>
-          <div class="flex items-center justify-between text-[10px] text-slate-500 pt-2 border-t border-black/5">
-            <img src="${n.author === 'p1' ? ICONS_3D.manTech : ICONS_3D.womanTech}" class="w-4 h-4" alt="" />
-            <span>${n.timeBadge || ''}</span>
-          </div>
-          <button onclick="deleteNote('${n.id}')" class="absolute top-2 left-2 text-slate-400 hover:text-rose-600 p-1"><i class="fa-solid fa-xmark text-xs"></i></button>
-        </div>`).join('');
-    }
-
-    /* ---------- DIARY ---------- */
-    function renderDiary() {
-      const c = document.getElementById('diaryContainer');
-      if (!c) return;
-      const diary = appState.diary || [];
-      const grouped = {};
-      diary.forEach(d => {
-        if (!grouped[d.dateKey]) grouped[d.dateKey] = [];
-        grouped[d.dateKey].push(d);
-      });
-      const sortedDates = Object.keys(grouped).sort((a, b) => b.localeCompare(a));
-
-      if (sortedDates.length === 0) {
-        c.innerHTML = `<p class="text-center py-6 text-slate-400 text-xs">هنوز خاطره‌ای ثبت نشده — اولین خاطره رو بنویس</p>`;
-        return;
-      }
-
-      c.innerHTML = sortedDates.slice(0, 10).map(dateKey => {
-        const posts = grouped[dateKey];
-        const [jy, jm, jd] = dateKey.split('-').map(Number);
-        return `
-          <div class="mb-3">
-            <div class="flex items-center gap-2 mb-2">
-              <span class="text-[11px] font-black text-slate-600">${toFa(jd)} ${JALALI_MONTHS[jm - 1]} ${toFa(jy)}</span>
-              <div class="flex-1 h-px bg-rose-100"></div>
-            </div>
-            ${posts.map(p => `
-              <div class="diary-post ${editingDiaryId === p.id ? 'editing' : ''}">
-                <div class="flex items-center justify-between mb-1.5">
-                  <div class="flex items-center gap-1.5">
-                    <img src="${p.author === 'p1' ? ICONS_3D.manTech : ICONS_3D.womanTech}" class="w-4 h-4" alt="" />
-                    <span class="text-[10px] font-bold ${p.author === 'p1' ? 'text-blue-600' : 'text-rose-600'}">${p.author === 'p1' ? 'امیرمحمد' : 'آرمیتا'}</span>
-                    <span class="text-[9px] text-slate-400">${p.time || ''}</span>
-                  </div>
-                  <div class="flex items-center gap-1">
-                    <button onclick="openDiaryPostModal('${p.id}')" class="text-slate-300 hover:text-rose-500 p-0.5"><i class="fa-solid fa-pen text-[9px]"></i></button>
-                    <button onclick="deleteDiaryPost('${p.id}')" class="text-slate-300 hover:text-rose-500 p-0.5"><i class="fa-solid fa-trash-can text-[9px]"></i></button>
-                  </div>
-                </div>
-                <p class="text-xs text-slate-700 leading-relaxed break-words">${escapeHtml(p.text)}</p>
-                ${p.imageUrl ? `<img src="${p.imageUrl}" class="diary-img" alt="" />` : ''}
-              </div>
-            `).join('')}
-          </div>`;
-      }).join('');
-    }
-
-    function deleteDiaryPost(id) {
-      requestConfirm('حذف خاطره', 'مطمئنی می‌خوای این خاطره رو حذف کنی؟', () => {
-        appState.diary = (appState.diary || []).filter(d => d.id !== id);
-        saveState(); renderDiary(); playTone(400, 'sine', 0.1);
-      });
-    }
-
-    async function compressImage(file, maxDim = 700, quality = 0.55) {
-      return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = function (e) {
-          const img = new Image();
-          img.onload = function () {
-            const canvas = document.createElement('canvas');
-            let w = img.width, h = img.height;
-            const maxSide = Math.max(w, h);
-            if (maxSide > maxDim) {
-              const scale = maxDim / maxSide;
-              w = Math.round(w * scale);
-              h = Math.round(h * scale);
-            }
-            canvas.width = w; canvas.height = h;
-            const ctx = canvas.getContext('2d');
-            ctx.drawImage(img, 0, 0, w, h);
-            try { resolve(canvas.toDataURL('image/jpeg', quality)); }
-            catch (err) { reject(err); }
-          };
-          img.onerror = reject;
-          img.src = e.target.result;
-        };
-        reader.onerror = reject;
-        reader.readAsDataURL(file);
-      });
-    }
-
-    function escapeHtml(str) {
-      if (str === null || str === undefined) return '';
-      return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;');
-    }
-
-    /* ==================== END OF PART 2 ==================== */
-        /* ============================================================
        WHEEL
        ============================================================ */
     let currentWheelAngle = 0;
@@ -2788,7 +2676,7 @@
     }
 
     /* ============================================================
-       WATCHLIST ADD
+       WATCHLIST ADD — با نمایش شفاف منبع نتایج
        ============================================================ */
     function openWatchlistModal() {
       openModalWithContent('افزودن به لیست تماشا', `
@@ -2871,17 +2759,23 @@
       if (btn) btn.disabled = true;
 
       let items = [];
-      if (type === 'movie') items = await searchTMDB(title, 'movie');
-      else if (type === 'series') items = await searchTMDB(title, 'tv');
-      else if (type === 'anime') items = await searchAnime(title);
-      else if (type === 'animation') items = await searchTMDB(title, 'movie');
+      try {
+        if (type === 'movie') items = await searchTMDB(title, 'movie');
+        else if (type === 'series') items = await searchTMDB(title, 'tv');
+        else if (type === 'anime') items = await searchAnime(title);
+        else if (type === 'animation') items = await searchTMDB(title, 'movie');
+      } catch (e) {
+        console.warn('[doSearchWatch]', e);
+      }
 
       if (btn) btn.disabled = false;
 
       if (items.length === 0) {
-        results.innerHTML = `<p class="text-xs text-slate-400 text-center py-2">چیزی پیدا نشد — خودت پوستر رو پیست کن</p>`;
+        const netHint = !navigator.onLine ? 'اینترنت قطع است.' : 'ممکن است سرویس جستجو موقتاً در دسترس نباشد.';
+        results.innerHTML = `<p class="text-xs text-rose-500 text-center py-3 leading-relaxed">چیزی پیدا نشد.<br><span class="text-[10px] text-slate-500">${netHint}<br>می‌توانی لینک پوستر رو دستی پایین پیست کنی.</span></p>`;
         return;
       }
+
       results.innerHTML = items.map((it, i) => `
         <div class="search-result-item" onclick="selectWatchResult(${i})" data-idx="${i}">
           <img src="${it.poster || ''}" class="w-12 h-16 object-cover rounded-lg flex-shrink-0" alt="" onerror="this.style.background='#f0f0f0'" />
@@ -2920,6 +2814,10 @@
         totalSeasonsEl.value = 1;
         epsPerSeasonEl.value = it.episodes;
       }
+      if (it._source === 'anilist' && it.episodes > 0) {
+        totalSeasonsEl.value = 1;
+        epsPerSeasonEl.value = it.episodes;
+      }
 
       const results = document.getElementById('watchSearchResults');
       const loadingEl = document.createElement('div');
@@ -2927,14 +2825,18 @@
       loadingEl.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> دریافت جزئیات فصل‌ها...';
       results.appendChild(loadingEl);
 
-      const details = await fetchMediaDetails(it);
-      loadingEl.remove();
-      if (!details) return;
-      if (details.totalSeasons) totalSeasonsEl.value = details.totalSeasons;
-      if (details.episodesPerSeason) epsPerSeasonEl.value = details.episodesPerSeason;
-      if (details.overview && overviewEl) overviewEl.value = details.overview;
-      if (details.poster) document.getElementById('inputWatchPoster').value = details.poster;
-      playTone(700, 'sine', 0.1);
+      try {
+        const details = await fetchMediaDetails(it);
+        loadingEl.remove();
+        if (!details) return;
+        if (details.totalSeasons) totalSeasonsEl.value = details.totalSeasons;
+        if (details.episodesPerSeason) epsPerSeasonEl.value = details.episodesPerSeason;
+        if (details.overview && overviewEl) overviewEl.value = details.overview;
+        if (details.poster) document.getElementById('inputWatchPoster').value = details.poster;
+        playTone(700, 'sine', 0.1);
+      } catch (e) {
+        loadingEl.remove();
+      }
     }
 
     function handleSaveWatchlist(e) {
@@ -3068,9 +2970,11 @@
       results.innerHTML = `<div class="text-center py-3 text-xs text-slate-400"><i class="fa-solid fa-spinner fa-spin"></i> جستجو...</div>`;
       if (btn) btn.disabled = true;
       let items = [];
-      if (type === 'movie' || type === 'animation') items = await searchTMDB(title, 'movie');
-      else if (type === 'series') items = await searchTMDB(title, 'tv');
-      else if (type === 'anime') items = await searchAnime(title);
+      try {
+        if (type === 'movie' || type === 'animation') items = await searchTMDB(title, 'movie');
+        else if (type === 'series') items = await searchTMDB(title, 'tv');
+        else if (type === 'anime') items = await searchAnime(title);
+      } catch (e) { console.warn(e); }
       if (btn) btn.disabled = false;
       if (!items.length) {
         results.innerHTML = `<p class="text-xs text-slate-400 text-center py-2">چیزی پیدا نشد</p>`;
@@ -3113,6 +3017,10 @@
         totalSeasonsEl.value = 1;
         epsPerSeasonEl.value = it.episodes;
       }
+      if (it._source === 'anilist' && it.episodes > 0) {
+        totalSeasonsEl.value = 1;
+        epsPerSeasonEl.value = it.episodes;
+      }
 
       const results = document.getElementById('editWatchSearchResults');
       const loadingEl = document.createElement('div');
@@ -3120,14 +3028,18 @@
       loadingEl.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> دریافت جزئیات فصل‌ها...';
       results.appendChild(loadingEl);
 
-      const details = await fetchMediaDetails(it);
-      loadingEl.remove();
-      if (!details) return;
-      if (details.totalSeasons) totalSeasonsEl.value = details.totalSeasons;
-      if (details.episodesPerSeason) epsPerSeasonEl.value = details.episodesPerSeason;
-      if (details.overview && ov) ov.value = details.overview;
-      if (details.poster) document.getElementById('editWatchPoster').value = details.poster;
-      playTone(700, 'sine', 0.1);
+      try {
+        const details = await fetchMediaDetails(it);
+        loadingEl.remove();
+        if (!details) return;
+        if (details.totalSeasons) totalSeasonsEl.value = details.totalSeasons;
+        if (details.episodesPerSeason) epsPerSeasonEl.value = details.episodesPerSeason;
+        if (details.overview && ov) ov.value = details.overview;
+        if (details.poster) document.getElementById('editWatchPoster').value = details.poster;
+        playTone(700, 'sine', 0.1);
+      } catch (e) {
+        loadingEl.remove();
+      }
     }
 
     function handleSaveWatchEdit(e, id) {
@@ -3164,7 +3076,7 @@
     }
 
     /* ============================================================
-       GAME ADD/EDIT
+       GAME ADD/EDIT — با RAWG به‌عنوان لایه اول
        ============================================================ */
     function openGameModal() {
       openModalWithContent('افزودن بازی', `
@@ -3182,7 +3094,7 @@
           <div>
             <button type="button" onclick="doSearchGame()" id="gameSearchBtn" class="w-full py-2.5 rounded-2xl bg-indigo-100 hover:bg-indigo-200 text-indigo-700 font-bold text-xs flex items-center justify-center gap-2">
               <i class="fa-solid fa-magnifying-glass"></i>
-              <span>جستجوی خودکار پوستر</span>
+              <span>جستجوی خودکار پوستر (RAWG + CheapShark)</span>
             </button>
           </div>
           <div id="gameSearchResults" class="space-y-2 max-h-64 overflow-y-auto"></div>
@@ -3218,10 +3130,18 @@
       if (!title) { results.innerHTML = `<p class="text-xs text-rose-500 text-center py-2">اول نام بازی رو بنویس</p>`; return; }
       results.innerHTML = `<div class="text-center py-3 text-xs text-slate-400"><i class="fa-solid fa-spinner fa-spin"></i> جستجو...</div>`;
       if (btn) btn.disabled = true;
-      const items = await searchCheapShark(title);
+
+      let items = [];
+      try {
+        items = await searchGame(title);
+      } catch (e) {
+        console.warn('[doSearchGame]', e);
+      }
       if (btn) btn.disabled = false;
+
       if (items.length === 0) {
-        results.innerHTML = `<p class="text-xs text-slate-400 text-center py-2">چیزی پیدا نشد — خودت پوستر رو پیست کن</p>`;
+        const netHint = !navigator.onLine ? 'اینترنت قطع است.' : 'ممکن است سرویس جستجو موقتاً در دسترس نباشد.';
+        results.innerHTML = `<p class="text-xs text-rose-500 text-center py-3 leading-relaxed">چیزی پیدا نشد.<br><span class="text-[10px] text-slate-500">${netHint}<br>می‌توانی لینک پوستر رو دستی پیست کنی.</span></p>`;
         return;
       }
       results.innerHTML = items.map((it, i) => `
@@ -3229,6 +3149,7 @@
           <img src="${it.poster || ''}" class="w-12 h-16 object-cover rounded-lg flex-shrink-0" alt="" onerror="this.style.background='#f0f0f0'" />
           <div class="flex-1 min-w-0">
             <p class="text-xs font-bold text-slate-800 truncate" dir="ltr">${escapeHtml(it.title)}</p>
+            ${it.year ? `<p class="text-[10px] text-slate-400">${toFa(it.year)}</p>` : ''}
           </div>
         </div>`).join('');
       window._gameSearchItems = items;
@@ -3286,7 +3207,7 @@
           <div>
             <button type="button" onclick="doEditGameSearch('${id}')" id="editGameSearchBtn" class="w-full py-2.5 rounded-2xl bg-indigo-100 hover:bg-indigo-200 text-indigo-700 font-bold text-xs flex items-center justify-center gap-2">
               <i class="fa-solid fa-magnifying-glass"></i>
-              <span>جستجوی دوباره پوستر</span>
+              <span>جستجوی دوباره پوستر (RAWG + CheapShark)</span>
             </button>
           </div>
           <div id="editGameSearchResults" class="space-y-2 max-h-56 overflow-y-auto"></div>
@@ -3332,7 +3253,10 @@
       if (!title) { results.innerHTML = `<p class="text-xs text-rose-500 text-center py-2">اول نام رو بنویس</p>`; return; }
       results.innerHTML = `<div class="text-center py-3 text-xs text-slate-400"><i class="fa-solid fa-spinner fa-spin"></i> جستجو...</div>`;
       if (btn) btn.disabled = true;
-      const items = await searchCheapShark(title);
+      let items = [];
+      try {
+        items = await searchGame(title);
+      } catch (e) { console.warn(e); }
       if (btn) btn.disabled = false;
       if (!items.length) {
         results.innerHTML = `<p class="text-xs text-slate-400 text-center py-2">چیزی پیدا نشد</p>`;
