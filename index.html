@@ -219,10 +219,11 @@
             <p id="nextEventTeaser" class="text-xs text-slate-500 flex items-center justify-center md:justify-start gap-1.5 pt-1"></p>
           </div>
           <div class="flex flex-col items-center gap-2 w-full md:w-auto">
-            <button onclick="sendLoveKiss()" class="group relative w-full md:w-auto px-6 py-3.5 rounded-2xl bg-gradient-to-r from-rose-500 via-pink-500 to-rose-600 text-white font-bold text-sm shadow-lg active:scale-95 transition flex items-center justify-center gap-2.5">
+            <button onclick="sendLoveKiss()" id="kissBtn" class="group relative w-full md:w-auto px-6 py-3.5 rounded-2xl bg-gradient-to-r from-rose-500 via-pink-500 to-rose-600 text-white font-bold text-sm shadow-lg active:scale-95 transition flex items-center justify-center gap-2.5 disabled:opacity-60">
               <img src="https://cdn.jsdelivr.net/gh/microsoft/fluentui-emoji@main/assets/Face%20blowing%20a%20kiss/3D/face_blowing_a_kiss_3d.png" class="w-6 h-6 animate-gentle-pulse" alt="" />
               <span>یه بوسه برات فرستادم!</span>
             </button>
+            <span id="kissLimitInfo" class="text-[10px] font-semibold text-slate-400 text-center"></span>
             <span id="kissFeedback" class="text-[11px] font-semibold text-rose-500 opacity-0 transition-opacity text-center"></span>
           </div>
         </div>
@@ -274,7 +275,7 @@
           </div>
           <div class="flex items-center justify-between text-xs text-slate-500 px-1">
             <span id="groceryCountBadge">۰ قلم کالا</span>
-            <button onclick="clearCompletedGroceries()" class="text-[11px] text-rose-500 hover:underline">پاکسازی انجام‌شده‌ها</button>
+            <button onclick="toggleGroceryArchive()" id="groceryArchiveToggleBtn" class="text-[11px] text-rose-500 hover:underline">نمایش آرشیو</button>
           </div>
           <div id="groceryList" class="space-y-2.5 max-h-[400px] overflow-y-auto pr-1 hide-scrollbar"></div>
         </div>
@@ -608,9 +609,12 @@
     const SUPABASE_KEY = "sb_publishable_b8-BEd1e8CWNkVdVvU4c-Q_Ir-isgoz";
     const ROOM_CODE = "amir-armita-us";
     const ANNIVERSARY_DATE = "2024-10-06";
-    const STATE_VERSION = 16;
+    const STATE_VERSION = 17;
     const TMDB_API_KEY = "29fb5c7e087065a22b71f28c6b1db7e8";
     const RAWG_API_KEY = "f391fbe43ebf447caf3618ca0d4cd0a7";
+    /* محدودیت بوسه: ۵ بوسه در هر ۳۰ دقیقه */
+    const KISS_LIMIT_MAX = 5;
+    const KISS_LIMIT_WINDOW_MS = 30 * 60 * 1000;
 
     function getOpenRouterKey() {
       try { return localStorage.getItem('twoOfUs_openrouter_key') || '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'; } catch (e) { return ''; }
@@ -703,7 +707,7 @@
       videoGame:BASE_ICON+'Video%20game/3D/video_game_3d.png', blossom:BASE_ICON+'Cherry%20blossom/3D/cherry_blossom_3d.png',
       checkBtn:BASE_ICON+'Check%20mark%20button/3D/check_mark_button_3d.png',
       hourglass:BASE_ICON+'Hourglass%20not%20done/3D/hourglass_not_done_3d.png',
-      star:BASE_ICON+'Star/3D/star_3d.png', handshake:BASE_ICON+'Handshake/Default/3D/handshake_3d_default.png',
+      star:BASE_ICON+'Star/3D/star_3d.png',
       manTech:BASE_ICON+'Technologist/Light/3D/technologist_3d_light.png',
       womanTech:BASE_ICON+'Woman%20technologist/Light/3D/woman_technologist_3d_light.png',
       pizza:BASE_ICON+'Pizza/3D/pizza_3d.png',
@@ -903,6 +907,7 @@
     let editingDiaryId = null;
     let _pendingDiaryImage = null;
     let showChoreArchive = false;
+    let showGroceryArchive = false;
 
     const DEFAULT_DATE_IDEAS = [
       "پختن یه غذای جدید که هیچ‌وقت نخوردیم","رفتن به یه کافه دنج که تاحالا نرفتیم",
@@ -927,6 +932,7 @@
       coupleEvents: [], watchList: [], gameList: [], bucketList: [],
       dateIdeas: [...DEFAULT_DATE_IDEAS], notes: [], diary: [],
       personalDates: [...DEFAULT_PERSONAL_DATES], customDays: {}, moodHistory: {},
+      kissHistory: { p1: [], p2: [] },
       moods: {
         p1: { key:'smile', text:'عالی و پرانرژی' },
         p2: { key:'love', text:'خوشحال و شاد' }
@@ -944,6 +950,7 @@
       initBgParticles();
       loadLocalState();
       initSupabaseSync();
+      updateKissLimitUI();
 
       const now = new Date();
       const [jy, jm, jd] = gregorianToJalali(now.getFullYear(), now.getMonth() + 1, now.getDate());
@@ -1042,6 +1049,7 @@
       if (tabId === 'games') renderGameList();
       if (tabId === 'notes') renderDiary();
       if (tabId === 'fun') requestAnimationFrame(() => { if (!isWheelSpinning) drawWheel(currentWheelAngle); });
+      if (tabId === 'tasks') updateKissLimitUI();
     }
 
     function positionNavBubble(tabId, animate) {
@@ -1129,6 +1137,9 @@
           if (!appState.customDays || typeof appState.customDays !== 'object') appState.customDays = {};
           if (!appState.moodHistory || typeof appState.moodHistory !== 'object') appState.moodHistory = {};
           if (!Array.isArray(appState.diary)) appState.diary = [];
+          if (!appState.kissHistory || typeof appState.kissHistory !== 'object') appState.kissHistory = { p1: [], p2: [] };
+          if (!Array.isArray(appState.kissHistory.p1)) appState.kissHistory.p1 = [];
+          if (!Array.isArray(appState.kissHistory.p2)) appState.kissHistory.p2 = [];
           appState.stateVersion = STATE_VERSION;
         } catch (e) {
           console.warn('[loadLocalState] failed:', e);
@@ -1182,11 +1193,15 @@
           if (!appState.customDays || typeof appState.customDays !== 'object') appState.customDays = {};
           if (!appState.moodHistory || typeof appState.moodHistory !== 'object') appState.moodHistory = {};
           if (!Array.isArray(appState.diary)) appState.diary = [];
+          if (!appState.kissHistory || typeof appState.kissHistory !== 'object') appState.kissHistory = { p1: [], p2: [] };
+          if (!Array.isArray(appState.kissHistory.p1)) appState.kissHistory.p1 = [];
+          if (!Array.isArray(appState.kissHistory.p2)) appState.kissHistory.p2 = [];
           appState.stateVersion = STATE_VERSION;
           try {
             localStorage.setItem(`twoOfUs_state_${ROOM_CODE}`, JSON.stringify(appState));
           } catch (e) { console.warn('[initSupabaseSync] local save failed:', e); }
           renderAll();
+          updateKissLimitUI();
         }
         roomChannel = supabaseClient.channel(`room_${ROOM_CODE}`)
           .on('postgres_changes', { event: '*', schema: 'public', table: 'couple_rooms', filter: `room_code=eq.${ROOM_CODE}` }, payload => {
@@ -1195,10 +1210,14 @@
               if (Array.isArray(appState.watchList)) {
                 appState.watchList = appState.watchList.map(normalizeWatchItem).filter(Boolean);
               }
+              if (!appState.kissHistory || typeof appState.kissHistory !== 'object') appState.kissHistory = { p1: [], p2: [] };
+              if (!Array.isArray(appState.kissHistory.p1)) appState.kissHistory.p1 = [];
+              if (!Array.isArray(appState.kissHistory.p2)) appState.kissHistory.p2 = [];
               try {
                 localStorage.setItem(`twoOfUs_state_${ROOM_CODE}`, JSON.stringify(appState));
               } catch (e) {}
               renderAll();
+              updateKissLimitUI();
             }
           })
           .on('broadcast', { event: 'love_kiss' }, payload => { showKissCelebration(payload.payload.senderName); })
@@ -1279,14 +1298,36 @@
       `);
     }
 
+    /* ============================================================
+       GROCERIES — با آرشیو
+       ============================================================ */
+    function toggleGroceryArchive() {
+      showGroceryArchive = !showGroceryArchive;
+      renderGroceries();
+      playTone(500, 'sine', 0.08);
+    }
+
     function renderGroceries() {
       const c = document.getElementById('groceryList');
       if (!c) return;
-      const list = appState.groceries || [];
+      const all = appState.groceries || [];
+      const list = showGroceryArchive ? all.filter(x => x.done) : all.filter(x => !x.done);
+
       const badge = document.getElementById('groceryCountBadge');
-      if (badge) badge.innerText = `${toFaNum(list.length)} قلم کالا`;
+      const archBtn = document.getElementById('groceryArchiveToggleBtn');
+      if (badge) {
+        const openCount = all.filter(x => !x.done).length;
+        const doneCount = all.filter(x => x.done).length;
+        badge.innerText = showGroceryArchive ? `${toFaNum(doneCount)} خرید انجام‌شده` : `${toFaNum(openCount)} قلم باز`;
+      }
+      if (archBtn) {
+        archBtn.innerText = showGroceryArchive ? 'بازگشت به لیست خرید' : 'نمایش آرشیو';
+      }
+
       if (list.length === 0) {
-        c.innerHTML = `<div class="text-center py-8 text-slate-400 text-xs"><img src="${ICONS_3D.cart}" class="w-10 h-10 mx-auto mb-2 opacity-40" alt="" /><p>سبد خرید خالیه</p></div>`;
+        c.innerHTML = showGroceryArchive
+          ? `<div class="text-center py-8 text-slate-400 text-xs"><i class="fa-solid fa-box-archive text-2xl mx-auto mb-2 opacity-40 block"></i><p>آرشیو خالیه</p></div>`
+          : `<div class="text-center py-8 text-slate-400 text-xs"><img src="${ICONS_3D.cart}" class="w-10 h-10 mx-auto mb-2 opacity-40" alt="" /><p>سبد خرید خالیه</p></div>`;
         return;
       }
       c.innerHTML = list.map(item => `
@@ -1310,19 +1351,32 @@
       saveState(); playTone(450);
     }
 
+    /* ============================================================
+       CHORES — با آرشیو و آیکون Font Awesome
+       ============================================================ */
     function renderChoreFilters() {
       const box = document.getElementById('choreFilters');
       if (!box) return;
       const opts = [
-        { id:'all', label:'همه' },
-        { id:'both', label:'دونفره', icon:ICONS_3D.handshake },
+        { id:'all', label:'همه', icon:null },
+        { id:'both', label:'دونفره', icon:'fa-people-group' },
         { id:'p1', label:'امیرمحمد', icon:ICONS_3D.manTech },
         { id:'p2', label:'آرمیتا', icon:ICONS_3D.womanTech }
       ];
-      box.innerHTML = opts.map(o => `
-        <button onclick="filterChores('${o.id}')" id="choreFilter-${o.id}" class="shrink-0 px-2.5 py-1 rounded-xl ${currentChoreFilter === o.id ? 'bg-indigo-500 text-white' : 'bg-white text-slate-600 border border-slate-200'} font-bold flex items-center gap-1 whitespace-nowrap transition">
-          ${o.icon ? `<img src="${o.icon}" class="w-3.5 h-3.5" alt="" />` : ''}<span>${o.label}</span>
-        </button>`).join('');
+      box.innerHTML = opts.map(o => {
+        let iconHtml = '';
+        if (o.icon) {
+          if (typeof o.icon === 'string' && o.icon.startsWith('fa-')) {
+            iconHtml = `<i class="fa-solid ${o.icon} text-[11px]"></i>`;
+          } else {
+            iconHtml = `<img src="${o.icon}" class="w-3.5 h-3.5" alt="" />`;
+          }
+        }
+        return `
+          <button onclick="filterChores('${o.id}')" id="choreFilter-${o.id}" class="shrink-0 px-2.5 py-1 rounded-xl ${currentChoreFilter === o.id ? 'bg-indigo-500 text-white' : 'bg-white text-slate-600 border border-slate-200'} font-bold flex items-center gap-1 whitespace-nowrap transition">
+            ${iconHtml}<span>${o.label}</span>
+          </button>`;
+      }).join('');
     }
 
     function toggleChoreArchive() {
@@ -1331,13 +1385,17 @@
       playTone(500, 'sine', 0.08);
     }
 
+    function choreAssigneeIcon(assignee, size = 3.5) {
+      if (assignee === 'p1') return `<img src="${ICONS_3D.manTech}" class="w-${size} h-${size}" alt="" />`;
+      if (assignee === 'p2') return `<img src="${ICONS_3D.womanTech}" class="w-${size} h-${size}" alt="" />`;
+      return `<i class="fa-solid fa-people-group text-indigo-500 text-[11px]"></i>`;
+    }
+
     function renderChores() {
       const c = document.getElementById('choreList');
       if (!c) return;
       let list = appState.chores || [];
-      // فیلتر آرشیو: بسته به حالت نمایش
       list = showChoreArchive ? list.filter(x => x.done) : list.filter(x => !x.done);
-      // فیلتر مسئول
       if (currentChoreFilter !== 'all') list = list.filter(x => x.assignee === currentChoreFilter);
 
       const countBadge = document.getElementById('choreCountBadge');
@@ -1366,7 +1424,7 @@
               <p class="text-xs font-bold ${x.done ? 'line-through text-slate-400' : 'text-slate-800'} break-words">${escapeHtml(x.title)}</p>
               <div class="flex items-center gap-1.5 mt-0.5 flex-wrap">
                 <span class="text-[10px] text-slate-400">${x.timeBadge || ''}</span>
-                <img src="${x.assignee === 'p1' ? ICONS_3D.manTech : x.assignee === 'p2' ? ICONS_3D.womanTech : ICONS_3D.handshake}" class="w-3.5 h-3.5" alt="" />
+                ${choreAssigneeIcon(x.assignee)}
               </div>
             </div>
           </div>
@@ -1377,15 +1435,12 @@
     function filterChores(id) { currentChoreFilter = id; renderChoreFilters(); renderChores(); }
 
     /* ============================================================
-       BUDGET — ماه جاری + میانگین ماهانه هر دسته
+       BUDGET
        ============================================================ */
     function renderBudgetChart() {
       const _n = getNowJalaliString();
       const curYM = `${_n.jy}-${String(_n.jm).padStart(2,'0')}`;
-
-      // همه هزینه‌ها برای محاسبه میانگین
       const allExpenses = appState.expenses || [];
-      // هزینه‌های ماه جاری برای چارت اصلی
       const expenses = allExpenses.filter(e => { const ym = expenseYM(e); return !ym || ym === curYM; });
       const total = expenses.reduce((s, x) => s + (Number(x.amount) || 0), 0);
 
@@ -1451,7 +1506,6 @@
         }).join('');
       }
 
-      // نمودار میانگین ماهانه هر دسته
       renderMonthlyAverage(allExpenses);
 
       const lc = document.getElementById('expenseList');
@@ -1486,7 +1540,6 @@
       const label = document.getElementById('avgChartMonthsLabel');
       if (!box) return;
 
-      // گروه‌بندی بر اساس ماه
       const byMonth = {};
       allExpenses.forEach(e => {
         const ym = expenseYM(e);
@@ -1507,7 +1560,6 @@
         return;
       }
 
-      // میانگین هر دسته در طول ماه‌ها
       const catAvg = {};
       BUDGET_CATEGORIES.forEach(c => catAvg[c.id] = 0);
       months.forEach(ym => {
@@ -2084,13 +2136,93 @@
     }
 
     /* ============================================================
-       fetchMediaDetails — با پشتیبانی از فصل‌های جدا
-       هر فصل تعداد قسمت واقعی خودش رو داره
+       🆕 fetchMediaDetails — با پیدا کردن سریال اصلی از TMDB
+       وقتی انیمه از AniList/Jikan میاد، خودکار روی TMDB TV هم
+       جستجو می‌کنیم تا فصل‌های واقعی کل فرنچایز رو بیاریم
        ============================================================ */
+    async function tmdbSeasonsFromTitle(title) {
+      if (!title) return null;
+      try {
+        // جستجو در TMDB (اول فارسی، بعد انگلیسی)
+        let searchData = await tmdbFetch('/search/tv', `&query=${encodeURIComponent(title)}&language=fa-IR&include_adult=false`);
+        let results = searchData.results || [];
+        if (results.length === 0) {
+          const enQ = await smartTranslateFaToEn(title);
+          if (enQ && enQ !== title) {
+            searchData = await tmdbFetch('/search/tv', `&query=${encodeURIComponent(enQ)}&language=fa-IR&include_adult=false`);
+            results = searchData.results || [];
+          }
+        }
+        if (results.length === 0) return null;
+        // بهترین نتیجه رو انتخاب کن
+        const best = results[0];
+        // جزئیات سریال رو بگیر
+        const details = await tmdbFetch(`/tv/${best.id}`, `&language=fa-IR`);
+        const seasonsRaw = Array.isArray(details.seasons) ? details.seasons : [];
+        const realSeasons = seasonsRaw
+          .filter(s => Number(s.season_number) > 0)
+          .sort((a, b) => Number(a.season_number) - Number(b.season_number));
+        if (realSeasons.length === 0) return null;
+        return {
+          tmdbId: best.id,
+          totalSeasons: realSeasons.length,
+          seasonsData: realSeasons.map(s => ({
+            seasonNumber: Number(s.season_number) || 1,
+            episodes: Number(s.episode_count) || 0,
+            name: s.name || ''
+          })),
+          overview: (details.overview || '').slice(0, 240),
+          poster: details.poster_path ? `https://image.tmdb.org/t/p/w342${details.poster_path}` : ''
+        };
+      } catch (e) { console.warn('tmdbSeasonsFromTitle', e); return null; }
+    }
+
     async function fetchMediaDetails(item) {
       if (!item) return null;
 
-      // AniList — یک فصل واحد با تعداد قسمت کل
+      // ===== TMDB مستقیم =====
+      if (item._source === 'tmdb' && item.id) {
+        const t = item._tmdbType || 'tv';
+        try {
+          const data = await tmdbFetch(`/${t}/${item.id}`, `&language=fa-IR`);
+          if (t === 'tv') {
+            const seasonsRaw = Array.isArray(data.seasons) ? data.seasons : [];
+            const realSeasons = seasonsRaw
+              .filter(s => Number(s.season_number) > 0)
+              .sort((a, b) => Number(a.season_number) - Number(b.season_number));
+            let seasonsData;
+            if (realSeasons.length > 0) {
+              seasonsData = realSeasons.map(s => ({
+                seasonNumber: Number(s.season_number) || 1,
+                episodes: Number(s.episode_count) || 0
+              }));
+            } else {
+              const totalSeasons = Number(data.number_of_seasons) || 1;
+              const totalEps = Number(data.number_of_episodes) || 0;
+              const avg = (totalEps > 0 && totalSeasons > 0) ? Math.round(totalEps / totalSeasons) : 0;
+              seasonsData = Array.from({ length: totalSeasons }, (_, i) => ({ seasonNumber: i + 1, episodes: avg }));
+            }
+            const totalSeasons = seasonsData.length;
+            const totalEps = seasonsData.reduce((a, s) => a + s.episodes, 0);
+            const episodesPerSeason = totalSeasons > 0 ? Math.round(totalEps / totalSeasons) : 0;
+            return {
+              totalSeasons, episodesPerSeason, seasonsData,
+              overview: (data.overview || item.overview || '').slice(0, 240),
+              poster: data.poster_path ? `https://image.tmdb.org/t/p/w342${data.poster_path}` : item.poster
+            };
+          }
+          return {
+            overview: (data.overview || item.overview || '').slice(0, 240),
+            poster: data.poster_path ? `https://image.tmdb.org/t/p/w342${data.poster_path}` : item.poster
+          };
+        } catch (e) { return null; }
+      }
+
+      // ===== AniList / Jikan =====
+      // برای انیمه: اول اطلاعات پایه از خود AniList/Jikan بگیر
+      // بعد سعی کن از TMDB هم فصل‌های واقعی فرنچایز رو بیاری
+      let baseData = null;
+
       if (item._source === 'anilist' && item.id) {
         const graphqlQuery = `
           query ($id: Int) {
@@ -2110,72 +2242,55 @@
           const data = await res.json();
           const a = data?.data?.Media || {};
           const eps = Number(a.episodes) || 0;
-          return {
+          baseData = {
             totalSeasons: 1,
             episodesPerSeason: eps,
             seasonsData: [{ seasonNumber: 1, episodes: eps }],
             overview: (a.description || '').replace(/<[^>]*>?/gm, '').slice(0, 240) || item.overview,
-            poster: a.coverImage?.large || item.poster
+            poster: a.coverImage?.large || item.poster,
+            isSingleAnime: true
           };
         } catch (e) { return null; }
-      }
-
-      // Jikan — یک فصل واحد
-      if (item._source === 'jikan' && item.id) {
+      } else if (item._source === 'jikan' && item.id) {
         try {
           const data = await jikanFetch(`https://api.jikan.moe/v4/anime/${item.id}/full`);
           const a = data.data || {};
           const eps = Number(a.episodes) || 0;
-          return {
+          baseData = {
             totalSeasons: 1,
             episodesPerSeason: eps,
             seasonsData: [{ seasonNumber: 1, episodes: eps }],
             overview: (a.synopsis || item.overview || '').slice(0, 240),
-            poster: a.images?.jpg?.large_image_url || a.images?.jpg?.image_url || item.poster
+            poster: a.images?.jpg?.large_image_url || a.images?.jpg?.image_url || item.poster,
+            isSingleAnime: true
           };
         } catch (e) { return null; }
+      } else {
+        return null;
       }
 
-      // TMDB
-      if (item._source === 'tmdb' && item.id) {
-        const t = item._tmdbType || 'tv';
-        try {
-          const data = await tmdbFetch(`/${t}/${item.id}`, `&language=fa-IR`);
-          if (t === 'tv') {
-            // TMDB در پاسخ /tv/{id} آرایه seasons رو می‌ده که هر فصل episode_count داره
-            const seasonsRaw = Array.isArray(data.seasons) ? data.seasons : [];
-            // فیلتر فصل‌های واقعی (بدون specials که season_number=0)
-            const realSeasons = seasonsRaw.filter(s => Number(s.season_number) > 0).sort((a, b) => Number(a.season_number) - Number(b.season_number));
-            let seasonsData = realSeasons.map(s => ({
-              seasonNumber: Number(s.season_number) || 1,
-              episodes: Number(s.episode_count) || 0
-            }));
-            // اگر seasonsData خالی بود، از اطلاعات کلی استفاده کن
-            if (seasonsData.length === 0) {
-              const totalSeasons = Number(data.number_of_seasons) || 1;
-              const totalEps = Number(data.number_of_episodes) || 0;
-              const avg = (totalEps > 0 && totalSeasons > 0) ? Math.round(totalEps / totalSeasons) : 0;
-              seasonsData = Array.from({ length: totalSeasons }, (_, i) => ({ seasonNumber: i + 1, episodes: avg }));
-            }
-            const totalSeasons = seasonsData.length;
-            const totalEps = seasonsData.reduce((a, s) => a + s.episodes, 0);
-            const episodesPerSeason = totalSeasons > 0 ? Math.round(totalEps / totalSeasons) : 0;
-            return {
-              totalSeasons,
-              episodesPerSeason,
-              seasonsData,
-              overview: (data.overview || item.overview || '').slice(0, 240),
-              poster: data.poster_path ? `https://image.tmdb.org/t/p/w342${data.poster_path}` : item.poster
-            };
-          }
+      // 🆕 تلاش برای پیدا کردن سریال اصلی از TMDB
+      // اگه TMDB پیدا کرد و تعداد فصل‌ها بیشتر از ۱ بود، اون رو استفاده کن
+      try {
+        const tmdb = await tmdbSeasonsFromTitle(item.title || item.originalTitle || '');
+        if (tmdb && tmdb.seasonsData && tmdb.seasonsData.length > 1) {
+          // فرنچایز چندفصلی — از TMDB استفاده کن
+          const totalSeasons = tmdb.totalSeasons;
+          const totalEps = tmdb.seasonsData.reduce((a, s) => a + s.episodes, 0);
+          const episodesPerSeason = totalSeasons > 0 ? Math.round(totalEps / totalSeasons) : 0;
           return {
-            overview: (data.overview || item.overview || '').slice(0, 240),
-            poster: data.poster_path ? `https://image.tmdb.org/t/p/w342${data.poster_path}` : item.poster
+            totalSeasons,
+            episodesPerSeason,
+            seasonsData: tmdb.seasonsData,
+            overview: tmdb.overview || baseData.overview,
+            poster: tmdb.poster || baseData.poster,
+            _mergedFromTMDB: true
           };
-        } catch (e) { return null; }
-      }
+        }
+      } catch (e) { /* نادیده بگیر */ }
 
-      return null;
+      // در غیر این صورت، از AniList/Jikan استفاده کن
+      return baseData;
     }
 
     /* ============================================================
@@ -2556,6 +2671,1822 @@
       return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;');
     }
 
+    /* ============================================================
+       🆕 محدودیت بوسه — ۵ بوسه در هر ۳۰ دقیقه
+       ============================================================ */
+    function getKissCount() {
+      const now = Date.now();
+      const hist = appState.kissHistory?.[currentPersona] || [];
+      // فقط بوسه‌های ۳۰ دقیقه اخیر
+      const recent = hist.filter(t => (now - t) < KISS_LIMIT_WINDOW_MS);
+      // اگه تاریخچه قدیمی‌تر داشت، پاکسازی
+      if (recent.length !== hist.length) {
+        appState.kissHistory[currentPersona] = recent;
+      }
+      return recent.length;
+    }
+
+    function getKissResetMs() {
+      const hist = appState.kissHistory?.[currentPersona] || [];
+      if (hist.length === 0) return 0;
+      const oldest = Math.min(...hist);
+      const remaining = KISS_LIMIT_WINDOW_MS - (Date.now() - oldest);
+      return Math.max(0, remaining);
+    }
+
+    function updateKissLimitUI() {
+      const info = document.getElementById('kissLimitInfo');
+      const btn = document.getElementById('kissBtn');
+      if (!info || !btn) return;
+      const count = getKissCount();
+      const remaining = KISS_LIMIT_MAX - count;
+      if (remaining > 0) {
+        info.innerText = `${toFaNum(remaining)} بوسه دیگه می‌تونی بفرستی`;
+        info.className = 'text-[10px] font-semibold text-slate-400 text-center';
+        btn.disabled = false;
+      } else {
+        const resetMs = getKissResetMs();
+        const mins = Math.ceil(resetMs / 60000);
+        info.innerText = `سهم امروزت تمومه — ${toFaNum(mins)} دقیقه دیگه`;
+        info.className = 'text-[10px] font-semibold text-rose-500 text-center';
+        btn.disabled = true;
+      }
+    }
+
+/* ==================== END OF PART 2 ==================== */
+  
+    /* ============================================================
+       LIFECYCLE
+       ============================================================ */
+    document.addEventListener("DOMContentLoaded", () => {
+      updateHeaderClock();
+      setInterval(updateHeaderClock, 1000);
+      initBgParticles();
+      loadLocalState();
+      initSupabaseSync();
+      updateKissLimitUI();
+
+      const now = new Date();
+      const [jy, jm, jd] = gregorianToJalali(now.getFullYear(), now.getMonth() + 1, now.getDate());
+      calYear = jy; calMonth = jm; selectedCalDay = jd;
+
+      renderChoreFilters();
+      renderWatchStatusFilters();
+      renderWatchTypeFilters();
+      renderGameStatusFilters();
+      renderAll();
+      initRouletteCanvas();
+
+      requestAnimationFrame(() => positionNavBubble('tasks', false));
+      window.addEventListener('resize', () => positionNavBubble(currentTab, false));
+      window.addEventListener('load', () => positionNavBubble('tasks', false));
+    });
+
+    function pickPersonaStart(p) {
+      setPersona(p);
+      const modal = document.getElementById('personaModal');
+      modal.style.transition = 'opacity 0.4s ease, transform 0.4s ease';
+      modal.style.opacity = '0';
+      modal.style.transform = 'scale(1.05)';
+      setTimeout(() => { modal.style.display = 'none'; }, 400);
+      playTone(600, 'sine', 0.12);
+      setTimeout(() => playTone(800, 'sine', 0.15), 120);
+    }
+
+    function setPersona(p) {
+      currentPersona = p;
+      localStorage.setItem('twoOfUs_persona', p);
+      const amirBtn = document.getElementById('personaAmir');
+      const armitaBtn = document.getElementById('personaArmita');
+      const activeCls = "px-2 sm:px-3 py-1 rounded-lg sm:rounded-xl text-[10px] sm:text-xs font-bold transition flex items-center gap-1 bg-rose-500 text-white shadow-sm";
+      const idleCls = "px-2 sm:px-3 py-1 rounded-lg sm:rounded-xl text-[10px] sm:text-xs font-bold transition flex items-center gap-1 text-slate-500 hover:text-slate-800";
+      if (!amirBtn || !armitaBtn) return;
+      if (p === 'p1') { amirBtn.className = activeCls; armitaBtn.className = idleCls; }
+      else { armitaBtn.className = activeCls; amirBtn.className = idleCls; }
+    }
+
+    function initBgParticles() {
+      const box = document.getElementById('bgParticles');
+      if (!box || box.dataset.init) return;
+      box.dataset.init = '1';
+      for (let i = 0; i < 18; i++) {
+        const p = document.createElement('div');
+        p.className = 'bg-particle';
+        const size = 5 + Math.random() * 12;
+        p.style.width = size + 'px'; p.style.height = size + 'px';
+        p.style.left = (Math.random() * 100) + '%';
+        p.style.bottom = '-30px';
+        p.style.animationDuration = (16 + Math.random() * 14) + 's';
+        p.style.animationDelay = (Math.random() * 16) + 's';
+        box.appendChild(p);
+      }
+    }
+
+    function updateHeaderClock() {
+      const now = new Date();
+      const [jy, jm, jd] = gregorianToJalali(now.getFullYear(), now.getMonth() + 1, now.getDate());
+      const hh = String(now.getHours()).padStart(2, '0');
+      const mm = String(now.getMinutes()).padStart(2, '0');
+      const ss = String(now.getSeconds()).padStart(2, '0');
+      const dateEl = document.getElementById('headerJalaliDate');
+      const timeEl = document.getElementById('headerLiveTime');
+      if (dateEl) dateEl.innerText = `${toFa(jd)} ${JALALI_MONTHS[jm - 1]}`;
+      if (timeEl) timeEl.innerText = toFa(`${hh}:${mm}:${ss}`);
+    }
+
+    function updateAnniversaryDays() {
+      const start = new Date(ANNIVERSARY_DATE);
+      const now = new Date();
+      const diffDays = Math.ceil(Math.abs(now - start) / 86400000);
+      const el = document.getElementById('daysCount');
+      if (el) el.innerText = toFaNum(diffDays);
+    }
+
+    /* ============================================================
+       TAB SWITCHING
+       ============================================================ */
+    function switchTab(tabId) {
+      currentTab = tabId;
+      ['tasks', 'budget', 'calendar', 'watchlist', 'games', 'fun', 'notes'].forEach(t => {
+        const sec = document.getElementById(`tabContent-${t}`);
+        if (sec) sec.classList.toggle('hidden', t !== tabId);
+      });
+      document.querySelectorAll('.nav-item').forEach(b => {
+        b.classList.toggle('active', b.dataset.tab === tabId);
+      });
+      positionNavBubble(tabId, true);
+      playTone(520, 'sine', 0.04, 0.06);
+
+      if (tabId === 'calendar') renderCalendar();
+      if (tabId === 'budget') renderBudgetChart();
+      if (tabId === 'watchlist') renderWatchlist();
+      if (tabId === 'games') renderGameList();
+      if (tabId === 'notes') renderDiary();
+      if (tabId === 'fun') requestAnimationFrame(() => { if (!isWheelSpinning) drawWheel(currentWheelAngle); });
+      if (tabId === 'tasks') updateKissLimitUI();
+    }
+
+    function positionNavBubble(tabId, animate) {
+      const items = document.querySelectorAll('.nav-item');
+      const target = Array.from(items).find(i => i.dataset.tab === tabId);
+      if (!target) return;
+      const bubble = document.getElementById('navBubble');
+      const bubbleIcon = document.getElementById('navBubbleIcon');
+      const navBar = document.getElementById('navBar');
+      if (!bubble || !navBar || !bubbleIcon) return;
+
+      const barRect = navBar.getBoundingClientRect();
+      const itemRect = target.getBoundingClientRect();
+      const centerX = itemRect.left - barRect.left + itemRect.width / 2;
+      const bubbleW = parseFloat(getComputedStyle(bubble).width);
+      const tx = centerX - bubbleW / 2;
+
+      if (!animate) {
+        bubble.style.transition = 'none';
+        bubble.style.transform = `translateX(${tx}px)`;
+        requestAnimationFrame(() => { bubble.style.transition = ''; });
+      } else {
+        bubble.style.transform = `translateX(${tx}px)`;
+      }
+
+      const iconSrc = target.querySelector('.nav-icon')?.src || '';
+      if (iconSrc && bubbleIcon.dataset.currentSrc !== iconSrc) {
+        bubble.classList.add('bubble-swap');
+        setTimeout(() => {
+          bubbleIcon.src = iconSrc;
+          bubbleIcon.dataset.currentSrc = iconSrc;
+          bubble.classList.remove('bubble-swap');
+        }, animate ? 160 : 0);
+      }
+    }
+
+    /* ============================================================
+       STATE PERSIST
+       ============================================================ */
+    function normalizeWatchItem(w) {
+      if (!w) return null;
+      const st = (w.status === 'watching' || w.status === 'watched' || w.status === 'queued') ? w.status : 'queued';
+      const type = ['movie','series','anime','animation'].includes(w.type) ? w.type : 'movie';
+      let seasonsData = Array.isArray(w.seasonsData) ? w.seasonsData.filter(s => s && s.seasonNumber > 0).map(s => ({ seasonNumber: Number(s.seasonNumber) || 1, episodes: Number(s.episodes) || 0 })) : null;
+      const totalSeasons = seasonsData && seasonsData.length > 0 ? seasonsData.length : (Number(w.totalSeasons) || 1);
+      const episodesPerSeason = seasonsData && seasonsData.length > 0 ? Math.round(seasonsData.reduce((a, s) => a + s.episodes, 0) / seasonsData.length) : (Number(w.episodesPerSeason) || 0);
+      const totalEpisodes = seasonsData && seasonsData.length > 0 ? seasonsData.reduce((a, s) => a + s.episodes, 0) : (Number(w.totalEpisodes) || 0);
+      return {
+        ...w, status: st, type,
+        currentSeason: Number(w.currentSeason) || 1,
+        totalSeasons,
+        currentEpisode: Number(w.currentEpisode) || 0,
+        episodesPerSeason,
+        totalEpisodes,
+        seasonsData,
+        lastWatched: w.lastWatched || null,
+        posterUrl: w.posterUrl || '',
+        originalTitle: w.originalTitle || '',
+        overview: w.overview || ''
+      };
+    }
+
+    function loadLocalState() {
+      const local = localStorage.getItem(`twoOfUs_state_${ROOM_CODE}`);
+      if (local) {
+        try {
+          const parsed = JSON.parse(local);
+          appState = { ...appState, ...parsed };
+          if (!Array.isArray(appState.dateIdeas) || appState.dateIdeas.length === 0) {
+            appState.dateIdeas = [...DEFAULT_DATE_IDEAS];
+          }
+          if (Array.isArray(appState.watchList)) {
+            appState.watchList = appState.watchList.map(normalizeWatchItem).filter(Boolean);
+          }
+          if (Array.isArray(appState.gameList)) {
+            appState.gameList = appState.gameList.map(g => {
+              if (!g) return null;
+              const st = (g.status === 'playing' || g.status === 'played' || g.status === 'queued') ? g.status : 'queued';
+              return { ...g, status: st, hours: Number(g.hours) || 0, posterUrl: g.posterUrl || '', platform: g.platform || 'pc', overview: g.overview || '' };
+            }).filter(Boolean);
+          }
+          if (!Array.isArray(appState.personalDates) || appState.personalDates.length === 0) {
+            appState.personalDates = [...DEFAULT_PERSONAL_DATES];
+          }
+          if (!appState.customDays || typeof appState.customDays !== 'object') appState.customDays = {};
+          if (!appState.moodHistory || typeof appState.moodHistory !== 'object') appState.moodHistory = {};
+          if (!Array.isArray(appState.diary)) appState.diary = [];
+          if (!appState.kissHistory || typeof appState.kissHistory !== 'object') appState.kissHistory = { p1: [], p2: [] };
+          if (!Array.isArray(appState.kissHistory.p1)) appState.kissHistory.p1 = [];
+          if (!Array.isArray(appState.kissHistory.p2)) appState.kissHistory.p2 = [];
+          appState.stateVersion = STATE_VERSION;
+        } catch (e) {
+          console.warn('[loadLocalState] failed:', e);
+        }
+      }
+    }
+
+    function saveState(broadcast = true) {
+      appState.stateVersion = STATE_VERSION;
+      let localOk = true;
+      try {
+        localStorage.setItem(`twoOfUs_state_${ROOM_CODE}`, JSON.stringify(appState));
+      } catch (err) {
+        localOk = false;
+        console.error('[saveState] localStorage failed:', err);
+        if (err.name === 'QuotaExceededError' || err.code === 22) {
+          showToast('⚠️ حافظه مرورگر پر شده! لطفاً تعدادی از خاطرات با عکس قدیمی رو حذف کن.', 7000);
+        } else {
+          showToast('خطای ذخیره محلی: ' + err.message, 6000);
+        }
+      }
+      try { renderAll(); } catch (e) { console.error('[renderAll]', e); }
+      if (supabaseClient && broadcast) {
+        supabaseClient.from('couple_rooms').upsert({
+          room_code: ROOM_CODE, state: appState, updated_at: new Date().toISOString()
+        }, { onConflict: 'room_code' }).then(({ error }) => {
+          if (error) {
+            console.error('[Supabase upsert]', error);
+            showToast('سینک با سرور ناموفق بود — داده‌ها روی همین دستگاه ذخیره شدن.', 5000);
+          }
+        });
+      }
+      return localOk;
+    }
+
+    async function initSupabaseSync() {
+      if (!supabaseClient) return;
+      try {
+        const { data } = await supabaseClient.from('couple_rooms').select('state').eq('room_code', ROOM_CODE).maybeSingle();
+        if (data && data.state) {
+          appState = { ...appState, ...data.state };
+          if (!Array.isArray(appState.dateIdeas) || appState.dateIdeas.length === 0) {
+            appState.dateIdeas = [...DEFAULT_DATE_IDEAS];
+          }
+          if (Array.isArray(appState.watchList)) {
+            appState.watchList = appState.watchList.map(normalizeWatchItem).filter(Boolean);
+          }
+          if (!Array.isArray(appState.personalDates) || appState.personalDates.length === 0) {
+            appState.personalDates = [...DEFAULT_PERSONAL_DATES];
+          }
+          if (!appState.customDays || typeof appState.customDays !== 'object') appState.customDays = {};
+          if (!appState.moodHistory || typeof appState.moodHistory !== 'object') appState.moodHistory = {};
+          if (!Array.isArray(appState.diary)) appState.diary = [];
+          if (!appState.kissHistory || typeof appState.kissHistory !== 'object') appState.kissHistory = { p1: [], p2: [] };
+          if (!Array.isArray(appState.kissHistory.p1)) appState.kissHistory.p1 = [];
+          if (!Array.isArray(appState.kissHistory.p2)) appState.kissHistory.p2 = [];
+          appState.stateVersion = STATE_VERSION;
+          try {
+            localStorage.setItem(`twoOfUs_state_${ROOM_CODE}`, JSON.stringify(appState));
+          } catch (e) { console.warn('[initSupabaseSync] local save failed:', e); }
+          renderAll();
+          updateKissLimitUI();
+        }
+        roomChannel = supabaseClient.channel(`room_${ROOM_CODE}`)
+          .on('postgres_changes', { event: '*', schema: 'public', table: 'couple_rooms', filter: `room_code=eq.${ROOM_CODE}` }, payload => {
+            if (payload.new && payload.new.state) {
+              appState = { ...appState, ...payload.new.state };
+              if (Array.isArray(appState.watchList)) {
+                appState.watchList = appState.watchList.map(normalizeWatchItem).filter(Boolean);
+              }
+              if (!appState.kissHistory || typeof appState.kissHistory !== 'object') appState.kissHistory = { p1: [], p2: [] };
+              if (!Array.isArray(appState.kissHistory.p1)) appState.kissHistory.p1 = [];
+              if (!Array.isArray(appState.kissHistory.p2)) appState.kissHistory.p2 = [];
+              try {
+                localStorage.setItem(`twoOfUs_state_${ROOM_CODE}`, JSON.stringify(appState));
+              } catch (e) {}
+              renderAll();
+              updateKissLimitUI();
+            }
+          })
+          .on('broadcast', { event: 'love_kiss' }, payload => { showKissCelebration(payload.payload.senderName); })
+          .subscribe();
+      } catch (e) {
+        console.warn('[initSupabaseSync] failed:', e);
+      }
+    }
+
+    /* ============================================================
+       RENDER MASTER
+       ============================================================ */
+    function renderAll() {
+      renderMoods();
+      renderGroceries();
+      renderChores();
+      renderBudgetChart();
+      renderCalendar();
+      renderWatchlist();
+      renderGameList();
+      renderBucketList();
+      renderDateIdeasDrawer();
+      renderNotes();
+      renderDiary();
+      updateUpcomingEventTeaser();
+      updateAnniversaryDays();
+    }
+
+    function renderMoods() {
+      if (!appState.moods) return;
+      const p1Key = appState.moods.p1?.key || 'smile';
+      const p2Key = appState.moods.p2?.key || 'love';
+      const i1 = document.getElementById('p1MoodIcon'), i2 = document.getElementById('p2MoodIcon');
+      const t1 = document.getElementById('p1MoodText'), t2 = document.getElementById('p2MoodText');
+      if (i1) i1.src = ICONS_3D[p1Key] || ICONS_3D.smile;
+      if (t1) t1.innerText = appState.moods.p1?.text || 'عالی';
+      if (i2) i2.src = ICONS_3D[p2Key] || ICONS_3D.love;
+      if (t2) t2.innerText = appState.moods.p2?.text || 'شاد';
+    }
+
+    function openMoodHistoryModal() {
+      const days = [];
+      for (let i = 29; i >= 0; i--) {
+        const d = new Date(); d.setDate(d.getDate() - i);
+        const [jy, jm, jd] = gregorianToJalali(d.getFullYear(), d.getMonth() + 1, d.getDate());
+        days.push({ key: `${jy}-${String(jm).padStart(2, '0')}-${String(jd).padStart(2, '0')}`, jy, jm, jd });
+      }
+      const history = appState.moodHistory || {};
+      const padStart = (() => { const _d = new Date(); _d.setDate(_d.getDate()-29); return (_d.getDay()+1)%7; })();
+      openModalWithContent('تاریخچه حال و هوا — ۳۰ روز اخیر', `
+        <div class="grid grid-cols-7 gap-1.5 mb-4">
+          <div class="text-[10px] font-bold text-slate-400 text-center">ش</div>
+          <div class="text-[10px] font-bold text-slate-400 text-center">ی</div>
+          <div class="text-[10px] font-bold text-slate-400 text-center">د</div>
+          <div class="text-[10px] font-bold text-slate-400 text-center">س</div>
+          <div class="text-[10px] font-bold text-slate-400 text-center">چ</div>
+          <div class="text-[10px] font-bold text-slate-400 text-center">پ</div>
+          <div class="text-[10px] font-bold text-slate-400 text-center">ج</div>
+          ${'<div></div>'.repeat(padStart)}
+          ${days.map(d => {
+            const m1 = history[`${d.key}_p1`];
+            const m2 = history[`${d.key}_p2`];
+            return `<div class="mood-history-cell" title="${toFa(d.jd)} ${JALALI_MONTHS[d.jm - 1]}">
+              <div class="absolute top-0.5 right-0.5 w-3.5 h-3.5 rounded-full overflow-hidden bg-blue-50">
+                ${m1 ? `<img src="${ICONS_3D[m1.key] || ICONS_3D.smile}" class="w-full h-full object-contain" />` : `<div class="w-full h-full"></div>`}
+              </div>
+              <div class="absolute top-0.5 left-0.5 w-3.5 h-3.5 rounded-full overflow-hidden bg-rose-50">
+                ${m2 ? `<img src="${ICONS_3D[m2.key] || ICONS_3D.smile}" class="w-full h-full object-contain" />` : `<div class="w-full h-full"></div>`}
+              </div>
+              <span class="text-[9px] font-bold text-slate-500 mt-3">${toFa(d.jd)}</span>
+            </div>`;
+          }).join('')}
+        </div>
+        <div class="flex items-center justify-center gap-4 text-[10px] text-slate-500">
+          <span class="flex items-center gap-1"><span class="w-3 h-3 rounded-full bg-blue-100 border border-blue-300"></span> امیرمحمد</span>
+          <span class="flex items-center gap-1"><span class="w-3 h-3 rounded-full bg-rose-100 border border-rose-300"></span> آرمیتا</span>
+        </div>
+      `);
+    }
+
+    /* ============================================================
+       GROCERIES — با آرشیو
+       ============================================================ */
+    function toggleGroceryArchive() {
+      showGroceryArchive = !showGroceryArchive;
+      renderGroceries();
+      playTone(500, 'sine', 0.08);
+    }
+
+    function renderGroceries() {
+      const c = document.getElementById('groceryList');
+      if (!c) return;
+      const all = appState.groceries || [];
+      const list = showGroceryArchive ? all.filter(x => x.done) : all.filter(x => !x.done);
+
+      const badge = document.getElementById('groceryCountBadge');
+      const archBtn = document.getElementById('groceryArchiveToggleBtn');
+      if (badge) {
+        const openCount = all.filter(x => !x.done).length;
+        const doneCount = all.filter(x => x.done).length;
+        badge.innerText = showGroceryArchive ? `${toFaNum(doneCount)} خرید انجام‌شده` : `${toFaNum(openCount)} قلم باز`;
+      }
+      if (archBtn) {
+        archBtn.innerText = showGroceryArchive ? 'بازگشت به لیست خرید' : 'نمایش آرشیو';
+      }
+
+      if (list.length === 0) {
+        c.innerHTML = showGroceryArchive
+          ? `<div class="text-center py-8 text-slate-400 text-xs"><i class="fa-solid fa-box-archive text-2xl mx-auto mb-2 opacity-40 block"></i><p>آرشیو خالیه</p></div>`
+          : `<div class="text-center py-8 text-slate-400 text-xs"><img src="${ICONS_3D.cart}" class="w-10 h-10 mx-auto mb-2 opacity-40" alt="" /><p>سبد خرید خالیه</p></div>`;
+        return;
+      }
+      c.innerHTML = list.map(item => `
+        <div class="flex items-center justify-between p-3 rounded-2xl ${item.done ? 'bg-slate-50/70 border border-slate-200/50' : 'bg-white border border-rose-100/80 shadow-sm'}">
+          <div class="flex items-center gap-2.5 min-w-0 flex-1">
+            <button onclick="toggleGrocery('${item.id}')" class="w-6 h-6 rounded-lg border-2 ${item.done ? 'bg-rose-500 border-rose-500 text-white' : 'border-slate-300'} flex items-center justify-center text-[10px] flex-shrink-0">${item.done ? '<i class="fa-solid fa-check"></i>' : ''}</button>
+            <div class="min-w-0 flex-1">
+              <p class="text-xs font-bold ${item.done ? 'line-through text-slate-400' : 'text-slate-800'} break-words">${escapeHtml(item.name)}</p>
+              <div class="flex items-center gap-1.5 mt-0.5 flex-wrap">
+                <span class="text-[10px] text-slate-400 flex items-center gap-1"><i class="fa-regular fa-clock text-[9px]"></i> ${item.timeBadge || ''}</span>
+                <img src="${item.addedBy === 'p1' ? ICONS_3D.manTech : ICONS_3D.womanTech}" class="w-3.5 h-3.5" alt="" />
+              </div>
+            </div>
+          </div>
+          <button onclick="deleteGrocery('${item.id}')" class="w-7 h-7 rounded-xl text-slate-300 hover:text-rose-500 hover:bg-rose-50 flex items-center justify-center flex-shrink-0"><i class="fa-solid fa-trash-can text-[10px]"></i></button>
+        </div>`).join('');
+    }
+
+    function clearCompletedGroceries() {
+      appState.groceries = (appState.groceries || []).filter(g => !g.done);
+      saveState(); playTone(450);
+    }
+
+    /* ============================================================
+       CHORES — با آرشیو و آیکون Font Awesome
+       ============================================================ */
+    function renderChoreFilters() {
+      const box = document.getElementById('choreFilters');
+      if (!box) return;
+      const opts = [
+        { id:'all', label:'همه', icon:null },
+        { id:'both', label:'دونفره', icon:'fa-people-group' },
+        { id:'p1', label:'امیرمحمد', icon:ICONS_3D.manTech },
+        { id:'p2', label:'آرمیتا', icon:ICONS_3D.womanTech }
+      ];
+      box.innerHTML = opts.map(o => {
+        let iconHtml = '';
+        if (o.icon) {
+          if (typeof o.icon === 'string' && o.icon.startsWith('fa-')) {
+            iconHtml = `<i class="fa-solid ${o.icon} text-[11px]"></i>`;
+          } else {
+            iconHtml = `<img src="${o.icon}" class="w-3.5 h-3.5" alt="" />`;
+          }
+        }
+        return `
+          <button onclick="filterChores('${o.id}')" id="choreFilter-${o.id}" class="shrink-0 px-2.5 py-1 rounded-xl ${currentChoreFilter === o.id ? 'bg-indigo-500 text-white' : 'bg-white text-slate-600 border border-slate-200'} font-bold flex items-center gap-1 whitespace-nowrap transition">
+            ${iconHtml}<span>${o.label}</span>
+          </button>`;
+      }).join('');
+    }
+
+    function toggleChoreArchive() {
+      showChoreArchive = !showChoreArchive;
+      renderChores();
+      playTone(500, 'sine', 0.08);
+    }
+
+    function choreAssigneeIcon(assignee, size = 3.5) {
+      if (assignee === 'p1') return `<img src="${ICONS_3D.manTech}" class="w-${size} h-${size}" alt="" />`;
+      if (assignee === 'p2') return `<img src="${ICONS_3D.womanTech}" class="w-${size} h-${size}" alt="" />`;
+      return `<i class="fa-solid fa-people-group text-indigo-500 text-[11px]"></i>`;
+    }
+
+    function renderChores() {
+      const c = document.getElementById('choreList');
+      if (!c) return;
+      let list = appState.chores || [];
+      list = showChoreArchive ? list.filter(x => x.done) : list.filter(x => !x.done);
+      if (currentChoreFilter !== 'all') list = list.filter(x => x.assignee === currentChoreFilter);
+
+      const countBadge = document.getElementById('choreCountBadge');
+      const archiveBtn = document.getElementById('choreArchiveToggleBtn');
+      if (countBadge) {
+        const all = appState.chores || [];
+        const openCount = all.filter(x => !x.done).length;
+        const doneCount = all.filter(x => x.done).length;
+        countBadge.innerText = showChoreArchive ? `${toFaNum(doneCount)} کار انجام‌شده` : `${toFaNum(openCount)} کار باز`;
+      }
+      if (archiveBtn) {
+        archiveBtn.innerText = showChoreArchive ? 'بازگشت به کارهای باز' : 'نمایش آرشیو';
+      }
+
+      if (list.length === 0) {
+        c.innerHTML = showChoreArchive
+          ? `<div class="text-center py-8 text-slate-400 text-xs"><i class="fa-solid fa-box-archive text-2xl mx-auto mb-2 opacity-40 block"></i><p>آرشیو خالیه</p></div>`
+          : `<div class="text-center py-8 text-slate-400 text-xs"><i class="fa-solid fa-broom text-2xl mx-auto mb-2 opacity-40 block"></i><p>همه کارها انجام شده</p></div>`;
+        return;
+      }
+      c.innerHTML = list.map(x => `
+        <div class="flex items-center justify-between p-3 rounded-2xl ${x.done ? 'bg-slate-50/70 border border-slate-200/50' : 'bg-white border border-indigo-100/80 shadow-sm'}">
+          <div class="flex items-center gap-2.5 min-w-0 flex-1">
+            <button onclick="toggleChore('${x.id}')" class="w-6 h-6 rounded-lg border-2 ${x.done ? 'bg-indigo-500 border-indigo-500 text-white' : 'border-slate-300'} flex items-center justify-center text-[10px] flex-shrink-0">${x.done ? '<i class="fa-solid fa-check"></i>' : ''}</button>
+            <div class="min-w-0 flex-1">
+              <p class="text-xs font-bold ${x.done ? 'line-through text-slate-400' : 'text-slate-800'} break-words">${escapeHtml(x.title)}</p>
+              <div class="flex items-center gap-1.5 mt-0.5 flex-wrap">
+                <span class="text-[10px] text-slate-400">${x.timeBadge || ''}</span>
+                ${choreAssigneeIcon(x.assignee)}
+              </div>
+            </div>
+          </div>
+          <button onclick="deleteChore('${x.id}')" class="w-7 h-7 rounded-xl text-slate-300 hover:text-rose-500 hover:bg-rose-50 flex items-center justify-center flex-shrink-0"><i class="fa-solid fa-trash-can text-[10px]"></i></button>
+        </div>`).join('');
+    }
+
+    function filterChores(id) { currentChoreFilter = id; renderChoreFilters(); renderChores(); }
+
+    /* ============================================================
+       BUDGET
+       ============================================================ */
+    function renderBudgetChart() {
+      const _n = getNowJalaliString();
+      const curYM = `${_n.jy}-${String(_n.jm).padStart(2,'0')}`;
+      const allExpenses = appState.expenses || [];
+      const expenses = allExpenses.filter(e => { const ym = expenseYM(e); return !ym || ym === curYM; });
+      const total = expenses.reduce((s, x) => s + (Number(x.amount) || 0), 0);
+
+      const subEl = document.getElementById('budgetSubtitle');
+      if (subEl) subEl.innerText = `مخارج ${JALALI_MONTHS[_n.jm - 1]} ${toFa(_n.jy)}`;
+
+      const amtEl = document.getElementById('chartTotalAmount');
+      const cntEl = document.getElementById('expenseCountText');
+      if (amtEl) amtEl.innerText = toFaNum(total);
+      if (cntEl) cntEl.innerText = `${toFaNum(expenses.length)} فقره`;
+
+      const limit = Number(appState.monthlyBudgetLimit) || 0;
+      const ind = document.getElementById('budgetLimitIndicator');
+      if (ind) {
+        if (limit > 0) {
+          const rem = limit - total;
+          const pct = Math.min(100, Math.round((total / limit) * 100));
+          ind.innerHTML = `
+            <div class="flex items-center justify-between text-[11px] mb-1">
+              <span>سقف: <strong>${toFaNum(limit)}</strong></span>
+              <span class="${rem >= 0 ? 'text-emerald-600' : 'text-rose-600'} font-bold">${rem >= 0 ? `${toFaNum(rem)} باقی` : `${toFaNum(Math.abs(rem))} فراتر`}</span>
+            </div>
+            <div class="w-full h-2 rounded-full bg-slate-100 overflow-hidden">
+              <div class="h-full rounded-full ${pct > 90 ? 'bg-rose-500' : pct > 70 ? 'bg-amber-400' : 'bg-emerald-500'}" style="width: ${pct}%"></div>
+            </div>`;
+        } else {
+          ind.innerHTML = `<button onclick="openSetMonthlyBudgetModal()" class="text-rose-500 font-bold underline text-xs">تعیین سقف بودجه</button>`;
+        }
+      }
+
+      const catTotals = {};
+      BUDGET_CATEGORIES.forEach(c => catTotals[c.id] = 0);
+      expenses.forEach(e => { const c = e.category || 'other'; catTotals[c] = (catTotals[c] || 0) + (Number(e.amount) || 0); });
+
+      const svg = document.getElementById('budgetDonutSvg');
+      if (svg) {
+        const circ = 2 * Math.PI * 38;
+        let offset = 0;
+        let html = `<circle cx="50" cy="50" r="38" stroke="#f1f5f9" stroke-width="11" fill="transparent"/>`;
+        BUDGET_CATEGORIES.forEach(cat => {
+          const v = catTotals[cat.id];
+          if (v > 0 && total > 0) {
+            const dash = (v / total) * circ;
+            html += `<circle cx="50" cy="50" r="38" stroke="${cat.color}" stroke-width="11" fill="transparent" stroke-dasharray="${dash} ${circ}" stroke-dashoffset="${-offset}" stroke-linecap="round"/>`;
+            offset += dash;
+          }
+        });
+        svg.innerHTML = html;
+      }
+
+      const catBox = document.getElementById('categoryBreakdownContainer');
+      if (catBox) {
+        catBox.innerHTML = BUDGET_CATEGORIES.map(cat => {
+          const v = catTotals[cat.id] || 0;
+          const pct = total > 0 ? Math.round((v / total) * 100) : 0;
+          return `<div class="space-y-1">
+            <div class="flex items-center justify-between text-xs">
+              <div class="flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-full" style="background:${cat.color}"></span><span class="font-bold text-slate-700">${cat.name}</span></div>
+              <div class="flex items-center gap-2 text-slate-500"><span class="font-extrabold text-slate-800">${toFaNum(v)}</span><span class="text-[10px] w-8 text-left font-semibold">${toFa(pct)}٪</span></div>
+            </div>
+            <div class="w-full h-2 rounded-full bg-slate-100 overflow-hidden"><div class="h-full rounded-full" style="width:${pct}%;background:${cat.color}"></div></div>
+          </div>`;
+        }).join('');
+      }
+
+      renderMonthlyAverage(allExpenses);
+
+      const lc = document.getElementById('expenseList');
+      if (!lc) return;
+      if (expenses.length === 0) {
+        lc.innerHTML = `<div class="text-center py-6 text-slate-400 text-xs">این ماه خرجی ثبت نشده</div>`;
+        return;
+      }
+      lc.innerHTML = [...expenses].reverse().map(e => {
+        const ci = BUDGET_CATEGORIES.find(c => c.id === e.category) || BUDGET_CATEGORIES[5];
+        return `<div class="flex items-center justify-between p-3 rounded-2xl bg-white border border-slate-100 shadow-sm gap-2">
+          <div class="flex items-center gap-2.5 min-w-0 flex-1">
+            <div class="w-9 h-9 rounded-xl flex items-center justify-center text-xs font-bold flex-shrink-0" style="background:${ci.color}15;color:${ci.color}"><i class="fa-solid ${ci.icon}"></i></div>
+            <div class="min-w-0">
+              <p class="text-xs font-bold text-slate-800 break-words">${escapeHtml(e.title)}</p>
+              <div class="flex items-center gap-1.5 text-[10px] text-slate-400 mt-0.5 flex-wrap">
+                <span>${e.dateStr || ''}</span>
+                <img src="${e.registeredBy === 'p1' ? ICONS_3D.manTech : ICONS_3D.womanTech}" class="w-3 h-3" alt="" />
+              </div>
+            </div>
+          </div>
+          <div class="flex items-center gap-2 flex-shrink-0">
+            <span class="font-display font-extrabold text-sm text-slate-800">${toFaNum(e.amount)}</span>
+            <button onclick="deleteExpense('${e.id}')" class="text-slate-300 hover:text-rose-500 p-1"><i class="fa-solid fa-trash-can text-xs"></i></button>
+          </div>
+        </div>`;
+      }).join('');
+    }
+
+    function renderMonthlyAverage(allExpenses) {
+      const box = document.getElementById('monthlyAvgContainer');
+      const label = document.getElementById('avgChartMonthsLabel');
+      if (!box) return;
+
+      const byMonth = {};
+      allExpenses.forEach(e => {
+        const ym = expenseYM(e);
+        if (!ym) return;
+        if (!byMonth[ym]) byMonth[ym] = {};
+        const cat = e.category || 'other';
+        byMonth[ym][cat] = (byMonth[ym][cat] || 0) + (Number(e.amount) || 0);
+      });
+      const months = Object.keys(byMonth).sort();
+      const monthCount = months.length;
+
+      if (label) {
+        label.innerText = monthCount > 0 ? `بر اساس ${toFaNum(monthCount)} ماه ثبت‌شده` : '';
+      }
+
+      if (monthCount === 0) {
+        box.innerHTML = `<p class="text-center py-4 text-slate-400 text-xs">هنوز داده‌ای برای محاسبه میانگین نیست</p>`;
+        return;
+      }
+
+      const catAvg = {};
+      BUDGET_CATEGORIES.forEach(c => catAvg[c.id] = 0);
+      months.forEach(ym => {
+        BUDGET_CATEGORIES.forEach(cat => {
+          const sum = byMonth[ym][cat.id] || 0;
+          catAvg[cat.id] += sum / monthCount;
+        });
+      });
+
+      const grandTotalAvg = Object.values(catAvg).reduce((a, b) => a + b, 0);
+      const maxAvg = Math.max(...Object.values(catAvg), 1);
+
+      box.innerHTML = BUDGET_CATEGORIES.filter(c => catAvg[c.id] > 0).sort((a, b) => catAvg[b.id] - catAvg[a.id]).map(cat => {
+        const avg = catAvg[cat.id];
+        const pct = Math.round((avg / maxAvg) * 100);
+        const sharePct = grandTotalAvg > 0 ? Math.round((avg / grandTotalAvg) * 100) : 0;
+        return `<div class="space-y-1">
+          <div class="flex items-center justify-between text-xs">
+            <div class="flex items-center gap-2">
+              <span class="w-2.5 h-2.5 rounded-full" style="background:${cat.color}"></span>
+              <span class="font-bold text-slate-700">${cat.name}</span>
+            </div>
+            <div class="flex items-center gap-2 text-slate-500">
+              <span class="font-extrabold text-slate-800">${toFaNum(Math.round(avg))}</span>
+              <span class="text-[10px] font-semibold">(${toFa(sharePct)}٪)</span>
+            </div>
+          </div>
+          <div class="w-full h-2 rounded-full bg-slate-100 overflow-hidden"><div class="h-full rounded-full" style="width:${pct}%;background:${cat.color};opacity:0.75"></div></div>
+        </div>`;
+      }).join('') + (grandTotalAvg > 0 ? `
+        <div class="pt-3 mt-3 border-t border-slate-100 flex items-center justify-between text-xs">
+          <span class="font-bold text-slate-700">مجموع میانگین ماهانه</span>
+          <span class="font-display font-black text-sm text-rose-600">${toFaNum(Math.round(grandTotalAvg))} تومان</span>
+        </div>` : '');
+    }
+
+    /* ============================================================
+       CALENDAR
+       ============================================================ */
+    function getDayCategory(md) {
+      const personal = (appState.personalDates || []).find(p => p.md === md);
+      if (personal) return { type: 'personal', data: personal };
+      if (GIFT_EVENTS[md]) return { type: 'gift', data: GIFT_EVENTS[md] };
+      if (EMBEDDED_HOLIDAYS[md]) return { type: 'holiday', data: { title: EMBEDDED_HOLIDAYS[md] } };
+      return { type: 'normal', data: null };
+    }
+
+    function renderCalendarLegend() {
+      const box = document.getElementById('calendarLegend');
+      if (!box) return;
+      const items = [
+        { key:'birthday', icon:ICONS_CAL.birthday, label:'تولد' },
+        { key:'anniversary', icon:ICONS_CAL.anniversary, label:'سالگرد' },
+        { key:'celebration', icon:ICONS_CAL.celebration, label:'جشن' },
+        { key:'travel', icon:ICONS_CAL.travel, label:'سفر' },
+        { key:'work', icon:ICONS_CAL.work, label:'کار' },
+        { key:'rest', icon:ICONS_CAL.rest, label:'استراحت' }
+      ];
+      box.innerHTML = `<span class="font-bold text-slate-400">راهنما:</span>` +
+        items.map(i => `
+          <span class="flex items-center gap-1 px-1.5 py-0.5 rounded-lg bg-rose-50/60 border border-rose-100/60">
+            <img src="${i.icon}" data-cal-icon="${i.key}" class="w-3.5 h-3.5 rounded" alt="" /><span>${i.label}</span>
+          </span>`).join('');
+    }
+
+    function renderCalendar() {
+      const titleEl = document.getElementById('calendarMonthTitle');
+      if (titleEl) titleEl.innerText = `${JALALI_MONTHS[calMonth - 1]} ${toFa(calYear)}`;
+      renderCalendarLegend();
+      const grid = document.getElementById('calendarGrid');
+      if (!grid) return;
+      grid.innerHTML = '';
+      const isJalaliLeap = y => [1,5,9,13,17,22,26,30].includes(y % 33);
+      const dim = (calMonth <= 6) ? 31 : (calMonth <= 11) ? 30 : (isJalaliLeap(calYear) ? 30 : 29);
+      const [gy, gm, gd] = jalaliToGregorian(calYear, calMonth, 1);
+      const startDOW = (new Date(gy, gm - 1, gd).getDay() + 1) % 7;
+      const now = new Date();
+      const [tjy, tjm, tjd] = gregorianToJalali(now.getFullYear(), now.getMonth() + 1, now.getDate());
+      const isCurrentMonth = (tjy === calYear && tjm === calMonth);
+      for (let i = 0; i < startDOW; i++) grid.innerHTML += `<div class="aspect-square"></div>`;
+      for (let day = 1; day <= dim; day++) {
+        const mp = String(calMonth).padStart(2, '0');
+        const dp = String(day).padStart(2, '0');
+        const md = `${mp}-${dp}`;
+        const fullKey = `${calYear}-${mp}-${dp}`;
+        const cat = getDayCategory(md);
+        const isSel = (selectedCalDay === day);
+        const isToday = isCurrentMonth && (day === tjd);
+        const custom = (appState.customDays || {})[fullKey];
+        const iconKey = custom?.icon || (cat.type === 'personal' ? cat.data.icon : (cat.type === 'gift' ? 'celebration' : null));
+        const hasIcon = !!iconKey;
+        const iconStyle = CAL_ICON_STYLE[iconKey] || { zoom: 120 };
+        let cellBgCls = 'cal-day-normal';
+        if (cat.type === 'personal') cellBgCls = 'cal-day-personal';
+        else if (cat.type === 'gift') cellBgCls = 'cal-day-gift';
+        else if (cat.type === 'holiday') cellBgCls = 'cal-day-holiday';
+        if (custom?.bgColor) cellBgCls = '';
+        const numColor = (cat.type === 'personal' && !custom?.bgColor) ? '#fff' : '#1e293b';
+        const inlineBg = custom?.bgColor ? `background:${custom.bgColor};` : '';
+        const iconEl = hasIcon ? `<div class="cal-day-bg" style="background-image:url('${ICONS_CAL_RESOLVED[iconKey]}');background-size:${iconStyle.zoom}%;"></div>` : '';
+        grid.innerHTML += `
+          <button onclick="selectCalendarDay(${day})" class="cal-day aspect-square rounded-2xl flex items-center justify-center relative transition-all ${cellBgCls} ${isSel ? 'sel' : ''} ${isToday && !isSel ? 'cal-day-today' : ''}" style="${inlineBg}">
+            ${iconEl}
+            <span class="cal-day-num text-xs sm:text-sm" style="color:${isSel ? '#fff' : numColor}">${toFa(day)}</span>
+          </button>`;
+      }
+      renderSelectedDayDetails();
+    }
+
+    function selectCalendarDay(day) { selectedCalDay = day; playTone(500, 'sine', 0.05); renderCalendar(); }
+
+    function renderSelectedDayDetails() {
+      if (!selectedCalDay) return;
+      const mp = String(calMonth).padStart(2, '0');
+      const dp = String(selectedCalDay).padStart(2, '0');
+      const full = `${calYear}/${mp}/${dp}`;
+      const fullKey = `${calYear}-${mp}-${dp}`;
+      const md = `${mp}-${dp}`;
+      const cat = getDayCategory(md);
+      const custom = (appState.customDays || {})[fullKey];
+      const labelEl = document.getElementById('selectedDayLabel');
+      if (labelEl) labelEl.innerText = `${toFa(selectedCalDay)} ${JALALI_MONTHS[calMonth - 1]}`;
+      const box = document.getElementById('selectedDayEventsList');
+      if (!box) return;
+      let html = '';
+      if (cat.type === 'holiday') {
+        html += `<div class="p-3 rounded-2xl bg-rose-100/70 text-rose-700 font-bold flex items-center gap-2.5 text-xs">
+          <img src="${ICONS_CAL_RESOLVED.celebration}" data-cal-icon="celebration" class="w-5 h-5 rounded" alt="" /><span>${cat.data.title}</span>
+        </div>`;
+      } else if (cat.type === 'gift') {
+        html += `<div class="p-3 rounded-2xl bg-gradient-to-l from-rose-50 to-pink-100 text-rose-700 font-bold flex items-center gap-2.5 text-xs border border-rose-200">
+          <img src="${ICONS_CAL_RESOLVED.anniversary}" data-cal-icon="anniversary" class="w-5 h-5 rounded" alt="" /><span>${cat.data.title} — روز کادو!</span>
+        </div>`;
+      } else if (cat.type === 'personal') {
+        html += `<div class="p-3 rounded-2xl bg-gradient-to-l from-rose-100 to-pink-200 text-rose-800 font-bold flex items-center gap-2.5 text-xs border border-rose-300">
+          <img src="${ICONS_CAL_RESOLVED[cat.data.icon] || ICONS_CAL_RESOLVED.anniversary}" data-cal-icon="${cat.data.icon || 'anniversary'}" class="w-5 h-5 rounded" alt="" /><span>${cat.data.title} (شروع از سال ${toFa(cat.data.year)})</span>
+        </div>`;
+      }
+      if (custom?.icon) {
+        html += `<div class="p-2.5 rounded-xl bg-amber-50 border border-amber-200 text-amber-700 text-[11px] font-bold flex items-center justify-between gap-2">
+          <span class="flex items-center gap-1.5"><i class="fa-solid fa-thumbtack text-[10px]"></i> آیکون دستی ست شده</span>
+          <button onclick="clearCustomDay('${fullKey}')" class="text-rose-500 text-[10px]">حذف</button>
+        </div>`;
+      }
+      const dEvs = (appState.coupleEvents || []).filter(e => e.jalaliDate === full);
+      dEvs.forEach(ev => {
+        const co = EVENT_CATEGORIES.find(c => c.id === ev.category) || EVENT_CATEGORIES[0];
+        html += `<div class="p-3 rounded-2xl bg-white border border-slate-200/80 flex items-center justify-between shadow-sm gap-2">
+          <div class="flex items-center gap-2.5 min-w-0">
+            <span class="w-2.5 h-2.5 rounded-full ${co.dot} flex-shrink-0"></span>
+            <div class="min-w-0">
+              <p class="font-bold text-slate-800 text-xs break-words">${escapeHtml(ev.title)}</p>
+              <p class="text-[10px] text-slate-400">${ev.time ? `ساعت ${toFa(ev.time)} • ` : ''}${co.name}</p>
+            </div>
+          </div>
+          <button onclick="deleteCoupleEvent('${ev.id}')" class="text-slate-300 hover:text-rose-500 p-1 flex-shrink-0"><i class="fa-solid fa-trash-can text-xs"></i></button>
+        </div>`;
+      });
+      if (cat.type === 'normal' && dEvs.length === 0 && !custom?.icon) {
+        html += `<p class="text-slate-400 text-[11px] py-1">روز عادی — با دکمه «ست کردن» می‌تونی آیکون دلخواه بذاری</p>`;
+      }
+      box.innerHTML = html;
+    }
+
+    function changeMonth(dir) {
+      calMonth += dir;
+      if (calMonth > 12) { calMonth = 1; calYear++; } else if (calMonth < 1) { calMonth = 12; calYear--; }
+      selectedCalDay = 1; playTone(400); renderCalendar();
+    }
+    function goToCurrentMonth() {
+      const now = new Date();
+      const [jy, jm, jd] = gregorianToJalali(now.getFullYear(), now.getMonth() + 1, now.getDate());
+      calYear = jy; calMonth = jm; selectedCalDay = jd; playTone(480); renderCalendar();
+    }
+
+    function openDayCustomizeModal() {
+      if (!selectedCalDay) return;
+      const mp = String(calMonth).padStart(2, '0');
+      const dp = String(selectedCalDay).padStart(2, '0');
+      const fullKey = `${calYear}-${mp}-${dp}`;
+      const cur = (appState.customDays || {})[fullKey] || {};
+      const icons = [
+        { key:'', label:'بدون' },
+        { key:'birthday', label:'تولد' }, { key:'anniversary', label:'سالگرد' },
+        { key:'celebration', label:'جشن' }, { key:'travel', label:'سفر' },
+        { key:'work', label:'کار' }, { key:'rest', label:'استراحت' }
+      ];
+      const bgColors = [
+        { key:'', label:'پیش‌فرض', color:'' },
+        { key:'pink', label:'صورتی', color:'linear-gradient(135deg,#fecdd7 0%,#fb7193 60%,#f43f6e 100%)' },
+        { key:'softpink', label:'ملایم', color:'linear-gradient(180deg,#fff5f7 0%,#ffd8e0 100%)' },
+        { key:'cream', label:'کرم', color:'linear-gradient(180deg,#fff 0%,#ffe4e9 100%)' },
+        { key:'lavender', label:'بنفش', color:'linear-gradient(135deg,#e9d5ff 0%,#c4b5fd 100%)' },
+        { key:'sky', label:'آبی', color:'linear-gradient(135deg,#bae6fd 0%,#7dd3fc 100%)' }
+      ];
+      openModalWithContent(`ست کردن روز ${toFa(selectedCalDay)} ${JALALI_MONTHS[calMonth - 1]}`, `
+        <form onsubmit="handleSaveCustomDay(event, '${fullKey}')" class="space-y-4">
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-2">آیکون</label>
+            <div id="cdIconPicker" class="grid grid-cols-4 gap-2">
+              ${icons.map(i => `
+                <button type="button" data-icon="${i.key}" onclick="pickCdIcon('${i.key}')" class="cd-icon-btn p-2 rounded-2xl border-2 ${(cur.icon || '') === i.key ? 'border-rose-400 bg-rose-50' : 'border-slate-200 bg-white'} flex flex-col items-center gap-1">
+                  ${i.key ? `<img src="${ICONS_CAL[i.key]}" data-cal-icon="${i.key}" class="w-7 h-7 rounded" alt="" onerror="this.style.display='none'" />` : `<i class="fa-solid fa-ban text-slate-300 text-lg"></i>`}
+                  <span class="text-[9px] font-bold text-slate-600">${i.label}</span>
+                </button>`).join('')}
+            </div>
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-2">پس‌زمینه</label>
+            <div id="cdBgPicker" class="grid grid-cols-3 gap-2">
+              ${bgColors.map(b => `
+                <button type="button" data-bg="${b.key}" onclick="pickCdBg('${b.key}')" class="cd-bg-btn p-2 rounded-xl border-2 ${(cur.bgKey || '') === b.key ? 'border-rose-400' : 'border-slate-200'} flex items-center justify-center gap-1" style="${b.color ? 'background:' + b.color : 'background:#fff'}">
+                  <span class="text-[10px] font-bold text-slate-700">${b.label}</span>
+                </button>`).join('')}
+            </div>
+          </div>
+          <div class="flex gap-2 pt-2">
+            <button type="submit" class="flex-1 py-3.5 rounded-2xl bg-rose-500 text-white font-bold text-xs active:scale-95 transition">ذخیره</button>
+            ${cur.icon || cur.bgKey ? `<button type="button" onclick="clearCustomDay('${fullKey}')" class="px-4 py-3.5 rounded-2xl bg-rose-100 text-rose-600 font-bold text-xs">حذف</button>` : ''}
+          </div>
+        </form>`);
+      window._cdIcon = cur.icon || '';
+      window._cdBg = cur.bgKey || '';
+    }
+
+    function pickCdIcon(k) {
+      window._cdIcon = k;
+      document.querySelectorAll('#cdIconPicker .cd-icon-btn').forEach(b => {
+        b.className = b.dataset.icon === k
+          ? 'cd-icon-btn p-2 rounded-2xl border-2 border-rose-400 bg-rose-50 flex flex-col items-center gap-1'
+          : 'cd-icon-btn p-2 rounded-2xl border-2 border-slate-200 bg-white flex flex-col items-center gap-1';
+      });
+    }
+    function pickCdBg(k) {
+      window._cdBg = k;
+      document.querySelectorAll('#cdBgPicker .cd-bg-btn').forEach(b => {
+        b.className = b.dataset.bg === k
+          ? 'cd-bg-btn p-2 rounded-xl border-2 border-rose-400 flex items-center justify-center gap-1'
+          : 'cd-bg-btn p-2 rounded-xl border-2 border-slate-200 flex items-center justify-center gap-1';
+      });
+    }
+    function handleSaveCustomDay(e, key) {
+      e.preventDefault();
+      const bgMap = {
+        '': '',
+        'pink':'linear-gradient(135deg,#fecdd7 0%,#fb7193 60%,#f43f6e 100%)',
+        'softpink':'linear-gradient(180deg,#fff5f7 0%,#ffd8e0 100%)',
+        'cream':'linear-gradient(180deg,#fff 0%,#ffe4e9 100%)',
+        'lavender':'linear-gradient(135deg,#e9d5ff 0%,#c4b5fd 100%)',
+        'sky':'linear-gradient(135deg,#bae6fd 0%,#7dd3fc 100%)'
+      };
+      if (!appState.customDays) appState.customDays = {};
+      const icon = window._cdIcon || '';
+      const bgKey = window._cdBg || '';
+      if (!icon && !bgKey) delete appState.customDays[key];
+      else appState.customDays[key] = { icon, bgKey, bgColor: bgMap[bgKey] || '' };
+      saveState(); closeModal(); playTone(600, 'sine', 0.1);
+    }
+    function clearCustomDay(key) {
+      if (appState.customDays) delete appState.customDays[key];
+      saveState(); closeModal(); playTone(450, 'sine', 0.1);
+    }
+
+    function updateUpcomingEventTeaser() {
+      const t = document.getElementById('nextEventTeaser');
+      if (!t) return;
+      const now = getNowJalaliString();
+      const todayKey = `${now.jy}-${String(now.jm).padStart(2, '0')}-${String(now.jd).padStart(2, '0')}`;
+      const candidates = [];
+      (appState.coupleEvents || []).forEach(ev => {
+        const k = standardizeJalaliDateKey(ev.jalaliDate);
+        if (k && k >= todayKey) candidates.push({ title: ev.title, dateKey: k, kind: 'event' });
+      });
+      (appState.personalDates || []).forEach(p => {
+        [now.jy, now.jy + 1].forEach(y => {
+          const k = `${y}-${p.md}`;
+          if (k >= todayKey) candidates.push({ title: p.title, dateKey: k, kind: 'personal', icon: p.icon });
+        });
+      });
+      Object.entries(GIFT_EVENTS).forEach(([md, info]) => {
+        [now.jy, now.jy + 1].forEach(y => {
+          const k = `${y}-${md}`;
+          if (k >= todayKey) candidates.push({ title: info.title, dateKey: k, kind: 'gift', icon: info.icon });
+        });
+      });
+      if (candidates.length === 0) {
+        t.innerHTML = `<i class="fa-regular fa-calendar-check text-rose-400"></i> <span>قرار نزدیکی ثبت نشده</span>`;
+        return;
+      }
+      candidates.sort((a, b) => a.dateKey.localeCompare(b.dateKey));
+      const next = candidates[0];
+      const tomorrow = new Date(); tomorrow.setDate(tomorrow.getDate() + 1);
+      const [ty, tm, td] = gregorianToJalali(tomorrow.getFullYear(), tomorrow.getMonth() + 1, tomorrow.getDate());
+      const tomorrowKey = `${ty}-${String(tm).padStart(2, '0')}-${String(td).padStart(2, '0')}`;
+      let label;
+      if (next.dateKey === todayKey) label = 'امروز';
+      else if (next.dateKey === tomorrowKey) label = 'فردا';
+      else {
+        const [, mm, dd] = next.dateKey.split('-');
+        label = `${toFa(parseInt(dd))} ${JALALI_MONTHS[parseInt(mm) - 1]}`;
+      }
+      const icon = (next.icon && ICONS_CAL_RESOLVED[next.icon])
+        ? `<img src="${ICONS_CAL_RESOLVED[next.icon]}" data-cal-icon="${next.icon}" class="w-4 h-4 inline-block rounded" alt="" />`
+        : `<img src="${ICONS_3D.heart}" class="w-3.5 h-3.5 inline-block" alt="" />`;
+      t.innerHTML = `${icon} <span>بعدی: <strong>${escapeHtml(next.title)}</strong> <span class="text-slate-400">(${label})</span></span>`;
+    }
+
+    /* ============================================================
+       SEARCH APIs + ترجمه هوشمند
+       ============================================================ */
+    let _translationCache = {};
+
+    async function translateFaToEnWithOpenRouter(text) {
+      const key = getOpenRouterKey();
+      const model = getOpenRouterModel();
+      if (!text || !key || key.includes('PASTE')) return null;
+      if (_translationCache[text]) return _translationCache[text];
+      try {
+        const res = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${key}` },
+          body: JSON.stringify({
+            model,
+            messages: [
+              { role: 'system', content: 'You are a translator. Translate the given Persian text to English. Return ONLY the English translation, nothing else. If it is an anime/movie/series/game name, use the official English title.' },
+              { role: 'user', content: text }
+            ],
+            temperature: 0.1
+          })
+        });
+        if (!res.ok) return null;
+        const data = await res.json();
+        const result = data?.choices?.[0]?.message?.content?.trim() || null;
+        if (result) _translationCache[text] = result;
+        return result;
+      } catch (e) { return null; }
+    }
+
+    async function translateFaToEnWithGoogle(text) {
+      try {
+        const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=fa&tl=en&dt=t&q=${encodeURIComponent(text)}`;
+        const res = await fetch(url);
+        const data = await res.json();
+        return data?.[0]?.[0]?.[0] || text;
+      } catch (e) { return text; }
+    }
+
+    async function smartTranslateFaToEn(text) {
+      if (_translationCache[text]) return _translationCache[text];
+      const aliasResult = normalizeAlias(text);
+      if (aliasResult) { _translationCache[text] = aliasResult; return aliasResult; }
+      const orResult = await translateFaToEnWithOpenRouter(text);
+      if (orResult) return orResult;
+      const gResult = await translateFaToEnWithGoogle(text);
+      if (gResult) _translationCache[text] = gResult;
+      return gResult || text;
+    }
+
+    async function tmdbFetch(path, params = '') {
+      const url = `https://api.themoviedb.org/3${path}?api_key=${TMDB_API_KEY}${params}`;
+      const res = await fetch(url);
+      if (!res.ok) throw new Error(`TMDB ${res.status}`);
+      return res.json();
+    }
+
+    async function searchTMDB(query, type) {
+      if (!query) return [];
+      try {
+        let data = await tmdbFetch(`/search/${type}`, `&query=${encodeURIComponent(query)}&language=fa-IR&include_adult=false`);
+        let results = data.results || [];
+        if (results.length === 0) {
+          const enQ = await smartTranslateFaToEn(query);
+          if (enQ && enQ !== query) {
+            data = await tmdbFetch(`/search/${type}`, `&query=${encodeURIComponent(enQ)}&language=fa-IR&include_adult=false`);
+            results = data.results || [];
+          }
+        }
+        return results.slice(0, 10).map(r => ({
+          id: r.id,
+          title: r.title || r.name || '',
+          originalTitle: r.original_title || r.original_name || '',
+          year: (r.release_date || r.first_air_date || '').slice(0, 4),
+          poster: r.poster_path ? `https://image.tmdb.org/t/p/w342${r.poster_path}` : '',
+          overview: (r.overview || '').slice(0, 240),
+          _source: 'tmdb',
+          _tmdbType: type
+        }));
+      } catch (e) { console.warn('TMDB', e); return []; }
+    }
+
+    async function jikanFetch(url, retries = 1, timeoutMs = 4500) {
+      for (let i = 0; i <= retries; i++) {
+        const ctrl = new AbortController();
+        const timer = setTimeout(() => ctrl.abort(), timeoutMs);
+        try {
+          const res = await fetch(url, { signal: ctrl.signal });
+          clearTimeout(timer);
+          if (res.status === 429) {
+            await new Promise(r => setTimeout(r, 800));
+            continue;
+          }
+          if (!res.ok) throw new Error(`Jikan ${res.status}`);
+          return await res.json();
+        } catch (e) {
+          clearTimeout(timer);
+          if (i === retries) throw e;
+          await new Promise(r => setTimeout(r, 400));
+        }
+      }
+      throw new Error('Jikan failed');
+    }
+
+    function mapJikanResult(a) {
+      return {
+        id: a.mal_id,
+        title: a.title_english || a.title || a.title_japanese || '',
+        originalTitle: a.title_japanese || a.title || '',
+        year: (a.year || (a.aired?.prop?.from?.year) || '').toString(),
+        poster: a.images?.jpg?.image_url || a.images?.webp?.image_url || '',
+        overview: (a.synopsis || '').slice(0, 240),
+        episodes: Number(a.episodes) || 0,
+        _source: 'jikan'
+      };
+    }
+
+    async function searchJikan(query) {
+      if (!query) return [];
+      try {
+        const data = await jikanFetch(`https://api.jikan.moe/v4/anime?q=${encodeURIComponent(query)}&limit=10`);
+        const list = data.data || [];
+        if (list.length === 0) {
+          const enQ = await smartTranslateFaToEn(query);
+          if (enQ && enQ !== query) {
+            const data2 = await jikanFetch(`https://api.jikan.moe/v4/anime?q=${encodeURIComponent(enQ)}&limit=10`);
+            return (data2.data || []).map(a => mapJikanResult(a));
+          }
+        }
+        return list.map(a => mapJikanResult(a));
+      } catch (e) { console.warn('Jikan', e); return []; }
+    }
+
+    async function searchAniList(query) {
+      if (!query) return [];
+      const graphqlQuery = `
+        query ($search: String) {
+          Page(page: 1, perPage: 10) {
+            media(search: $search, type: ANIME, sort: SEARCH_MATCH) {
+              id
+              title { romaji english native }
+              description
+              coverImage { large }
+              episodes
+              seasonYear
+            }
+          }
+        }
+      `;
+      try {
+        const ctrl = new AbortController();
+        const timer = setTimeout(() => ctrl.abort(), 5000);
+        const res = await fetch('https://graphql.anilist.co', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+          body: JSON.stringify({ query: graphqlQuery, variables: { search: query } }),
+          signal: ctrl.signal
+        });
+        clearTimeout(timer);
+        if (!res.ok) throw new Error(`AniList ${res.status}`);
+        const data = await res.json();
+        const list = data?.data?.Page?.media || [];
+        return list.map(a => ({
+          id: a.id,
+          title: a.title?.english || a.title?.romaji || a.title?.native || '',
+          originalTitle: a.title?.native || a.title?.romaji || '',
+          year: (a.seasonYear || '').toString(),
+          poster: a.coverImage?.large || '',
+          overview: (a.description || '').replace(/<[^>]*>?/gm, '').slice(0, 240),
+          episodes: Number(a.episodes) || 0,
+          _source: 'anilist'
+        }));
+      } catch (e) { console.warn('AniList', e); return []; }
+    }
+
+    async function searchAnime(query) {
+      if (!query) return [];
+      let items = [];
+      try {
+        items = await searchAniList(query);
+        if (items.length > 0) return items.slice(0, 12);
+      } catch (e) { console.warn('AniList layer failed', e); }
+      try {
+        items = await searchJikan(query);
+        if (items.length > 0) return items.slice(0, 12);
+      } catch (e) { console.warn('Jikan layer failed', e); }
+      try {
+        items = await searchTMDB(query, 'tv');
+        return items.slice(0, 12);
+      } catch (e) { console.warn('TMDB layer failed', e); }
+      return [];
+    }
+
+    async function searchRAWG(query) {
+      if (!query || !RAWG_API_KEY) return [];
+      try {
+        const ctrl = new AbortController();
+        const timer = setTimeout(() => ctrl.abort(), 5000);
+        const url = `https://api.rawg.io/api/games?key=${RAWG_API_KEY}&search=${encodeURIComponent(query)}&page_size=10`;
+        const res = await fetch(url, { signal: ctrl.signal });
+        clearTimeout(timer);
+        if (!res.ok) throw new Error(`RAWG ${res.status}`);
+        const data = await res.json();
+        const list = data?.results || [];
+        if (list.length === 0) {
+          const enQ = await smartTranslateFaToEn(query);
+          if (enQ && enQ !== query) {
+            const url2 = `https://api.rawg.io/api/games?key=${RAWG_API_KEY}&search=${encodeURIComponent(enQ)}&page_size=10`;
+            const res2 = await fetch(url2);
+            if (res2.ok) {
+              const data2 = await res2.json();
+              return (data2?.results || []).map(g => ({
+                id: g.id, title: g.name || '', originalTitle: g.name || '',
+                year: (g.released || '').slice(0, 4), poster: g.background_image || '',
+                overview: '', rating: g.rating || 0, _source: 'rawg'
+              }));
+            }
+          }
+        }
+        return list.map(g => ({
+          id: g.id, title: g.name || '', originalTitle: g.name || '',
+          year: (g.released || '').slice(0, 4), poster: g.background_image || '',
+          overview: '', rating: g.rating || 0, _source: 'rawg'
+        }));
+      } catch (e) { console.warn('RAWG', e); return []; }
+    }
+
+    async function searchCheapShark(query) {
+      if (!query) return [];
+      try {
+        let url = `https://www.cheapshark.com/api/1.0/games?title=${encodeURIComponent(query)}&limit=10`;
+        let res = await fetch(url);
+        let data = await res.json();
+        if (!Array.isArray(data) || data.length === 0) {
+          const enQ = await smartTranslateFaToEn(query);
+          if (enQ && enQ !== query) {
+            url = `https://www.cheapshark.com/api/1.0/games?title=${encodeURIComponent(enQ)}&limit=10`;
+            res = await fetch(url);
+            data = await res.json();
+          }
+        }
+        if (!Array.isArray(data)) return [];
+        const seen = new Set();
+        return data.filter(g => {
+          if (seen.has(g.external)) return false;
+          seen.add(g.external);
+          return true;
+        }).slice(0, 12).map(g => ({
+          id: g.gameID, title: g.external || '', originalTitle: g.external || '',
+          year: '', poster: g.thumb || '', overview: '', _source: 'cheapshark'
+        }));
+      } catch (e) { return []; }
+    }
+
+    async function searchGame(query) {
+      if (!query) return [];
+      try {
+        const items = await searchRAWG(query);
+        if (items.length > 0) return items.slice(0, 12);
+      } catch (e) { console.warn('RAWG layer failed', e); }
+      try {
+        const items = await searchCheapShark(query);
+        return items.slice(0, 12);
+      } catch (e) { console.warn('CheapShark layer failed', e); }
+      return [];
+    }
+
+    /* ============================================================
+       🆕 fetchMediaDetails — با پیدا کردن سریال اصلی از TMDB
+       وقتی انیمه از AniList/Jikan میاد، خودکار روی TMDB TV هم
+       جستجو می‌کنیم تا فصل‌های واقعی کل فرنچایز رو بیاریم
+       ============================================================ */
+    async function tmdbSeasonsFromTitle(title) {
+      if (!title) return null;
+      try {
+        // جستجو در TMDB (اول فارسی، بعد انگلیسی)
+        let searchData = await tmdbFetch('/search/tv', `&query=${encodeURIComponent(title)}&language=fa-IR&include_adult=false`);
+        let results = searchData.results || [];
+        if (results.length === 0) {
+          const enQ = await smartTranslateFaToEn(title);
+          if (enQ && enQ !== title) {
+            searchData = await tmdbFetch('/search/tv', `&query=${encodeURIComponent(enQ)}&language=fa-IR&include_adult=false`);
+            results = searchData.results || [];
+          }
+        }
+        if (results.length === 0) return null;
+        // بهترین نتیجه رو انتخاب کن
+        const best = results[0];
+        // جزئیات سریال رو بگیر
+        const details = await tmdbFetch(`/tv/${best.id}`, `&language=fa-IR`);
+        const seasonsRaw = Array.isArray(details.seasons) ? details.seasons : [];
+        const realSeasons = seasonsRaw
+          .filter(s => Number(s.season_number) > 0)
+          .sort((a, b) => Number(a.season_number) - Number(b.season_number));
+        if (realSeasons.length === 0) return null;
+        return {
+          tmdbId: best.id,
+          totalSeasons: realSeasons.length,
+          seasonsData: realSeasons.map(s => ({
+            seasonNumber: Number(s.season_number) || 1,
+            episodes: Number(s.episode_count) || 0,
+            name: s.name || ''
+          })),
+          overview: (details.overview || '').slice(0, 240),
+          poster: details.poster_path ? `https://image.tmdb.org/t/p/w342${details.poster_path}` : ''
+        };
+      } catch (e) { console.warn('tmdbSeasonsFromTitle', e); return null; }
+    }
+
+    async function fetchMediaDetails(item) {
+      if (!item) return null;
+
+      // ===== TMDB مستقیم =====
+      if (item._source === 'tmdb' && item.id) {
+        const t = item._tmdbType || 'tv';
+        try {
+          const data = await tmdbFetch(`/${t}/${item.id}`, `&language=fa-IR`);
+          if (t === 'tv') {
+            const seasonsRaw = Array.isArray(data.seasons) ? data.seasons : [];
+            const realSeasons = seasonsRaw
+              .filter(s => Number(s.season_number) > 0)
+              .sort((a, b) => Number(a.season_number) - Number(b.season_number));
+            let seasonsData;
+            if (realSeasons.length > 0) {
+              seasonsData = realSeasons.map(s => ({
+                seasonNumber: Number(s.season_number) || 1,
+                episodes: Number(s.episode_count) || 0
+              }));
+            } else {
+              const totalSeasons = Number(data.number_of_seasons) || 1;
+              const totalEps = Number(data.number_of_episodes) || 0;
+              const avg = (totalEps > 0 && totalSeasons > 0) ? Math.round(totalEps / totalSeasons) : 0;
+              seasonsData = Array.from({ length: totalSeasons }, (_, i) => ({ seasonNumber: i + 1, episodes: avg }));
+            }
+            const totalSeasons = seasonsData.length;
+            const totalEps = seasonsData.reduce((a, s) => a + s.episodes, 0);
+            const episodesPerSeason = totalSeasons > 0 ? Math.round(totalEps / totalSeasons) : 0;
+            return {
+              totalSeasons, episodesPerSeason, seasonsData,
+              overview: (data.overview || item.overview || '').slice(0, 240),
+              poster: data.poster_path ? `https://image.tmdb.org/t/p/w342${data.poster_path}` : item.poster
+            };
+          }
+          return {
+            overview: (data.overview || item.overview || '').slice(0, 240),
+            poster: data.poster_path ? `https://image.tmdb.org/t/p/w342${data.poster_path}` : item.poster
+          };
+        } catch (e) { return null; }
+      }
+
+      // ===== AniList / Jikan =====
+      // برای انیمه: اول اطلاعات پایه از خود AniList/Jikan بگیر
+      // بعد سعی کن از TMDB هم فصل‌های واقعی فرنچایز رو بیاری
+      let baseData = null;
+
+      if (item._source === 'anilist' && item.id) {
+        const graphqlQuery = `
+          query ($id: Int) {
+            Media(id: $id, type: ANIME) {
+              episodes duration description coverImage { large }
+              title { english romaji native }
+            }
+          }
+        `;
+        try {
+          const res = await fetch('https://graphql.anilist.co', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+            body: JSON.stringify({ query: graphqlQuery, variables: { id: item.id } })
+          });
+          if (!res.ok) return null;
+          const data = await res.json();
+          const a = data?.data?.Media || {};
+          const eps = Number(a.episodes) || 0;
+          baseData = {
+            totalSeasons: 1,
+            episodesPerSeason: eps,
+            seasonsData: [{ seasonNumber: 1, episodes: eps }],
+            overview: (a.description || '').replace(/<[^>]*>?/gm, '').slice(0, 240) || item.overview,
+            poster: a.coverImage?.large || item.poster,
+            isSingleAnime: true
+          };
+        } catch (e) { return null; }
+      } else if (item._source === 'jikan' && item.id) {
+        try {
+          const data = await jikanFetch(`https://api.jikan.moe/v4/anime/${item.id}/full`);
+          const a = data.data || {};
+          const eps = Number(a.episodes) || 0;
+          baseData = {
+            totalSeasons: 1,
+            episodesPerSeason: eps,
+            seasonsData: [{ seasonNumber: 1, episodes: eps }],
+            overview: (a.synopsis || item.overview || '').slice(0, 240),
+            poster: a.images?.jpg?.large_image_url || a.images?.jpg?.image_url || item.poster,
+            isSingleAnime: true
+          };
+        } catch (e) { return null; }
+      } else {
+        return null;
+      }
+
+      // 🆕 تلاش برای پیدا کردن سریال اصلی از TMDB
+      // اگه TMDB پیدا کرد و تعداد فصل‌ها بیشتر از ۱ بود، اون رو استفاده کن
+      try {
+        const tmdb = await tmdbSeasonsFromTitle(item.title || item.originalTitle || '');
+        if (tmdb && tmdb.seasonsData && tmdb.seasonsData.length > 1) {
+          // فرنچایز چندفصلی — از TMDB استفاده کن
+          const totalSeasons = tmdb.totalSeasons;
+          const totalEps = tmdb.seasonsData.reduce((a, s) => a + s.episodes, 0);
+          const episodesPerSeason = totalSeasons > 0 ? Math.round(totalEps / totalSeasons) : 0;
+          return {
+            totalSeasons,
+            episodesPerSeason,
+            seasonsData: tmdb.seasonsData,
+            overview: tmdb.overview || baseData.overview,
+            poster: tmdb.poster || baseData.poster,
+            _mergedFromTMDB: true
+          };
+        }
+      } catch (e) { /* نادیده بگیر */ }
+
+      // در غیر این صورت، از AniList/Jikan استفاده کن
+      return baseData;
+    }
+
+    /* ============================================================
+       WATCHLIST RENDER
+       ============================================================ */
+    function renderWatchStatusFilters() {
+      const box = document.getElementById('watchStatusFilters');
+      if (!box) return;
+      const opts = [
+        { id:'all', label:'همه', icon:ICONS_3D.eyes },
+        ...WATCH_STATUSES.map(s => ({ id:s.id, label:s.name, icon:ICONS_3D[s.icon] }))
+      ];
+      box.innerHTML = opts.map(o => `
+        <button onclick="filterWatchStatus('${o.id}')" class="shrink-0 px-3 py-1.5 rounded-xl text-[11px] font-bold flex items-center gap-1.5 whitespace-nowrap transition ${currentWatchStatusFilter === o.id ? 'bg-rose-600 text-white shadow-sm' : 'bg-white text-slate-600 border border-slate-200'}">
+          ${o.icon ? `<img src="${o.icon}" class="w-4 h-4 flex-shrink-0" alt="" onerror="this.style.display='none'" />` : ''}
+          <span>${o.label}</span>
+        </button>`).join('');
+    }
+
+    function renderWatchTypeFilters() {
+      const box = document.getElementById('watchTypeFilters');
+      if (!box) return;
+      const opts = [
+        { id:'all', label:'همه', icon:null },
+        ...WATCH_TYPES.map(t => ({ id:t.id, label:t.name, icon:ICONS_3D[t.icon] }))
+      ];
+      box.innerHTML = opts.map(o => `
+        <button onclick="filterWatchType('${o.id}')" class="shrink-0 px-3 py-1.5 rounded-xl text-[11px] font-bold flex items-center gap-1.5 whitespace-nowrap transition ${currentWatchFilter === o.id ? 'bg-purple-600 text-white shadow-sm' : 'bg-white text-slate-600 border border-slate-200'}">
+          ${o.icon ? `<img src="${o.icon}" class="w-4 h-4 flex-shrink-0" alt="" onerror="this.style.display='none'" />` : ''}
+          <span>${o.label}</span>
+        </button>`).join('');
+    }
+
+    function renderWatchlist() {
+      const c = document.getElementById('watchlistContainer');
+      if (!c) return;
+      let list = appState.watchList || [];
+      if (currentWatchFilter !== 'all') list = list.filter(x => x.type === currentWatchFilter);
+      if (currentWatchStatusFilter !== 'all') list = list.filter(x => x.status === currentWatchStatusFilter);
+
+      if (list.length === 0) {
+        c.innerHTML = `<div class="col-span-full text-center py-8 text-slate-400 text-xs">
+          <img src="${ICONS_3D.clapper}" class="w-10 h-10 mx-auto mb-2 opacity-40" alt="" /><p>موردی پیدا نشد</p></div>`;
+        return;
+      }
+      c.innerHTML = list.map(item => renderMediaCard(item)).join('');
+    }
+
+    function calcWatchProgress(item) {
+      const cur = Number(item.currentEpisode) || 0;
+      const curSeason = Number(item.currentSeason) || 1;
+      const seasons = Array.isArray(item.seasonsData) && item.seasonsData.length > 0 ? item.seasonsData : null;
+
+      let totalEps = 0;
+      let watchedBefore = 0;
+      let epsThisSeason = 0;
+
+      if (seasons) {
+        totalEps = seasons.reduce((a, s) => a + (s.episodes || 0), 0);
+        watchedBefore = seasons.filter(s => s.seasonNumber < curSeason).reduce((a, s) => a + (s.episodes || 0), 0);
+        const curS = seasons.find(s => s.seasonNumber === curSeason);
+        epsThisSeason = curS ? curS.episodes : 0;
+      } else {
+        const epsPerSeason = Number(item.episodesPerSeason) || 0;
+        const totalSeasons = Number(item.totalSeasons) || 1;
+        totalEps = epsPerSeason * totalSeasons || Number(item.totalEpisodes) || 0;
+        watchedBefore = (curSeason - 1) * epsPerSeason;
+        epsThisSeason = epsPerSeason;
+      }
+      const watchedTotal = watchedBefore + cur;
+      const pct = totalEps > 0 ? Math.min(100, Math.round((watchedTotal / totalEps) * 100)) : 0;
+      return { totalEps, watchedBefore, epsThisSeason, watchedTotal, pct, cur, curSeason, seasons };
+    }
+
+    function renderMediaCard(item) {
+      const statusObj = WATCH_STATUSES.find(s => s.id === item.status) || WATCH_STATUSES[0];
+      const typeObj = WATCH_TYPES.find(t => t.id === item.type) || WATCH_TYPES[0];
+      const prog = calcWatchProgress(item);
+      const isSerial = (item.type === 'series' || item.type === 'anime');
+      const showProgress = isSerial && prog.totalEps > 0;
+
+      const typeColor = item.type === 'anime' ? 'text-pink-600' : item.type === 'animation' ? 'text-cyan-600' : 'text-purple-600';
+      const typeBgGrad = item.type === 'anime' ? 'from-pink-400 to-rose-400' : item.type === 'animation' ? 'from-cyan-400 to-blue-400' : 'from-purple-400 to-rose-400';
+
+      const poster = item.posterUrl
+        ? `<img src="${item.posterUrl}" class="media-poster" alt="" onerror="this.style.display='none'" />`
+        : `<div class="media-poster-empty"><img src="${ICONS_3D[typeObj.icon]}" class="w-9 h-9" alt="" /></div>`;
+
+      const seasonInfo = (prog.seasons && prog.seasons.length > 1)
+        ? `فصل ${toFa(prog.curSeason)} از ${toFa(prog.seasons.length)} — قسمت ${toFa(prog.cur)}${prog.epsThisSeason > 0 ? ` از ${toFa(prog.epsThisSeason)}` : ''}`
+        : `فصل ${toFa(prog.curSeason)} — قسمت ${toFa(prog.cur)}${prog.epsThisSeason > 0 ? ` از ${toFa(prog.epsThisSeason)}` : ''}`;
+
+      return `
+        <div class="flex flex-col p-3 rounded-2xl bg-white border border-slate-200/70 shadow-sm gap-2">
+          <div class="flex items-start gap-3">
+            ${poster}
+            <div class="min-w-0 flex-1">
+              <p class="text-sm font-bold ${item.status === 'watched' ? 'line-through text-slate-400' : 'text-slate-800'} break-words leading-tight">${escapeHtml(item.title)}</p>
+              ${item.originalTitle && item.originalTitle !== item.title ? `<p class="text-[9px] text-slate-400 mt-0.5" dir="ltr">${escapeHtml(item.originalTitle)}</p>` : ''}
+              <div class="flex items-center gap-1.5 mt-1.5 text-[10px] text-slate-500 flex-wrap">
+                <span class="${typeColor} font-semibold flex items-center gap-0.5">
+                  <img src="${ICONS_3D[typeObj.icon]}" class="w-3 h-3" alt="" /> ${typeObj.name}
+                </span>
+                <span>•</span>
+                <span class="font-bold" style="color:${statusObj.color}">${statusObj.name}</span>
+                ${item.rating ? `<span class="flex items-center gap-0.5">• <img src="${ICONS_3D.star}" class="w-3 h-3" alt="" /> ${toFa(item.rating)}/۵</span>` : ''}
+              </div>
+              ${item.overview ? `<p class="media-overview mt-1.5">${escapeHtml(item.overview)}</p>` : ''}
+              <div class="flex items-center gap-1 mt-2">
+                <button onclick="cycleWatchStatus('${item.id}')" class="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0" style="background:${statusObj.color}22;">
+                  <img src="${ICONS_3D[statusObj.icon]}" class="w-4 h-4" alt="" />
+                </button>
+                <button onclick="openWatchEditModal('${item.id}')" class="w-7 h-7 rounded-lg text-slate-400 hover:text-purple-600 hover:bg-purple-50 flex items-center justify-center">
+                  <i class="fa-solid fa-pen text-[10px]"></i>
+                </button>
+                <button onclick="deleteWatchItem('${item.id}')" class="w-7 h-7 rounded-lg text-slate-300 hover:text-rose-500 hover:bg-rose-50 flex items-center justify-center">
+                  <i class="fa-solid fa-trash-can text-[10px]"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+          ${showProgress ? `
+            <div class="space-y-1.5 pt-1.5 border-t border-slate-100">
+              <div class="flex items-center justify-between text-[10px] font-bold">
+                <span class="text-slate-500">${seasonInfo}</span>
+                <span class="${typeColor}">${toFa(prog.pct)}٪</span>
+              </div>
+              <div class="w-full h-2 rounded-full bg-slate-100 overflow-hidden">
+                <div class="h-full rounded-full bg-gradient-to-r ${typeBgGrad}" style="width:${prog.pct}%"></div>
+              </div>
+              <div class="flex items-center gap-1.5 pt-1">
+                <button onclick="incrementEpisode('${item.id}')" class="flex-1 py-1.5 rounded-lg ${item.type === 'anime' ? 'bg-pink-100 hover:bg-pink-200 text-pink-700' : 'bg-purple-100 hover:bg-purple-200 text-purple-700'} text-[10px] font-bold flex items-center justify-center gap-1">
+                  <i class="fa-solid fa-plus text-[9px]"></i> قسمت بعد
+                </button>
+                ${(prog.cur > 1 || prog.curSeason > 1) ? `<button onclick="decrementEpisode('${item.id}')" class="px-2.5 py-1.5 rounded-lg bg-slate-100 text-slate-600 text-[10px] font-bold"><i class="fa-solid fa-minus text-[9px]"></i></button>` : ''}
+              </div>
+            </div>
+          ` : isSerial ? `
+            <div class="pt-1.5 border-t border-slate-100">
+              <button onclick="openWatchEditModal('${item.id}')" class="text-[10px] font-bold ${typeColor} flex items-center gap-1">
+                <i class="fa-solid fa-plus text-[9px]"></i> افزودن فصل و قسمت
+              </button>
+            </div>
+          ` : ''}
+        </div>`;
+    }
+
+    function filterWatchStatus(id) { currentWatchStatusFilter = id; renderWatchStatusFilters(); renderWatchlist(); }
+    function filterWatchType(id) { currentWatchFilter = id; renderWatchTypeFilters(); renderWatchlist(); }
+
+    /* ============================================================
+       GAMES RENDER
+       ============================================================ */
+    function renderGameStatusFilters() {
+      const box = document.getElementById('gameStatusFilters');
+      if (!box) return;
+      const opts = [
+        { id:'all', label:'همه', icon:ICONS_3D.eyes },
+        ...GAME_STATUSES.map(s => ({ id:s.id, label:s.name, icon:ICONS_3D[s.icon] }))
+      ];
+      box.innerHTML = opts.map(o => `
+        <button onclick="filterGameStatus('${o.id}')" class="shrink-0 px-3 py-1.5 rounded-xl text-[11px] font-bold flex items-center gap-1.5 whitespace-nowrap transition ${currentGameStatusFilter === o.id ? 'bg-indigo-600 text-white shadow-sm' : 'bg-white text-slate-600 border border-slate-200'}">
+          ${o.icon ? `<img src="${o.icon}" class="w-4 h-4 flex-shrink-0" alt="" onerror="this.style.display='none'" />` : ''}
+          <span>${o.label}</span>
+        </button>`).join('');
+    }
+
+    function renderGameList() {
+      const c = document.getElementById('gameListContainer');
+      if (!c) return;
+      let list = appState.gameList || [];
+      if (currentGameStatusFilter !== 'all') list = list.filter(x => x.status === currentGameStatusFilter);
+
+      if (list.length === 0) {
+        c.innerHTML = `<div class="col-span-full text-center py-8 text-slate-400 text-xs">
+          <img src="${ICONS_3D.videoGame}" class="w-10 h-10 mx-auto mb-2 opacity-40" alt="" /><p>هنوز بازی‌ای اضافه نشده</p></div>`;
+        return;
+      }
+      c.innerHTML = list.map(g => {
+        const statusObj = GAME_STATUSES.find(s => s.id === g.status) || GAME_STATUSES[0];
+        const platformName = GAME_PLATFORMS.find(p => p.id === g.platform)?.name || g.platform;
+        const poster = g.posterUrl
+          ? `<img src="${g.posterUrl}" class="media-poster" alt="" onerror="this.style.display='none'" />`
+          : `<div class="media-poster-empty"><img src="${ICONS_3D.videoGame}" class="w-9 h-9" alt="" /></div>`;
+        return `
+          <div class="flex flex-col p-3 rounded-2xl bg-white border border-slate-200/70 shadow-sm gap-2">
+            <div class="flex items-start gap-3">
+              ${poster}
+              <div class="min-w-0 flex-1">
+                <p class="text-sm font-bold ${g.status === 'played' ? 'line-through text-slate-400' : 'text-slate-800'} break-words leading-tight">${escapeHtml(g.title)}</p>
+                <div class="flex items-center gap-1.5 mt-1.5 text-[10px] text-slate-500 flex-wrap">
+                  <span class="px-1.5 py-0.5 rounded-md bg-indigo-50 text-indigo-600 font-semibold">${platformName}</span>
+                  <span class="font-bold" style="color:${statusObj.color}">${statusObj.name}</span>
+                  ${g.hours > 0 ? `<span class="flex items-center gap-0.5"><i class="fa-regular fa-clock text-[9px]"></i> ${toFa(g.hours)}س</span>` : ''}
+                  ${g.rating ? `<span class="flex items-center gap-0.5"><img src="${ICONS_3D.star}" class="w-3 h-3" alt="" /> ${toFa(g.rating)}/۵</span>` : ''}
+                </div>
+                <div class="flex items-center gap-1 mt-2">
+                  <button onclick="cycleGameStatus('${g.id}')" class="w-7 h-7 rounded-lg flex items-center justify-center" style="background:${statusObj.color}22;">
+                    <img src="${ICONS_3D[statusObj.icon]}" class="w-4 h-4" alt="" />
+                  </button>
+                  <button onclick="openGameEditModal('${g.id}')" class="w-7 h-7 rounded-lg text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 flex items-center justify-center">
+                    <i class="fa-solid fa-pen text-[10px]"></i>
+                  </button>
+                  <button onclick="deleteGame('${g.id}')" class="w-7 h-7 rounded-lg text-slate-300 hover:text-rose-500 hover:bg-rose-50 flex items-center justify-center">
+                    <i class="fa-solid fa-trash-can text-[10px]"></i>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>`;
+      }).join('');
+    }
+
+    function filterGameStatus(id) { currentGameStatusFilter = id; renderGameStatusFilters(); renderGameList(); }
+
+    /* ============================================================
+       BUCKET RENDER
+       ============================================================ */
+    function renderBucketList() {
+      const c = document.getElementById('bucketList');
+      if (!c) return;
+      const list = appState.bucketList || [];
+      if (list.length === 0) {
+        c.innerHTML = `<p class="text-center py-6 text-slate-400 text-xs">هنوز آرزویی ننوشتیم</p>`;
+        return;
+      }
+      c.innerHTML = list.map(item => `
+        <div class="flex items-center justify-between p-3 rounded-2xl ${item.done ? 'bg-slate-50 border border-slate-200/60' : 'bg-white border border-rose-100'} shadow-sm gap-2">
+          <div class="flex items-center gap-2.5 min-w-0 flex-1">
+            <button onclick="toggleBucket('${item.id}')" class="w-5 h-5 rounded-lg border-2 ${item.done ? 'bg-amber-400 border-amber-400 text-white' : 'border-slate-300'} flex items-center justify-center text-[10px] flex-shrink-0">
+              ${item.done ? '<i class="fa-solid fa-check"></i>' : ''}
+            </button>
+            <span class="text-xs font-bold ${item.done ? 'line-through text-slate-400' : 'text-slate-700'} break-words">${escapeHtml(item.title)}</span>
+          </div>
+          <button onclick="deleteBucket('${item.id}')" class="text-slate-300 hover:text-rose-500 p-1 flex-shrink-0"><i class="fa-solid fa-trash-can text-xs"></i></button>
+        </div>`).join('');
+    }
+
+    /* ============================================================
+       IDEAS RENDER
+       ============================================================ */
+    function renderDateIdeasDrawer() {
+      const d = document.getElementById('ideasDrawer');
+      if (!d) return;
+      const list = appState.dateIdeas || [];
+      d.innerHTML = list.map((idea, i) => `
+        <div class="flex items-center justify-between p-2 rounded-xl bg-slate-100 text-[11px] text-slate-700 gap-2">
+          <span class="flex-1 flex items-center gap-2 min-w-0">
+            <span class="w-6 h-6 rounded-md bg-rose-100 text-rose-700 font-bold flex items-center justify-center flex-shrink-0 text-[10px]">${toFa(i + 1)}</span>
+            <span class="truncate">${escapeHtml(idea)}</span>
+          </span>
+          <button onclick="deleteCustomIdea(${i})" class="text-slate-400 hover:text-rose-500 flex-shrink-0"><i class="fa-solid fa-xmark text-xs"></i></button>
+        </div>`).join('');
+    }
+
+    function toggleIdeasDrawer() {
+      const d = document.getElementById('ideasDrawer');
+      if (d) d.classList.toggle('hidden');
+    }
+
+    /* ============================================================
+       NOTES RENDER
+       ============================================================ */
+    function renderNotes() {
+      const c = document.getElementById('notesContainer');
+      if (!c) return;
+      const notes = appState.notes || [];
+      if (notes.length === 0) {
+        c.innerHTML = `<div class="col-span-full text-center py-8 text-slate-400 text-xs">دیوار نامه‌ها خالیه</div>`;
+        return;
+      }
+      const grad = [
+        'from-pink-50 to-rose-100 border-rose-200',
+        'from-amber-50 to-orange-100 border-amber-200',
+        'from-purple-50 to-fuchsia-100 border-purple-200',
+        'from-teal-50 to-emerald-100 border-teal-200'
+      ];
+      c.innerHTML = [...notes].reverse().map((n, i) => `
+        <div class="p-4 rounded-3xl bg-gradient-to-br ${grad[i % grad.length]} border shadow-sm space-y-2 relative">
+          <p class="text-xs font-semibold text-slate-800 leading-relaxed break-words">${escapeHtml(n.content)}</p>
+          <div class="flex items-center justify-between text-[10px] text-slate-500 pt-2 border-t border-black/5">
+            <img src="${n.author === 'p1' ? ICONS_3D.manTech : ICONS_3D.womanTech}" class="w-4 h-4" alt="" />
+            <span>${n.timeBadge || ''}</span>
+          </div>
+          <button onclick="deleteNote('${n.id}')" class="absolute top-2 left-2 text-slate-400 hover:text-rose-600 p-1"><i class="fa-solid fa-xmark text-xs"></i></button>
+        </div>`).join('');
+    }
+
+    /* ============================================================
+       DIARY RENDER
+       ============================================================ */
+    function renderDiary() {
+      const c = document.getElementById('diaryContainer');
+      if (!c) return;
+      const diary = appState.diary || [];
+      const grouped = {};
+      diary.forEach(d => {
+        if (!grouped[d.dateKey]) grouped[d.dateKey] = [];
+        grouped[d.dateKey].push(d);
+      });
+      const sortedDates = Object.keys(grouped).sort((a, b) => b.localeCompare(a));
+
+      if (sortedDates.length === 0) {
+        c.innerHTML = `<p class="text-center py-6 text-slate-400 text-xs">هنوز خاطره‌ای ثبت نشده — اولین خاطره رو بنویس</p>`;
+        return;
+      }
+
+      c.innerHTML = sortedDates.slice(0, 10).map(dateKey => {
+        const posts = grouped[dateKey];
+        const [jy, jm, jd] = dateKey.split('-').map(Number);
+        return `
+          <div class="mb-3">
+            <div class="flex items-center gap-2 mb-2">
+              <span class="text-[11px] font-black text-slate-600">${toFa(jd)} ${JALALI_MONTHS[jm - 1]} ${toFa(jy)}</span>
+              <div class="flex-1 h-px bg-rose-100"></div>
+            </div>
+            ${posts.map(p => `
+              <div class="diary-post ${editingDiaryId === p.id ? 'editing' : ''}">
+                <div class="flex items-center justify-between mb-1.5">
+                  <div class="flex items-center gap-1.5">
+                    <img src="${p.author === 'p1' ? ICONS_3D.manTech : ICONS_3D.womanTech}" class="w-4 h-4" alt="" />
+                    <span class="text-[10px] font-bold ${p.author === 'p1' ? 'text-blue-600' : 'text-rose-600'}">${p.author === 'p1' ? 'امیرمحمد' : 'آرمیتا'}</span>
+                    <span class="text-[9px] text-slate-400">${p.time || ''}</span>
+                  </div>
+                  <div class="flex items-center gap-1">
+                    <button onclick="openDiaryPostModal('${p.id}')" class="text-slate-300 hover:text-rose-500 p-0.5"><i class="fa-solid fa-pen text-[9px]"></i></button>
+                    <button onclick="deleteDiaryPost('${p.id}')" class="text-slate-300 hover:text-rose-500 p-0.5"><i class="fa-solid fa-trash-can text-[9px]"></i></button>
+                  </div>
+                </div>
+                <p class="text-xs text-slate-700 leading-relaxed break-words">${escapeHtml(p.text)}</p>
+                ${p.imageUrl ? `<img src="${p.imageUrl}" class="diary-img" alt="" />` : ''}
+              </div>
+            `).join('')}
+          </div>`;
+      }).join('');
+    }
+
+    function deleteDiaryPost(id) {
+      requestConfirm('حذف خاطره', 'مطمئنی می‌خوای این خاطره رو حذف کنی؟', () => {
+        appState.diary = (appState.diary || []).filter(d => d.id !== id);
+        saveState(); renderDiary(); playTone(400, 'sine', 0.1);
+      });
+    }
+
+    /* ============================================================
+       IMAGE + ESCAPE
+       ============================================================ */
+    async function compressImage(file, maxDim = 700, quality = 0.55) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = function (e) {
+          const img = new Image();
+          img.onload = function () {
+            const canvas = document.createElement('canvas');
+            let w = img.width, h = img.height;
+            const maxSide = Math.max(w, h);
+            if (maxSide > maxDim) {
+              const scale = maxDim / maxSide;
+              w = Math.round(w * scale);
+              h = Math.round(h * scale);
+            }
+            canvas.width = w; canvas.height = h;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0, w, h);
+            try { resolve(canvas.toDataURL('image/jpeg', quality)); }
+            catch (err) { reject(err); }
+          };
+          img.onerror = reject;
+          img.src = e.target.result;
+        };
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
+    }
+
+    function escapeHtml(str) {
+      if (str === null || str === undefined) return '';
+      return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;');
+    }
+
+    /* ============================================================
+       🆕 محدودیت بوسه — ۵ بوسه در هر ۳۰ دقیقه
+       ============================================================ */
+    function getKissCount() {
+      const now = Date.now();
+      const hist = appState.kissHistory?.[currentPersona] || [];
+      // فقط بوسه‌های ۳۰ دقیقه اخیر
+      const recent = hist.filter(t => (now - t) < KISS_LIMIT_WINDOW_MS);
+      // اگه تاریخچه قدیمی‌تر داشت، پاکسازی
+      if (recent.length !== hist.length) {
+        appState.kissHistory[currentPersona] = recent;
+      }
+      return recent.length;
+    }
+
+    function getKissResetMs() {
+      const hist = appState.kissHistory?.[currentPersona] || [];
+      if (hist.length === 0) return 0;
+      const oldest = Math.min(...hist);
+      const remaining = KISS_LIMIT_WINDOW_MS - (Date.now() - oldest);
+      return Math.max(0, remaining);
+    }
+
+    function updateKissLimitUI() {
+      const info = document.getElementById('kissLimitInfo');
+      const btn = document.getElementById('kissBtn');
+      if (!info || !btn) return;
+      const count = getKissCount();
+      const remaining = KISS_LIMIT_MAX - count;
+      if (remaining > 0) {
+        info.innerText = `${toFaNum(remaining)} بوسه دیگه می‌تونی بفرستی`;
+        info.className = 'text-[10px] font-semibold text-slate-400 text-center';
+        btn.disabled = false;
+      } else {
+        const resetMs = getKissResetMs();
+        const mins = Math.ceil(resetMs / 60000);
+        info.innerText = `سهم امروزت تمومه — ${toFaNum(mins)} دقیقه دیگه`;
+        info.className = 'text-[10px] font-semibold text-rose-500 text-center';
+        btn.disabled = true;
+      }
+    }
+
 /* ==================== END OF PART 2 ==================== */
   
     /* ============================================================
@@ -2830,8 +4761,24 @@
        ACTIONS
        ============================================================ */
     function sendLoveKiss() {
+      // چک محدودیت
+      const count = getKissCount();
+      if (count >= KISS_LIMIT_MAX) {
+        const resetMs = getKissResetMs();
+        const mins = Math.ceil(resetMs / 60000);
+        showToast(`⏳ سهم بوسه‌ت برای این ۳۰ دقیقه تموم شده — ${toFaNum(mins)} دقیقه دیگه صبر کن`);
+        updateKissLimitUI();
+        return;
+      }
+
       const sender = (currentPersona === 'p1') ? 'امیرمحمد' : 'آرمیتا';
       showKissCelebration(sender);
+
+      // ثبت در تاریخچه
+      if (!appState.kissHistory) appState.kissHistory = { p1: [], p2: [] };
+      if (!Array.isArray(appState.kissHistory[currentPersona])) appState.kissHistory[currentPersona] = [];
+      appState.kissHistory[currentPersona].push(Date.now());
+
       const nowInfo = getNowJalaliString();
       const sweetNotes = [
         "یه بوسه زنده فرستادم تا یادت بندازم چقدر دوستت دارم",
@@ -2841,9 +4788,17 @@
       const note = sweetNotes[Math.floor(Math.random() * sweetNotes.length)];
       if (!appState.notes) appState.notes = [];
       appState.notes.push({ id: 'note_' + Date.now(), content: note, author: currentPersona, timeBadge: nowInfo.fullTimestamp });
+
       saveState(true);
       if (roomChannel) {
         roomChannel.send({ type: 'broadcast', event: 'love_kiss', payload: { senderName: sender } });
+      }
+
+      updateKissLimitUI();
+      // زمان‌بندی برای ریست خودکار
+      const resetMs = getKissResetMs();
+      if (resetMs > 0) {
+        setTimeout(() => updateKissLimitUI(), resetMs + 1000);
       }
     }
 
@@ -2908,7 +4863,6 @@
         if (epsThisSeason > 0) {
           cur++;
           if (cur > epsThisSeason) {
-            // برو به فصل بعد
             const nextSeason = seasons.find(s => s.seasonNumber > curSeason);
             if (nextSeason) {
               curSeason = nextSeason.seasonNumber;
@@ -2957,7 +4911,6 @@
       if (cur > 1) {
         cur--;
       } else {
-        // برگرد به فصل قبل
         if (seasons) {
           const prevSeason = [...seasons].filter(s => s.seasonNumber < curSeason).sort((a, b) => b.seasonNumber - a.seasonNumber)[0];
           if (prevSeason) {
@@ -3207,7 +5160,7 @@
        WATCHLIST ADD
        ============================================================ */
     let _watchSearchSelection = null;
-    let _watchPendingSeasons = null; // برای نگه‌داشتن اطلاعات فصل‌ها هنگام افزودن
+    let _watchPendingSeasons = null;
 
     function openWatchlistModal() {
       _watchPendingSeasons = null;
@@ -3253,7 +5206,7 @@
           <div id="watchSeasonsWrapper" class="hidden">
             <label class="block text-xs font-semibold text-slate-700 mb-2">فصل‌ها و تعداد قسمت هر فصل</label>
             <div id="watchSeasonsList" class="space-y-1.5"></div>
-            <p class="text-[10px] text-slate-400 mt-2">اگه خالی باشه، می‌تونی دستی پر کنی. برای هر فصل تعداد قسمت واقعی رو وارد کن.</p>
+            <p class="text-[10px] text-slate-400 mt-2">اگه خالی باشه، می‌تونی دستی پر کنی.</p>
           </div>
           <div id="watchFallbackSeasonWrapper" class="hidden grid grid-cols-2 gap-3">
             <div>
@@ -3346,7 +5299,6 @@
       const type = document.getElementById('selectWatchType').value;
       if (type !== 'series' && type !== 'anime') return;
 
-      // نمایش لودینگ
       const results = document.getElementById('watchSearchResults');
       const loadingEl = document.createElement('div');
       loadingEl.className = 'text-center py-2 text-[10px] text-slate-400';
@@ -3360,7 +5312,6 @@
         if (details.overview && overviewEl) overviewEl.value = details.overview;
         if (details.poster) document.getElementById('inputWatchPoster').value = details.poster;
 
-        // اگه seasonsData داریم، نمایش لیست قابل ویرایش فصل‌ها
         if (Array.isArray(details.seasonsData) && details.seasonsData.length > 0) {
           _watchPendingSeasons = details.seasonsData.map(s => ({ seasonNumber: s.seasonNumber, episodes: s.episodes }));
           renderPendingSeasonsList();
@@ -3369,7 +5320,6 @@
           if (wrap) wrap.classList.remove('hidden');
           if (fbWrap) fbWrap.classList.add('hidden');
         } else {
-          // fallback به حالت قدیمی
           const totalSeasonsEl = document.getElementById('inputWatchTotalSeasons');
           const epsPerSeasonEl = document.getElementById('inputWatchEpsPerSeason');
           if (totalSeasonsEl && details.totalSeasons) totalSeasonsEl.value = details.totalSeasons;
@@ -3549,7 +5499,6 @@
             seasonsWrap.classList.toggle('hidden', !isSer);
             curWrap.classList.toggle('hidden', !isSer);
             if (isSer && (!_editPendingSeasons || _editPendingSeasons.length === 0)) {
-              // اگه فصل‌ها خالی بود، یه فصل پیش‌فرض اضافه کن
               _editPendingSeasons = [{ seasonNumber: 1, episodes: 0 }];
               renderEditSeasonsList();
             }
@@ -3584,7 +5533,6 @@
     function removeEditSeason(i) {
       if (!_editPendingSeasons) return;
       _editPendingSeasons.splice(i, 1);
-      // شماره فصل‌ها رو دوباره از ۱ بچین
       _editPendingSeasons = _editPendingSeasons.map((s, idx) => ({ ...s, seasonNumber: idx + 1 }));
       renderEditSeasonsList();
     }
@@ -4329,9 +6277,13 @@
             if (Array.isArray(appState.watchList)) {
               appState.watchList = appState.watchList.map(normalizeWatchItem).filter(Boolean);
             }
+            if (!appState.kissHistory || typeof appState.kissHistory !== 'object') appState.kissHistory = { p1: [], p2: [] };
+            if (!Array.isArray(appState.kissHistory.p1)) appState.kissHistory.p1 = [];
+            if (!Array.isArray(appState.kissHistory.p2)) appState.kissHistory.p2 = [];
             buildWheelPalette();
             renderWheelToCache();
             saveState();
+            updateKissLimitUI();
             alert("بازیابی موفق");
             closeModal();
           }
