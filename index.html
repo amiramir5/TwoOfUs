@@ -119,6 +119,9 @@
 
     .mood-history-cell { aspect-ratio: 1; border-radius: 12px; display: flex; align-items: center; justify-content: center; background: #fff5f7; border: 1px solid #fce7f3; position: relative; overflow: hidden; }
     .mood-history-cell img { width: 70%; height: 70%; object-fit: contain; }
+
+    .season-row { display: flex; align-items: center; gap: 6px; padding: 6px 8px; border-radius: 12px; background: #f8fafc; border: 1px solid #e2e8f0; }
+    .season-row input { width: 60px; padding: 4px 6px; border-radius: 8px; border: 1px solid #cbd5e1; font-size: 12px; text-align: center; }
   </style>
 </head>
 <body class="text-slate-800 min-h-screen font-sans antialiased">
@@ -279,7 +282,7 @@
           <div class="flex items-center justify-between">
             <div class="flex items-center gap-3">
               <div class="w-10 h-10 rounded-2xl bg-indigo-50 border border-indigo-100 flex items-center justify-center p-2 flex-shrink-0">
-                <img src="https://cdn.jsdelivr.net/gh/microsoft/fluentui-emoji@main/assets/Broom/3D/broom_3d.png" class="w-full h-full object-contain" alt="" />
+                <i class="fa-solid fa-broom text-indigo-500 text-base"></i>
               </div>
               <div>
                 <h3 class="font-bold text-slate-900 text-sm sm:text-base">کارهای دونفره منزل</h3>
@@ -291,6 +294,10 @@
             </button>
           </div>
           <div id="choreFilters" class="flex items-center gap-1.5 overflow-x-auto hide-scrollbar pb-1 text-xs -mx-1 px-1"></div>
+          <div class="flex items-center justify-between text-xs text-slate-500 px-1">
+            <span id="choreCountBadge">۰ کار باز</span>
+            <button onclick="toggleChoreArchive()" id="choreArchiveToggleBtn" class="text-[11px] text-indigo-500 hover:underline">نمایش آرشیو</button>
+          </div>
           <div id="choreList" class="space-y-2.5 max-h-[400px] overflow-y-auto pr-1 hide-scrollbar"></div>
         </div>
       </div>
@@ -305,7 +312,7 @@
             </div>
             <div>
               <h3 class="font-bold text-slate-900 text-base">بودجه و هزینه‌ها</h3>
-              <p class="text-xs text-slate-400">برآورد کلی مخارج ماهانه</p>
+              <p class="text-xs text-slate-400" id="budgetSubtitle">مخارج ماه جاری</p>
             </div>
           </div>
           <div class="flex items-center gap-2 w-full sm:w-auto">
@@ -333,9 +340,21 @@
           </div>
           <div id="categoryBreakdownContainer" class="md:col-span-7 space-y-3 w-full"></div>
         </div>
-        <div class="space-y-3">
+
+        <div class="pt-4 border-t border-slate-100 space-y-3">
+          <div class="flex items-center justify-between px-1">
+            <h4 class="text-sm font-black text-slate-800 flex items-center gap-2">
+              <i class="fa-solid fa-chart-column text-amber-500"></i>
+              <span>میانگین ماهانه هر دسته</span>
+            </h4>
+            <span id="avgChartMonthsLabel" class="text-[10px] text-slate-400"></span>
+          </div>
+          <div id="monthlyAvgContainer" class="space-y-2.5"></div>
+        </div>
+
+        <div class="space-y-3 pt-4 border-t border-slate-100">
           <div class="flex items-center justify-between text-xs font-bold text-slate-700 px-1">
-            <span>ریز هزینه‌ها</span>
+            <span>ریز هزینه‌های ماه جاری</span>
             <span id="expenseCountText" class="text-slate-400 font-normal">۰ مورد</span>
           </div>
           <div id="expenseList" class="space-y-2 max-h-[380px] overflow-y-auto pr-1 hide-scrollbar"></div>
@@ -589,7 +608,7 @@
     const SUPABASE_KEY = "sb_publishable_b8-BEd1e8CWNkVdVvU4c-Q_Ir-isgoz";
     const ROOM_CODE = "amir-armita-us";
     const ANNIVERSARY_DATE = "2024-10-06";
-    const STATE_VERSION = 15;
+    const STATE_VERSION = 16;
     const TMDB_API_KEY = "29fb5c7e087065a22b71f28c6b1db7e8";
     const RAWG_API_KEY = "f391fbe43ebf447caf3618ca0d4cd0a7";
 
@@ -602,6 +621,7 @@
 
     let supabaseClient = null;
     try { supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY); } catch (e) {}
+    let roomChannel = null;
 
     const ALIAS_MAP = {
       'موشوکو تنسی': 'Mushoku Tensei','موشوکو': 'Mushoku Tensei','تناسخ یک بیکار': 'Mushoku Tensei',
@@ -653,6 +673,13 @@
       rest:'https://cdn.jsdelivr.net/gh/microsoft/fluentui-emoji@main/assets/Crescent%20moon/3D/crescent_moon_3d.png'
     };
     const CAL_ICON_STYLE = { birthday:{zoom:122}, anniversary:{zoom:118}, celebration:{zoom:124}, travel:{zoom:122}, work:{zoom:120}, rest:{zoom:118} };
+
+    const ICONS_CAL_RESOLVED = { ...ICONS_CAL_FALLBACK };
+    Object.keys(ICONS_CAL).forEach(k => {
+      const im = new Image();
+      im.onload = () => { ICONS_CAL_RESOLVED[k] = ICONS_CAL[k]; };
+      im.src = ICONS_CAL[k];
+    });
 
     window.addEventListener('error', function (e) {
       const t = e.target;
@@ -790,18 +817,24 @@
     function jalaliToGregorian(jy, jm, jd) {
       let gy = (jy <= 979) ? 621 : 1600;
       jy -= (jy <= 979) ? 0 : 979;
-      let days = (365*jy) + ((Math.floor(jy/33))*8) + (Math.floor(((jy%33)+3)/4)) + 78 + jd + ((jm < 7) ? (jm-1)*31 : ((jm-7)*30)+186);
-      gy += 400 * Math.floor(days/146097); days %= 146097;
-      if (days > 36524) { gy += 100 * Math.floor(--days/36524); days %= 36524; if (days >= 365) days++; }
-      gy += 4 * Math.floor(days/1461); days %= 1461;
+      let days = (365*jy) + (Math.floor(jy/33)*8) + Math.floor(((jy%33)+3)/4) + 78 + jd + ((jm<7)?(jm-1)*31:((jm-7)*30)+186);
+      gy += 400*Math.floor(days/146097); days %= 146097;
+      if (days > 36524) { gy += 100*Math.floor(--days/36524); days %= 36524; if (days >= 365) days++; }
+      gy += 4*Math.floor(days/1461); days %= 1461;
       if (days > 365) { gy += Math.floor((days-1)/365); days = (days-1)%365; }
-      const g_d_m = [0,31,59,90,120,151,181,212,243,273,304,334];
-      let gm = 0;
-      while (gm < 12 && days >= g_d_m[gm] + (gm === 1 && ((gy%4===0 && gy%100!==0) || (gy%400===0)) ? 1 : 0)) gm++;
-      let gd = days - g_d_m[gm-1] + 1;
+      let gd = days + 1;
+      const sal = [0,31,((gy%4===0&&gy%100!==0)||gy%400===0)?29:28,31,30,31,30,31,31,30,31,30,31];
+      let gm;
+      for (gm=0; gm<13 && gd>sal[gm]; gm++) gd -= sal[gm];
       return [gy, gm, gd];
     }
     const JALALI_MONTHS = ["فروردین","اردیبهشت","خرداد","تیر","مرداد","شهریور","مهر","آبان","آذر","دی","بهمن","اسفند"];
+    const FA_MONTH_INDEX = Object.fromEntries(JALALI_MONTHS.map((m,i)=>[m,i+1]));
+    function expenseYM(e) {
+      if (e.ym) return e.ym;
+      const m = String(e.dateStr||'').match(/(\d+)\s+(\S+)\s+(\d{4})/);
+      return (m && FA_MONTH_INDEX[m[2]]) ? `${m[3]}-${String(FA_MONTH_INDEX[m[2]]).padStart(2,'0')}` : '';
+    }
     function getNowJalaliString() {
       const now = new Date();
       const [jy, jm, jd] = gregorianToJalali(now.getFullYear(), now.getMonth()+1, now.getDate());
@@ -869,6 +902,7 @@
     let selectedCalDay = null;
     let editingDiaryId = null;
     let _pendingDiaryImage = null;
+    let showChoreArchive = false;
 
     const DEFAULT_DATE_IDEAS = [
       "پختن یه غذای جدید که هیچ‌وقت نخوردیم","رفتن به یه کافه دنج که تاحالا نرفتیم",
@@ -924,7 +958,7 @@
 
       requestAnimationFrame(() => positionNavBubble('tasks', false));
       window.addEventListener('resize', () => positionNavBubble(currentTab, false));
-      window.addEventListener('load', () => positionNavBubble(currentTab, false));
+      window.addEventListener('load', () => positionNavBubble('tasks', false));
     });
 
     function pickPersonaStart(p) {
@@ -1047,33 +1081,40 @@
     /* ============================================================
        STATE PERSIST
        ============================================================ */
+    function normalizeWatchItem(w) {
+      if (!w) return null;
+      const st = (w.status === 'watching' || w.status === 'watched' || w.status === 'queued') ? w.status : 'queued';
+      const type = ['movie','series','anime','animation'].includes(w.type) ? w.type : 'movie';
+      let seasonsData = Array.isArray(w.seasonsData) ? w.seasonsData.filter(s => s && s.seasonNumber > 0).map(s => ({ seasonNumber: Number(s.seasonNumber) || 1, episodes: Number(s.episodes) || 0 })) : null;
+      const totalSeasons = seasonsData && seasonsData.length > 0 ? seasonsData.length : (Number(w.totalSeasons) || 1);
+      const episodesPerSeason = seasonsData && seasonsData.length > 0 ? Math.round(seasonsData.reduce((a, s) => a + s.episodes, 0) / seasonsData.length) : (Number(w.episodesPerSeason) || 0);
+      const totalEpisodes = seasonsData && seasonsData.length > 0 ? seasonsData.reduce((a, s) => a + s.episodes, 0) : (Number(w.totalEpisodes) || 0);
+      return {
+        ...w, status: st, type,
+        currentSeason: Number(w.currentSeason) || 1,
+        totalSeasons,
+        currentEpisode: Number(w.currentEpisode) || 0,
+        episodesPerSeason,
+        totalEpisodes,
+        seasonsData,
+        lastWatched: w.lastWatched || null,
+        posterUrl: w.posterUrl || '',
+        originalTitle: w.originalTitle || '',
+        overview: w.overview || ''
+      };
+    }
+
     function loadLocalState() {
       const local = localStorage.getItem(`twoOfUs_state_${ROOM_CODE}`);
       if (local) {
         try {
           const parsed = JSON.parse(local);
           appState = { ...appState, ...parsed };
-          if (!Array.isArray(appState.dateIdeas) || appState.dateIdeas.length < 10 || (parsed.stateVersion || 0) < STATE_VERSION) {
+          if (!Array.isArray(appState.dateIdeas) || appState.dateIdeas.length === 0) {
             appState.dateIdeas = [...DEFAULT_DATE_IDEAS];
           }
           if (Array.isArray(appState.watchList)) {
-            appState.watchList = appState.watchList.map(w => {
-              if (!w) return null;
-              const st = (w.status === 'watching' || w.status === 'watched' || w.status === 'queued') ? w.status : 'queued';
-              const type = ['movie','series','anime','animation'].includes(w.type) ? w.type : 'movie';
-              return {
-                ...w, status: st, type,
-                currentSeason: Number(w.currentSeason) || 1,
-                totalSeasons: Number(w.totalSeasons) || 1,
-                currentEpisode: Number(w.currentEpisode) || 0,
-                episodesPerSeason: Number(w.episodesPerSeason) || 0,
-                totalEpisodes: Number(w.totalEpisodes) || 0,
-                lastWatched: w.lastWatched || null,
-                posterUrl: w.posterUrl || '',
-                originalTitle: w.originalTitle || '',
-                overview: w.overview || ''
-              };
-            }).filter(Boolean);
+            appState.watchList = appState.watchList.map(normalizeWatchItem).filter(Boolean);
           }
           if (Array.isArray(appState.gameList)) {
             appState.gameList = appState.gameList.map(g => {
@@ -1129,8 +1170,11 @@
         const { data } = await supabaseClient.from('couple_rooms').select('state').eq('room_code', ROOM_CODE).maybeSingle();
         if (data && data.state) {
           appState = { ...appState, ...data.state };
-          if (!Array.isArray(appState.dateIdeas) || appState.dateIdeas.length < 10 || (data.state.stateVersion || 0) < STATE_VERSION) {
+          if (!Array.isArray(appState.dateIdeas) || appState.dateIdeas.length === 0) {
             appState.dateIdeas = [...DEFAULT_DATE_IDEAS];
+          }
+          if (Array.isArray(appState.watchList)) {
+            appState.watchList = appState.watchList.map(normalizeWatchItem).filter(Boolean);
           }
           if (!Array.isArray(appState.personalDates) || appState.personalDates.length === 0) {
             appState.personalDates = [...DEFAULT_PERSONAL_DATES];
@@ -1144,10 +1188,13 @@
           } catch (e) { console.warn('[initSupabaseSync] local save failed:', e); }
           renderAll();
         }
-        supabaseClient.channel(`room_${ROOM_CODE}`)
+        roomChannel = supabaseClient.channel(`room_${ROOM_CODE}`)
           .on('postgres_changes', { event: '*', schema: 'public', table: 'couple_rooms', filter: `room_code=eq.${ROOM_CODE}` }, payload => {
             if (payload.new && payload.new.state) {
               appState = { ...appState, ...payload.new.state };
+              if (Array.isArray(appState.watchList)) {
+                appState.watchList = appState.watchList.map(normalizeWatchItem).filter(Boolean);
+              }
               try {
                 localStorage.setItem(`twoOfUs_state_${ROOM_CODE}`, JSON.stringify(appState));
               } catch (e) {}
@@ -1200,6 +1247,7 @@
         days.push({ key: `${jy}-${String(jm).padStart(2, '0')}-${String(jd).padStart(2, '0')}`, jy, jm, jd });
       }
       const history = appState.moodHistory || {};
+      const padStart = (() => { const _d = new Date(); _d.setDate(_d.getDate()-29); return (_d.getDay()+1)%7; })();
       openModalWithContent('تاریخچه حال و هوا — ۳۰ روز اخیر', `
         <div class="grid grid-cols-7 gap-1.5 mb-4">
           <div class="text-[10px] font-bold text-slate-400 text-center">ش</div>
@@ -1209,6 +1257,7 @@
           <div class="text-[10px] font-bold text-slate-400 text-center">چ</div>
           <div class="text-[10px] font-bold text-slate-400 text-center">پ</div>
           <div class="text-[10px] font-bold text-slate-400 text-center">ج</div>
+          ${'<div></div>'.repeat(padStart)}
           ${days.map(d => {
             const m1 = history[`${d.key}_p1`];
             const m2 = history[`${d.key}_p2`];
@@ -1276,13 +1325,37 @@
         </button>`).join('');
     }
 
+    function toggleChoreArchive() {
+      showChoreArchive = !showChoreArchive;
+      renderChores();
+      playTone(500, 'sine', 0.08);
+    }
+
     function renderChores() {
       const c = document.getElementById('choreList');
       if (!c) return;
       let list = appState.chores || [];
+      // فیلتر آرشیو: بسته به حالت نمایش
+      list = showChoreArchive ? list.filter(x => x.done) : list.filter(x => !x.done);
+      // فیلتر مسئول
       if (currentChoreFilter !== 'all') list = list.filter(x => x.assignee === currentChoreFilter);
+
+      const countBadge = document.getElementById('choreCountBadge');
+      const archiveBtn = document.getElementById('choreArchiveToggleBtn');
+      if (countBadge) {
+        const all = appState.chores || [];
+        const openCount = all.filter(x => !x.done).length;
+        const doneCount = all.filter(x => x.done).length;
+        countBadge.innerText = showChoreArchive ? `${toFaNum(doneCount)} کار انجام‌شده` : `${toFaNum(openCount)} کار باز`;
+      }
+      if (archiveBtn) {
+        archiveBtn.innerText = showChoreArchive ? 'بازگشت به کارهای باز' : 'نمایش آرشیو';
+      }
+
       if (list.length === 0) {
-        c.innerHTML = `<div class="text-center py-8 text-slate-400 text-xs"><img src="${ICONS_3D.broom}" class="w-10 h-10 mx-auto mb-2 opacity-40" alt="" /><p>همه کارها انجام شده</p></div>`;
+        c.innerHTML = showChoreArchive
+          ? `<div class="text-center py-8 text-slate-400 text-xs"><i class="fa-solid fa-box-archive text-2xl mx-auto mb-2 opacity-40 block"></i><p>آرشیو خالیه</p></div>`
+          : `<div class="text-center py-8 text-slate-400 text-xs"><i class="fa-solid fa-broom text-2xl mx-auto mb-2 opacity-40 block"></i><p>همه کارها انجام شده</p></div>`;
         return;
       }
       c.innerHTML = list.map(x => `
@@ -1303,9 +1376,22 @@
 
     function filterChores(id) { currentChoreFilter = id; renderChoreFilters(); renderChores(); }
 
+    /* ============================================================
+       BUDGET — ماه جاری + میانگین ماهانه هر دسته
+       ============================================================ */
     function renderBudgetChart() {
-      const expenses = appState.expenses || [];
+      const _n = getNowJalaliString();
+      const curYM = `${_n.jy}-${String(_n.jm).padStart(2,'0')}`;
+
+      // همه هزینه‌ها برای محاسبه میانگین
+      const allExpenses = appState.expenses || [];
+      // هزینه‌های ماه جاری برای چارت اصلی
+      const expenses = allExpenses.filter(e => { const ym = expenseYM(e); return !ym || ym === curYM; });
       const total = expenses.reduce((s, x) => s + (Number(x.amount) || 0), 0);
+
+      const subEl = document.getElementById('budgetSubtitle');
+      if (subEl) subEl.innerText = `مخارج ${JALALI_MONTHS[_n.jm - 1]} ${toFa(_n.jy)}`;
+
       const amtEl = document.getElementById('chartTotalAmount');
       const cntEl = document.getElementById('expenseCountText');
       if (amtEl) amtEl.innerText = toFaNum(total);
@@ -1365,10 +1451,13 @@
         }).join('');
       }
 
+      // نمودار میانگین ماهانه هر دسته
+      renderMonthlyAverage(allExpenses);
+
       const lc = document.getElementById('expenseList');
       if (!lc) return;
       if (expenses.length === 0) {
-        lc.innerHTML = `<div class="text-center py-6 text-slate-400 text-xs">هنوز خرجی ثبت نشده</div>`;
+        lc.innerHTML = `<div class="text-center py-6 text-slate-400 text-xs">این ماه خرجی ثبت نشده</div>`;
         return;
       }
       lc.innerHTML = [...expenses].reverse().map(e => {
@@ -1390,6 +1479,69 @@
           </div>
         </div>`;
       }).join('');
+    }
+
+    function renderMonthlyAverage(allExpenses) {
+      const box = document.getElementById('monthlyAvgContainer');
+      const label = document.getElementById('avgChartMonthsLabel');
+      if (!box) return;
+
+      // گروه‌بندی بر اساس ماه
+      const byMonth = {};
+      allExpenses.forEach(e => {
+        const ym = expenseYM(e);
+        if (!ym) return;
+        if (!byMonth[ym]) byMonth[ym] = {};
+        const cat = e.category || 'other';
+        byMonth[ym][cat] = (byMonth[ym][cat] || 0) + (Number(e.amount) || 0);
+      });
+      const months = Object.keys(byMonth).sort();
+      const monthCount = months.length;
+
+      if (label) {
+        label.innerText = monthCount > 0 ? `بر اساس ${toFaNum(monthCount)} ماه ثبت‌شده` : '';
+      }
+
+      if (monthCount === 0) {
+        box.innerHTML = `<p class="text-center py-4 text-slate-400 text-xs">هنوز داده‌ای برای محاسبه میانگین نیست</p>`;
+        return;
+      }
+
+      // میانگین هر دسته در طول ماه‌ها
+      const catAvg = {};
+      BUDGET_CATEGORIES.forEach(c => catAvg[c.id] = 0);
+      months.forEach(ym => {
+        BUDGET_CATEGORIES.forEach(cat => {
+          const sum = byMonth[ym][cat.id] || 0;
+          catAvg[cat.id] += sum / monthCount;
+        });
+      });
+
+      const grandTotalAvg = Object.values(catAvg).reduce((a, b) => a + b, 0);
+      const maxAvg = Math.max(...Object.values(catAvg), 1);
+
+      box.innerHTML = BUDGET_CATEGORIES.filter(c => catAvg[c.id] > 0).sort((a, b) => catAvg[b.id] - catAvg[a.id]).map(cat => {
+        const avg = catAvg[cat.id];
+        const pct = Math.round((avg / maxAvg) * 100);
+        const sharePct = grandTotalAvg > 0 ? Math.round((avg / grandTotalAvg) * 100) : 0;
+        return `<div class="space-y-1">
+          <div class="flex items-center justify-between text-xs">
+            <div class="flex items-center gap-2">
+              <span class="w-2.5 h-2.5 rounded-full" style="background:${cat.color}"></span>
+              <span class="font-bold text-slate-700">${cat.name}</span>
+            </div>
+            <div class="flex items-center gap-2 text-slate-500">
+              <span class="font-extrabold text-slate-800">${toFaNum(Math.round(avg))}</span>
+              <span class="text-[10px] font-semibold">(${toFa(sharePct)}٪)</span>
+            </div>
+          </div>
+          <div class="w-full h-2 rounded-full bg-slate-100 overflow-hidden"><div class="h-full rounded-full" style="width:${pct}%;background:${cat.color};opacity:0.75"></div></div>
+        </div>`;
+      }).join('') + (grandTotalAvg > 0 ? `
+        <div class="pt-3 mt-3 border-t border-slate-100 flex items-center justify-between text-xs">
+          <span class="font-bold text-slate-700">مجموع میانگین ماهانه</span>
+          <span class="font-display font-black text-sm text-rose-600">${toFaNum(Math.round(grandTotalAvg))} تومان</span>
+        </div>` : '');
     }
 
     /* ============================================================
@@ -1428,7 +1580,8 @@
       const grid = document.getElementById('calendarGrid');
       if (!grid) return;
       grid.innerHTML = '';
-      const dim = (calMonth <= 6) ? 31 : (calMonth <= 11) ? 30 : 29;
+      const isJalaliLeap = y => [1,5,9,13,17,22,26,30].includes(y % 33);
+      const dim = (calMonth <= 6) ? 31 : (calMonth <= 11) ? 30 : (isJalaliLeap(calYear) ? 30 : 29);
       const [gy, gm, gd] = jalaliToGregorian(calYear, calMonth, 1);
       const startDOW = (new Date(gy, gm - 1, gd).getDay() + 1) % 7;
       const now = new Date();
@@ -1454,7 +1607,7 @@
         if (custom?.bgColor) cellBgCls = '';
         const numColor = (cat.type === 'personal' && !custom?.bgColor) ? '#fff' : '#1e293b';
         const inlineBg = custom?.bgColor ? `background:${custom.bgColor};` : '';
-        const iconEl = hasIcon ? `<div class="cal-day-bg" style="background-image:url('${ICONS_CAL[iconKey]}');background-size:${iconStyle.zoom}%;"></div>` : '';
+        const iconEl = hasIcon ? `<div class="cal-day-bg" style="background-image:url('${ICONS_CAL_RESOLVED[iconKey]}');background-size:${iconStyle.zoom}%;"></div>` : '';
         grid.innerHTML += `
           <button onclick="selectCalendarDay(${day})" class="cal-day aspect-square rounded-2xl flex items-center justify-center relative transition-all ${cellBgCls} ${isSel ? 'sel' : ''} ${isToday && !isSel ? 'cal-day-today' : ''}" style="${inlineBg}">
             ${iconEl}
@@ -1482,15 +1635,15 @@
       let html = '';
       if (cat.type === 'holiday') {
         html += `<div class="p-3 rounded-2xl bg-rose-100/70 text-rose-700 font-bold flex items-center gap-2.5 text-xs">
-          <img src="${ICONS_CAL.celebration}" data-cal-icon="celebration" class="w-5 h-5 rounded" alt="" /><span>${cat.data.title}</span>
+          <img src="${ICONS_CAL_RESOLVED.celebration}" data-cal-icon="celebration" class="w-5 h-5 rounded" alt="" /><span>${cat.data.title}</span>
         </div>`;
       } else if (cat.type === 'gift') {
         html += `<div class="p-3 rounded-2xl bg-gradient-to-l from-rose-50 to-pink-100 text-rose-700 font-bold flex items-center gap-2.5 text-xs border border-rose-200">
-          <img src="${ICONS_CAL.anniversary}" data-cal-icon="anniversary" class="w-5 h-5 rounded" alt="" /><span>${cat.data.title} — روز کادو!</span>
+          <img src="${ICONS_CAL_RESOLVED.anniversary}" data-cal-icon="anniversary" class="w-5 h-5 rounded" alt="" /><span>${cat.data.title} — روز کادو!</span>
         </div>`;
       } else if (cat.type === 'personal') {
         html += `<div class="p-3 rounded-2xl bg-gradient-to-l from-rose-100 to-pink-200 text-rose-800 font-bold flex items-center gap-2.5 text-xs border border-rose-300">
-          <img src="${ICONS_CAL[cat.data.icon] || ICONS_CAL.anniversary}" data-cal-icon="${cat.data.icon || 'anniversary'}" class="w-5 h-5 rounded" alt="" /><span>${cat.data.title} (شروع از سال ${toFa(cat.data.year)})</span>
+          <img src="${ICONS_CAL_RESOLVED[cat.data.icon] || ICONS_CAL_RESOLVED.anniversary}" data-cal-icon="${cat.data.icon || 'anniversary'}" class="w-5 h-5 rounded" alt="" /><span>${cat.data.title} (شروع از سال ${toFa(cat.data.year)})</span>
         </div>`;
       }
       if (custom?.icon) {
@@ -1656,8 +1809,8 @@
         const [, mm, dd] = next.dateKey.split('-');
         label = `${toFa(parseInt(dd))} ${JALALI_MONTHS[parseInt(mm) - 1]}`;
       }
-      const icon = (next.icon && ICONS_CAL[next.icon])
-        ? `<img src="${ICONS_CAL[next.icon]}" data-cal-icon="${next.icon}" class="w-4 h-4 inline-block rounded" alt="" />`
+      const icon = (next.icon && ICONS_CAL_RESOLVED[next.icon])
+        ? `<img src="${ICONS_CAL_RESOLVED[next.icon]}" data-cal-icon="${next.icon}" class="w-4 h-4 inline-block rounded" alt="" />`
         : `<img src="${ICONS_3D.heart}" class="w-3.5 h-3.5 inline-block" alt="" />`;
       t.innerHTML = `${icon} <span>بعدی: <strong>${escapeHtml(next.title)}</strong> <span class="text-slate-400">(${label})</span></span>`;
     }
@@ -1930,8 +2083,14 @@
       return [];
     }
 
+    /* ============================================================
+       fetchMediaDetails — با پشتیبانی از فصل‌های جدا
+       هر فصل تعداد قسمت واقعی خودش رو داره
+       ============================================================ */
     async function fetchMediaDetails(item) {
       if (!item) return null;
+
+      // AniList — یک فصل واحد با تعداد قسمت کل
       if (item._source === 'anilist' && item.id) {
         const graphqlQuery = `
           query ($id: Int) {
@@ -1950,36 +2109,61 @@
           if (!res.ok) return null;
           const data = await res.json();
           const a = data?.data?.Media || {};
+          const eps = Number(a.episodes) || 0;
           return {
             totalSeasons: 1,
-            episodesPerSeason: Number(a.episodes) || 0,
+            episodesPerSeason: eps,
+            seasonsData: [{ seasonNumber: 1, episodes: eps }],
             overview: (a.description || '').replace(/<[^>]*>?/gm, '').slice(0, 240) || item.overview,
             poster: a.coverImage?.large || item.poster
           };
         } catch (e) { return null; }
       }
+
+      // Jikan — یک فصل واحد
       if (item._source === 'jikan' && item.id) {
         try {
           const data = await jikanFetch(`https://api.jikan.moe/v4/anime/${item.id}/full`);
           const a = data.data || {};
+          const eps = Number(a.episodes) || 0;
           return {
             totalSeasons: 1,
-            episodesPerSeason: Number(a.episodes) || 0,
+            episodesPerSeason: eps,
+            seasonsData: [{ seasonNumber: 1, episodes: eps }],
             overview: (a.synopsis || item.overview || '').slice(0, 240),
             poster: a.images?.jpg?.large_image_url || a.images?.jpg?.image_url || item.poster
           };
         } catch (e) { return null; }
       }
+
+      // TMDB
       if (item._source === 'tmdb' && item.id) {
         const t = item._tmdbType || 'tv';
         try {
           const data = await tmdbFetch(`/${t}/${item.id}`, `&language=fa-IR`);
           if (t === 'tv') {
-            const totalSeasons = Number(data.number_of_seasons) || 1;
-            const totalEps = Number(data.number_of_episodes) || 0;
-            const episodesPerSeason = (totalEps > 0 && totalSeasons > 0) ? Math.round(totalEps / totalSeasons) : 0;
+            // TMDB در پاسخ /tv/{id} آرایه seasons رو می‌ده که هر فصل episode_count داره
+            const seasonsRaw = Array.isArray(data.seasons) ? data.seasons : [];
+            // فیلتر فصل‌های واقعی (بدون specials که season_number=0)
+            const realSeasons = seasonsRaw.filter(s => Number(s.season_number) > 0).sort((a, b) => Number(a.season_number) - Number(b.season_number));
+            let seasonsData = realSeasons.map(s => ({
+              seasonNumber: Number(s.season_number) || 1,
+              episodes: Number(s.episode_count) || 0
+            }));
+            // اگر seasonsData خالی بود، از اطلاعات کلی استفاده کن
+            if (seasonsData.length === 0) {
+              const totalSeasons = Number(data.number_of_seasons) || 1;
+              const totalEps = Number(data.number_of_episodes) || 0;
+              const avg = (totalEps > 0 && totalSeasons > 0) ? Math.round(totalEps / totalSeasons) : 0;
+              seasonsData = Array.from({ length: totalSeasons }, (_, i) => ({ seasonNumber: i + 1, episodes: avg }));
+            }
+            const totalSeasons = seasonsData.length;
+            const totalEps = seasonsData.reduce((a, s) => a + s.episodes, 0);
+            const episodesPerSeason = totalSeasons > 0 ? Math.round(totalEps / totalSeasons) : 0;
             return {
-              totalSeasons, episodesPerSeason,
+              totalSeasons,
+              episodesPerSeason,
+              seasonsData,
               overview: (data.overview || item.overview || '').slice(0, 240),
               poster: data.poster_path ? `https://image.tmdb.org/t/p/w342${data.poster_path}` : item.poster
             };
@@ -1990,6 +2174,7 @@
           };
         } catch (e) { return null; }
       }
+
       return null;
     }
 
@@ -2039,18 +2224,38 @@
       c.innerHTML = list.map(item => renderMediaCard(item)).join('');
     }
 
+    function calcWatchProgress(item) {
+      const cur = Number(item.currentEpisode) || 0;
+      const curSeason = Number(item.currentSeason) || 1;
+      const seasons = Array.isArray(item.seasonsData) && item.seasonsData.length > 0 ? item.seasonsData : null;
+
+      let totalEps = 0;
+      let watchedBefore = 0;
+      let epsThisSeason = 0;
+
+      if (seasons) {
+        totalEps = seasons.reduce((a, s) => a + (s.episodes || 0), 0);
+        watchedBefore = seasons.filter(s => s.seasonNumber < curSeason).reduce((a, s) => a + (s.episodes || 0), 0);
+        const curS = seasons.find(s => s.seasonNumber === curSeason);
+        epsThisSeason = curS ? curS.episodes : 0;
+      } else {
+        const epsPerSeason = Number(item.episodesPerSeason) || 0;
+        const totalSeasons = Number(item.totalSeasons) || 1;
+        totalEps = epsPerSeason * totalSeasons || Number(item.totalEpisodes) || 0;
+        watchedBefore = (curSeason - 1) * epsPerSeason;
+        epsThisSeason = epsPerSeason;
+      }
+      const watchedTotal = watchedBefore + cur;
+      const pct = totalEps > 0 ? Math.min(100, Math.round((watchedTotal / totalEps) * 100)) : 0;
+      return { totalEps, watchedBefore, epsThisSeason, watchedTotal, pct, cur, curSeason, seasons };
+    }
+
     function renderMediaCard(item) {
       const statusObj = WATCH_STATUSES.find(s => s.id === item.status) || WATCH_STATUSES[0];
       const typeObj = WATCH_TYPES.find(t => t.id === item.type) || WATCH_TYPES[0];
-      const cur = Number(item.currentEpisode) || 0;
-      const curSeason = Number(item.currentSeason) || 1;
-      const totalSeasons = Number(item.totalSeasons) || 1;
-      const epsPerSeason = Number(item.episodesPerSeason) || 0;
-      const totalEps = epsPerSeason > 0 ? (epsPerSeason * totalSeasons) : (Number(item.totalEpisodes) || 0);
-      const watchedTotal = (curSeason - 1) * epsPerSeason + cur;
-      const pct = totalEps > 0 ? Math.min(100, Math.round((watchedTotal / totalEps) * 100)) : 0;
+      const prog = calcWatchProgress(item);
       const isSerial = (item.type === 'series' || item.type === 'anime');
-      const showProgress = isSerial && totalEps > 0;
+      const showProgress = isSerial && prog.totalEps > 0;
 
       const typeColor = item.type === 'anime' ? 'text-pink-600' : item.type === 'animation' ? 'text-cyan-600' : 'text-purple-600';
       const typeBgGrad = item.type === 'anime' ? 'from-pink-400 to-rose-400' : item.type === 'animation' ? 'from-cyan-400 to-blue-400' : 'from-purple-400 to-rose-400';
@@ -2058,6 +2263,10 @@
       const poster = item.posterUrl
         ? `<img src="${item.posterUrl}" class="media-poster" alt="" onerror="this.style.display='none'" />`
         : `<div class="media-poster-empty"><img src="${ICONS_3D[typeObj.icon]}" class="w-9 h-9" alt="" /></div>`;
+
+      const seasonInfo = (prog.seasons && prog.seasons.length > 1)
+        ? `فصل ${toFa(prog.curSeason)} از ${toFa(prog.seasons.length)} — قسمت ${toFa(prog.cur)}${prog.epsThisSeason > 0 ? ` از ${toFa(prog.epsThisSeason)}` : ''}`
+        : `فصل ${toFa(prog.curSeason)} — قسمت ${toFa(prog.cur)}${prog.epsThisSeason > 0 ? ` از ${toFa(prog.epsThisSeason)}` : ''}`;
 
       return `
         <div class="flex flex-col p-3 rounded-2xl bg-white border border-slate-200/70 shadow-sm gap-2">
@@ -2091,17 +2300,17 @@
           ${showProgress ? `
             <div class="space-y-1.5 pt-1.5 border-t border-slate-100">
               <div class="flex items-center justify-between text-[10px] font-bold">
-                <span class="text-slate-500">فصل ${toFa(curSeason)} — قسمت ${toFa(cur)}${epsPerSeason > 0 ? ` از ${toFa(epsPerSeason)}` : ''}</span>
-                <span class="${typeColor}">${toFa(pct)}٪</span>
+                <span class="text-slate-500">${seasonInfo}</span>
+                <span class="${typeColor}">${toFa(prog.pct)}٪</span>
               </div>
               <div class="w-full h-2 rounded-full bg-slate-100 overflow-hidden">
-                <div class="h-full rounded-full bg-gradient-to-r ${typeBgGrad}" style="width:${pct}%"></div>
+                <div class="h-full rounded-full bg-gradient-to-r ${typeBgGrad}" style="width:${prog.pct}%"></div>
               </div>
               <div class="flex items-center gap-1.5 pt-1">
                 <button onclick="incrementEpisode('${item.id}')" class="flex-1 py-1.5 rounded-lg ${item.type === 'anime' ? 'bg-pink-100 hover:bg-pink-200 text-pink-700' : 'bg-purple-100 hover:bg-purple-200 text-purple-700'} text-[10px] font-bold flex items-center justify-center gap-1">
                   <i class="fa-solid fa-plus text-[9px]"></i> قسمت بعد
                 </button>
-                ${(cur > 1 || curSeason > 1) ? `<button onclick="decrementEpisode('${item.id}')" class="px-2.5 py-1.5 rounded-lg bg-slate-100 text-slate-600 text-[10px] font-bold"><i class="fa-solid fa-minus text-[9px]"></i></button>` : ''}
+                ${(prog.cur > 1 || prog.curSeason > 1) ? `<button onclick="decrementEpisode('${item.id}')" class="px-2.5 py-1.5 rounded-lg bg-slate-100 text-slate-600 text-[10px] font-bold"><i class="fa-solid fa-minus text-[9px]"></i></button>` : ''}
               </div>
             </div>
           ` : isSerial ? `
@@ -2348,7 +2557,7 @@
     }
 
 /* ==================== END OF PART 2 ==================== */
-    
+  
     /* ============================================================
        WHEEL
        ============================================================ */
@@ -2633,8 +2842,8 @@
       if (!appState.notes) appState.notes = [];
       appState.notes.push({ id: 'note_' + Date.now(), content: note, author: currentPersona, timeBadge: nowInfo.fullTimestamp });
       saveState(true);
-      if (supabaseClient) {
-        supabaseClient.channel(`room_${ROOM_CODE}`).send({ type: 'broadcast', event: 'love_kiss', payload: { senderName: sender } });
+      if (roomChannel) {
+        roomChannel.send({ type: 'broadcast', event: 'love_kiss', payload: { senderName: sender } });
       }
     }
 
@@ -2689,37 +2898,51 @@
     function incrementEpisode(id) {
       const item = (appState.watchList || []).find(w => w.id === id);
       if (!item) return;
-      const epsPerSeason = Number(item.episodesPerSeason) || 0;
-      const totalSeasons = Number(item.totalSeasons) || 1;
+      const seasons = Array.isArray(item.seasonsData) && item.seasonsData.length > 0 ? item.seasonsData : null;
       let cur = Number(item.currentEpisode) || 0;
       let curSeason = Number(item.currentSeason) || 1;
 
-      if (epsPerSeason > 0) {
-        cur++;
-        if (cur > epsPerSeason) {
-          if (curSeason < totalSeasons) {
-            curSeason++;
-            cur = 1;
-          } else {
-            cur = epsPerSeason;
-            item.status = 'watched';
+      if (seasons) {
+        const curS = seasons.find(s => s.seasonNumber === curSeason);
+        const epsThisSeason = curS ? curS.episodes : 0;
+        if (epsThisSeason > 0) {
+          cur++;
+          if (cur > epsThisSeason) {
+            // برو به فصل بعد
+            const nextSeason = seasons.find(s => s.seasonNumber > curSeason);
+            if (nextSeason) {
+              curSeason = nextSeason.seasonNumber;
+              cur = 1;
+            } else {
+              cur = epsThisSeason;
+              item.status = 'watched';
+            }
           }
+        } else {
+          cur++;
         }
       } else {
-        cur++;
+        const epsPerSeason = Number(item.episodesPerSeason) || 0;
+        const totalSeasons = Number(item.totalSeasons) || 1;
+        if (epsPerSeason > 0) {
+          cur++;
+          if (cur > epsPerSeason) {
+            if (curSeason < totalSeasons) { curSeason++; cur = 1; }
+            else { cur = epsPerSeason; item.status = 'watched'; }
+          }
+        } else {
+          cur++;
+        }
       }
 
       item.currentEpisode = cur;
       item.currentSeason = curSeason;
       item.lastWatched = new Date().toLocaleDateString('fa-IR');
 
-      const totalEps = epsPerSeason > 0 ? (epsPerSeason * totalSeasons) : (Number(item.totalEpisodes) || 0);
-      const watchedTotal = (curSeason - 1) * epsPerSeason + cur;
-      if (totalEps > 0 && watchedTotal >= totalEps) {
-        item.status = 'watched';
-      } else if (item.status === 'queued') {
-        item.status = 'watching';
-      }
+      const prog = calcWatchProgress(item);
+      if (prog.totalEps > 0 && prog.watchedTotal >= prog.totalEps) item.status = 'watched';
+      else if (item.status === 'queued') item.status = 'watching';
+
       playTone(650, 'sine', 0.08);
       saveState();
     }
@@ -2727,17 +2950,27 @@
     function decrementEpisode(id) {
       const item = (appState.watchList || []).find(w => w.id === id);
       if (!item) return;
-      const epsPerSeason = Number(item.episodesPerSeason) || 0;
+      const seasons = Array.isArray(item.seasonsData) && item.seasonsData.length > 0 ? item.seasonsData : null;
       let cur = Number(item.currentEpisode) || 0;
       let curSeason = Number(item.currentSeason) || 1;
 
-      if (epsPerSeason > 0 && cur <= 1 && curSeason > 1) {
-        curSeason--;
-        cur = epsPerSeason;
-      } else if (cur > 1) {
+      if (cur > 1) {
         cur--;
       } else {
-        return;
+        // برگرد به فصل قبل
+        if (seasons) {
+          const prevSeason = [...seasons].filter(s => s.seasonNumber < curSeason).sort((a, b) => b.seasonNumber - a.seasonNumber)[0];
+          if (prevSeason) {
+            curSeason = prevSeason.seasonNumber;
+            cur = prevSeason.episodes || 1;
+          } else return;
+        } else {
+          const epsPerSeason = Number(item.episodesPerSeason) || 0;
+          if (curSeason > 1 && epsPerSeason > 0) {
+            curSeason--;
+            cur = epsPerSeason;
+          } else return;
+        }
       }
 
       item.currentEpisode = cur;
@@ -2793,6 +3026,7 @@
       bd.classList.add('hidden');
       bd.classList.remove('flex');
       _pendingDiaryImage = null;
+      if (editingDiaryId) { editingDiaryId = null; renderDiary(); }
     }
 
     function requestConfirm(title, message, onConfirm) {
@@ -2858,7 +3092,7 @@
       if (!val) return;
       const n = getNowJalaliString();
       if (!appState.chores) appState.chores = [];
-      appState.chores.push({ id: 'c_' + Date.now(), title: val, assignee, done: false, timeBadge: n.fullTimestamp });
+      appState.chores.push({ id: 'c_' + Date.now(), title: val, assignee, done: false, timeBadge: n.fullTimestamp, createdAt: new Date().toISOString() });
       playTone(550, 'sine', 0.1);
       saveState();
       closeModal();
@@ -2893,7 +3127,12 @@
       if (!title || !amount) return;
       const n = getNowJalaliString();
       if (!appState.expenses) appState.expenses = [];
-      appState.expenses.push({ id: 'exp_' + Date.now(), title, amount, category, dateStr: n.dateStr, registeredBy: currentPersona });
+      appState.expenses.push({
+        id: 'exp_' + Date.now(), title, amount, category,
+        dateStr: n.dateStr,
+        ym: `${n.jy}-${String(n.jm).padStart(2,'0')}`,
+        registeredBy: currentPersona
+      });
       playTone(600, 'sine', 0.1);
       saveState();
       closeModal();
@@ -2954,8 +3193,11 @@
       const time = document.getElementById('inputEventTime').value;
       const category = document.getElementById('selectEventCategory').value;
       if (!title || !date) return;
+      const key = standardizeJalaliDateKey(date);
+      if (!key) { showToast('تاریخ باید مثل ۱۴۰۵/۰۷/۱۵ باشه'); return; }
+      const jalaliDate = key.replace(/-/g, '/');
       if (!appState.coupleEvents) appState.coupleEvents = [];
-      appState.coupleEvents.push({ id: 'ev_' + Date.now(), title, jalaliDate: date, time, category });
+      appState.coupleEvents.push({ id: 'ev_' + Date.now(), title, jalaliDate, time, category });
       playTone(550, 'sine', 0.1);
       saveState();
       closeModal();
@@ -2964,7 +3206,11 @@
     /* ============================================================
        WATCHLIST ADD
        ============================================================ */
+    let _watchSearchSelection = null;
+    let _watchPendingSeasons = null; // برای نگه‌داشتن اطلاعات فصل‌ها هنگام افزودن
+
     function openWatchlistModal() {
+      _watchPendingSeasons = null;
       openModalWithContent('افزودن به لیست تماشا', `
         <form onsubmit="handleSaveWatchlist(event)" class="space-y-4">
           <div>
@@ -2980,7 +3226,7 @@
           <div>
             <button type="button" onclick="doSearchWatch()" id="watchSearchBtn" class="w-full py-2.5 rounded-2xl bg-purple-100 hover:bg-purple-200 text-purple-700 font-bold text-xs flex items-center justify-center gap-2">
               <i class="fa-solid fa-magnifying-glass"></i>
-              <span>جستجوی خودکار پوستر</span>
+              <span>جستجوی خودکار پوستر و فصل‌ها</span>
             </button>
           </div>
           <div id="watchSearchResults" class="space-y-2 max-h-64 overflow-y-auto"></div>
@@ -3004,7 +3250,12 @@
               <input id="inputWatchRating" type="number" min="1" max="5" value="5" class="w-full px-4 py-3 rounded-2xl border border-slate-200 text-sm">
             </div>
           </div>
-          <div id="watchSeasonWrapper" style="display:none;" class="grid grid-cols-2 gap-3">
+          <div id="watchSeasonsWrapper" class="hidden">
+            <label class="block text-xs font-semibold text-slate-700 mb-2">فصل‌ها و تعداد قسمت هر فصل</label>
+            <div id="watchSeasonsList" class="space-y-1.5"></div>
+            <p class="text-[10px] text-slate-400 mt-2">اگه خالی باشه، می‌تونی دستی پر کنی. برای هر فصل تعداد قسمت واقعی رو وارد کن.</p>
+          </div>
+          <div id="watchFallbackSeasonWrapper" class="hidden grid grid-cols-2 gap-3">
             <div>
               <label class="block text-xs font-semibold text-slate-700 mb-1.5">تعداد فصل‌ها</label>
               <input id="inputWatchTotalSeasons" type="number" min="1" value="1" class="w-full px-4 py-3 rounded-2xl border border-slate-200 text-sm">
@@ -3018,11 +3269,14 @@
         </form>`);
       setTimeout(() => {
         const typeSel = document.getElementById('selectWatchType');
-        const seasonWrap = document.getElementById('watchSeasonWrapper');
-        if (typeSel && seasonWrap) {
+        const seasonsWrap = document.getElementById('watchSeasonsWrapper');
+        const fallbackWrap = document.getElementById('watchFallbackSeasonWrapper');
+        if (typeSel && seasonsWrap && fallbackWrap) {
           const toggle = () => {
             const v = typeSel.value;
-            seasonWrap.style.display = (v === 'series' || v === 'anime') ? 'grid' : 'none';
+            const isSer = (v === 'series' || v === 'anime');
+            seasonsWrap.classList.toggle('hidden', !isSer);
+            fallbackWrap.classList.toggle('hidden', !isSer);
           };
           typeSel.addEventListener('change', toggle);
           toggle();
@@ -3030,7 +3284,6 @@
       }, 80);
     }
 
-    let _watchSearchSelection = null;
     async function doSearchWatch() {
       const title = document.getElementById('inputWatchTitle').value.trim();
       const type = document.getElementById('selectWatchType').value;
@@ -3058,7 +3311,7 @@
 
       if (items.length === 0) {
         const netHint = !navigator.onLine ? 'اینترنت قطع است.' : 'ممکن است سرویس جستجو موقتاً در دسترس نباشد.';
-        results.innerHTML = `<p class="text-xs text-rose-500 text-center py-3 leading-relaxed">چیزی پیدا نشد.<br><span class="text-[10px] text-slate-500">${netHint}<br>می‌توانی لینک پوستر رو دستی پایین پیست کنی.</span></p>`;
+        results.innerHTML = `<p class="text-xs text-rose-500 text-center py-3 leading-relaxed">چیزی پیدا نشد.<br><span class="text-[10px] text-slate-500">${netHint}<br>می‌توانی لینک پوستر رو دستی پیست کنی.</span></p>`;
         return;
       }
 
@@ -3092,37 +3345,68 @@
 
       const type = document.getElementById('selectWatchType').value;
       if (type !== 'series' && type !== 'anime') return;
-      const totalSeasonsEl = document.getElementById('inputWatchTotalSeasons');
-      const epsPerSeasonEl = document.getElementById('inputWatchEpsPerSeason');
-      if (!totalSeasonsEl || !epsPerSeasonEl) return;
 
-      if (it._source === 'jikan' && it.episodes > 0) {
-        totalSeasonsEl.value = 1;
-        epsPerSeasonEl.value = it.episodes;
-      }
-      if (it._source === 'anilist' && it.episodes > 0) {
-        totalSeasonsEl.value = 1;
-        epsPerSeasonEl.value = it.episodes;
-      }
-
+      // نمایش لودینگ
       const results = document.getElementById('watchSearchResults');
       const loadingEl = document.createElement('div');
       loadingEl.className = 'text-center py-2 text-[10px] text-slate-400';
-      loadingEl.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> دریافت جزئیات فصل‌ها...';
+      loadingEl.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> دریافت اطلاعات فصل‌ها...';
       results.appendChild(loadingEl);
 
       try {
         const details = await fetchMediaDetails(it);
         loadingEl.remove();
         if (!details) return;
-        if (details.totalSeasons) totalSeasonsEl.value = details.totalSeasons;
-        if (details.episodesPerSeason) epsPerSeasonEl.value = details.episodesPerSeason;
         if (details.overview && overviewEl) overviewEl.value = details.overview;
         if (details.poster) document.getElementById('inputWatchPoster').value = details.poster;
+
+        // اگه seasonsData داریم، نمایش لیست قابل ویرایش فصل‌ها
+        if (Array.isArray(details.seasonsData) && details.seasonsData.length > 0) {
+          _watchPendingSeasons = details.seasonsData.map(s => ({ seasonNumber: s.seasonNumber, episodes: s.episodes }));
+          renderPendingSeasonsList();
+          const wrap = document.getElementById('watchSeasonsWrapper');
+          const fbWrap = document.getElementById('watchFallbackSeasonWrapper');
+          if (wrap) wrap.classList.remove('hidden');
+          if (fbWrap) fbWrap.classList.add('hidden');
+        } else {
+          // fallback به حالت قدیمی
+          const totalSeasonsEl = document.getElementById('inputWatchTotalSeasons');
+          const epsPerSeasonEl = document.getElementById('inputWatchEpsPerSeason');
+          if (totalSeasonsEl && details.totalSeasons) totalSeasonsEl.value = details.totalSeasons;
+          if (epsPerSeasonEl && details.episodesPerSeason) epsPerSeasonEl.value = details.episodesPerSeason;
+          const wrap = document.getElementById('watchSeasonsWrapper');
+          const fbWrap = document.getElementById('watchFallbackSeasonWrapper');
+          if (wrap) wrap.classList.add('hidden');
+          if (fbWrap) fbWrap.classList.remove('hidden');
+        }
         playTone(700, 'sine', 0.1);
       } catch (e) {
         loadingEl.remove();
       }
+    }
+
+    function renderPendingSeasonsList() {
+      const box = document.getElementById('watchSeasonsList');
+      if (!box || !Array.isArray(_watchPendingSeasons)) return;
+      box.innerHTML = _watchPendingSeasons.map((s, i) => `
+        <div class="season-row">
+          <span class="text-[11px] font-bold text-slate-700 w-16">فصل ${toFa(s.seasonNumber)}</span>
+          <input type="number" min="0" value="${s.episodes}" onchange="updatePendingSeasonEpisodes(${i}, this.value)" />
+          <span class="text-[10px] text-slate-500">قسمت</span>
+          <button type="button" onclick="removePendingSeason(${i})" class="text-slate-400 hover:text-rose-500 ml-auto"><i class="fa-solid fa-xmark text-xs"></i></button>
+        </div>
+      `).join('');
+    }
+
+    function updatePendingSeasonEpisodes(i, val) {
+      if (!_watchPendingSeasons || !_watchPendingSeasons[i]) return;
+      _watchPendingSeasons[i].episodes = Math.max(0, Number(val) || 0);
+    }
+
+    function removePendingSeason(i) {
+      if (!_watchPendingSeasons) return;
+      _watchPendingSeasons.splice(i, 1);
+      renderPendingSeasonsList();
     }
 
     function handleSaveWatchlist(e) {
@@ -3133,9 +3417,27 @@
       const rating = document.getElementById('inputWatchRating').value;
       const posterUrl = document.getElementById('inputWatchPoster').value.trim();
       const overview = document.getElementById('inputWatchOverview').value.trim();
-      const totalSeasons = Number(document.getElementById('inputWatchTotalSeasons')?.value) || 1;
-      const epsPerSeason = Number(document.getElementById('inputWatchEpsPerSeason')?.value) || 0;
-      const totalEpisodes = epsPerSeason * totalSeasons;
+      const isSerial = (type === 'series' || type === 'anime');
+
+      let seasonsData = null;
+      let totalSeasons = 1;
+      let episodesPerSeason = 0;
+      let totalEpisodes = 0;
+
+      if (isSerial) {
+        if (Array.isArray(_watchPendingSeasons) && _watchPendingSeasons.length > 0) {
+          seasonsData = _watchPendingSeasons.map(s => ({ seasonNumber: Number(s.seasonNumber) || 1, episodes: Number(s.episodes) || 0 }));
+          totalSeasons = seasonsData.length;
+          totalEpisodes = seasonsData.reduce((a, s) => a + s.episodes, 0);
+          episodesPerSeason = totalSeasons > 0 ? Math.round(totalEpisodes / totalSeasons) : 0;
+        } else {
+          totalSeasons = Number(document.getElementById('inputWatchTotalSeasons')?.value) || 1;
+          episodesPerSeason = Number(document.getElementById('inputWatchEpsPerSeason')?.value) || 0;
+          totalEpisodes = totalSeasons * episodesPerSeason;
+          seasonsData = Array.from({ length: totalSeasons }, (_, i) => ({ seasonNumber: i + 1, episodes: episodesPerSeason }));
+        }
+      }
+
       if (!title) return;
       if (!appState.watchList) appState.watchList = [];
       appState.watchList.push({
@@ -3147,12 +3449,14 @@
         currentSeason: 1,
         totalSeasons,
         currentEpisode: 0,
-        episodesPerSeason: epsPerSeason,
+        episodesPerSeason,
         totalEpisodes,
+        seasonsData,
         lastWatched: null,
         createdAt: new Date().toISOString()
       });
       _watchSearchSelection = null;
+      _watchPendingSeasons = null;
       playTone(550, 'sine', 0.1);
       saveState();
       closeModal();
@@ -3162,12 +3466,17 @@
        WATCHLIST EDIT
        ============================================================ */
     let _watchEditSelection = null;
+    let _editPendingSeasons = null;
 
     function openWatchEditModal(id) {
       const item = (appState.watchList || []).find(w => w.id === id);
       if (!item) return;
       const isSerial = item.type === 'series' || item.type === 'anime';
       _watchEditSelection = null;
+      _editPendingSeasons = Array.isArray(item.seasonsData) && item.seasonsData.length > 0
+        ? item.seasonsData.map(s => ({ seasonNumber: s.seasonNumber, episodes: s.episodes }))
+        : null;
+
       openModalWithContent(`ویرایش «${escapeHtml(item.title)}»`, `
         <form onsubmit="handleSaveWatchEdit(event, '${id}')" class="space-y-4">
           <div>
@@ -3183,7 +3492,7 @@
           <div>
             <button type="button" onclick="doEditWatchSearch('${id}')" id="editWatchSearchBtn" class="w-full py-2.5 rounded-2xl bg-purple-100 hover:bg-purple-200 text-purple-700 font-bold text-xs flex items-center justify-center gap-2">
               <i class="fa-solid fa-magnifying-glass"></i>
-              <span>جستجوی دوباره پوستر</span>
+              <span>جستجوی دوباره پوستر و فصل‌ها</span>
             </button>
           </div>
           <div id="editWatchSearchResults" class="space-y-2 max-h-56 overflow-y-auto"></div>
@@ -3191,15 +3500,12 @@
             <label class="block text-xs font-semibold text-slate-700 mb-1.5">لینک پوستر</label>
             <input id="editWatchPoster" type="url" value="${item.posterUrl || ''}" class="w-full px-4 py-3 rounded-2xl border border-slate-200 text-xs" dir="ltr">
           </div>
-          <div id="editWatchSeasonWrap" class="grid grid-cols-2 gap-3 ${isSerial ? '' : 'hidden'}">
-            <div>
-              <label class="block text-xs font-semibold text-slate-700 mb-1.5">تعداد فصل‌ها</label>
-              <input id="editWatchTotalSeasons" type="number" min="1" value="${item.totalSeasons || 1}" class="w-full px-4 py-3 rounded-2xl border border-slate-200 text-sm">
-            </div>
-            <div>
-              <label class="block text-xs font-semibold text-slate-700 mb-1.5">قسمت هر فصل</label>
-              <input id="editWatchEpsPerSeason" type="number" min="0" value="${item.episodesPerSeason || ''}" class="w-full px-4 py-3 rounded-2xl border border-slate-200 text-sm">
-            </div>
+          <div id="editWatchSeasonsWrapper" class="${isSerial ? '' : 'hidden'}">
+            <label class="block text-xs font-semibold text-slate-700 mb-2">فصل‌ها و تعداد قسمت هر فصل</label>
+            <div id="editWatchSeasonsList" class="space-y-1.5"></div>
+            <button type="button" onclick="addEditSeason()" class="w-full mt-2 py-2 rounded-xl bg-slate-100 text-slate-700 text-[11px] font-bold">
+              <i class="fa-solid fa-plus text-[10px]"></i> افزودن فصل
+            </button>
           </div>
           <div id="editWatchCurWrap" class="grid grid-cols-2 gap-3 ${isSerial ? '' : 'hidden'}">
             <div>
@@ -3233,18 +3539,61 @@
           </div>
         </form>`);
       setTimeout(() => {
+        renderEditSeasonsList();
         const typeSel = document.getElementById('editWatchType');
-        const seasonWrap = document.getElementById('editWatchSeasonWrap');
+        const seasonsWrap = document.getElementById('editWatchSeasonsWrapper');
         const curWrap = document.getElementById('editWatchCurWrap');
-        if (typeSel && seasonWrap && curWrap) {
+        if (typeSel && seasonsWrap && curWrap) {
           const toggle = () => {
             const isSer = (typeSel.value === 'series' || typeSel.value === 'anime');
-            seasonWrap.classList.toggle('hidden', !isSer);
+            seasonsWrap.classList.toggle('hidden', !isSer);
             curWrap.classList.toggle('hidden', !isSer);
+            if (isSer && (!_editPendingSeasons || _editPendingSeasons.length === 0)) {
+              // اگه فصل‌ها خالی بود، یه فصل پیش‌فرض اضافه کن
+              _editPendingSeasons = [{ seasonNumber: 1, episodes: 0 }];
+              renderEditSeasonsList();
+            }
           };
           typeSel.addEventListener('change', toggle);
         }
       }, 80);
+    }
+
+    function renderEditSeasonsList() {
+      const box = document.getElementById('editWatchSeasonsList');
+      if (!box) return;
+      if (!Array.isArray(_editPendingSeasons) || _editPendingSeasons.length === 0) {
+        box.innerHTML = `<p class="text-[10px] text-slate-400 text-center py-2">فصلی ثبت نشده — روی «افزودن فصل» بزن</p>`;
+        return;
+      }
+      box.innerHTML = _editPendingSeasons.map((s, i) => `
+        <div class="season-row">
+          <span class="text-[11px] font-bold text-slate-700 w-16">فصل ${toFa(s.seasonNumber)}</span>
+          <input type="number" min="0" value="${s.episodes}" onchange="updateEditSeasonEpisodes(${i}, this.value)" />
+          <span class="text-[10px] text-slate-500">قسمت</span>
+          <button type="button" onclick="removeEditSeason(${i})" class="text-slate-400 hover:text-rose-500 ml-auto"><i class="fa-solid fa-xmark text-xs"></i></button>
+        </div>
+      `).join('');
+    }
+
+    function updateEditSeasonEpisodes(i, val) {
+      if (!_editPendingSeasons || !_editPendingSeasons[i]) return;
+      _editPendingSeasons[i].episodes = Math.max(0, Number(val) || 0);
+    }
+
+    function removeEditSeason(i) {
+      if (!_editPendingSeasons) return;
+      _editPendingSeasons.splice(i, 1);
+      // شماره فصل‌ها رو دوباره از ۱ بچین
+      _editPendingSeasons = _editPendingSeasons.map((s, idx) => ({ ...s, seasonNumber: idx + 1 }));
+      renderEditSeasonsList();
+    }
+
+    function addEditSeason() {
+      if (!_editPendingSeasons) _editPendingSeasons = [];
+      const nextNum = _editPendingSeasons.length + 1;
+      _editPendingSeasons.push({ seasonNumber: nextNum, episodes: 0 });
+      renderEditSeasonsList();
     }
 
     async function doEditWatchSearch(id) {
@@ -3295,33 +3644,24 @@
 
       const type = document.getElementById('editWatchType').value;
       if (type !== 'series' && type !== 'anime') return;
-      const totalSeasonsEl = document.getElementById('editWatchTotalSeasons');
-      const epsPerSeasonEl = document.getElementById('editWatchEpsPerSeason');
-      if (!totalSeasonsEl || !epsPerSeasonEl) return;
-
-      if (it._source === 'jikan' && it.episodes > 0) {
-        totalSeasonsEl.value = 1;
-        epsPerSeasonEl.value = it.episodes;
-      }
-      if (it._source === 'anilist' && it.episodes > 0) {
-        totalSeasonsEl.value = 1;
-        epsPerSeasonEl.value = it.episodes;
-      }
 
       const results = document.getElementById('editWatchSearchResults');
       const loadingEl = document.createElement('div');
       loadingEl.className = 'text-center py-2 text-[10px] text-slate-400';
-      loadingEl.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> دریافت جزئیات فصل‌ها...';
+      loadingEl.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> دریافت اطلاعات فصل‌ها...';
       results.appendChild(loadingEl);
 
       try {
         const details = await fetchMediaDetails(it);
         loadingEl.remove();
         if (!details) return;
-        if (details.totalSeasons) totalSeasonsEl.value = details.totalSeasons;
-        if (details.episodesPerSeason) epsPerSeasonEl.value = details.episodesPerSeason;
         if (details.overview && ov) ov.value = details.overview;
         if (details.poster) document.getElementById('editWatchPoster').value = details.poster;
+
+        if (Array.isArray(details.seasonsData) && details.seasonsData.length > 0) {
+          _editPendingSeasons = details.seasonsData.map(s => ({ seasonNumber: s.seasonNumber, episodes: s.episodes }));
+          renderEditSeasonsList();
+        }
         playTone(700, 'sine', 0.1);
       } catch (e) {
         loadingEl.remove();
@@ -3335,15 +3675,28 @@
       const newTitle = document.getElementById('editWatchTitle').value.trim();
       if (newTitle) item.title = newTitle;
       item.type = document.getElementById('editWatchType').value;
-      const totalSeasonsEl = document.getElementById('editWatchTotalSeasons');
-      const epsPerSeasonEl = document.getElementById('editWatchEpsPerSeason');
+      const isSerial = (item.type === 'series' || item.type === 'anime');
+
+      if (isSerial) {
+        if (Array.isArray(_editPendingSeasons) && _editPendingSeasons.length > 0) {
+          item.seasonsData = _editPendingSeasons.map(s => ({ seasonNumber: Number(s.seasonNumber) || 1, episodes: Number(s.episodes) || 0 }));
+          item.totalSeasons = item.seasonsData.length;
+          item.totalEpisodes = item.seasonsData.reduce((a, s) => a + s.episodes, 0);
+          item.episodesPerSeason = item.totalSeasons > 0 ? Math.round(item.totalEpisodes / item.totalSeasons) : 0;
+        } else {
+          item.seasonsData = null;
+          item.totalSeasons = 1;
+          item.episodesPerSeason = 0;
+          item.totalEpisodes = 0;
+        }
+      } else {
+        item.seasonsData = null;
+      }
+
       const curSeasonEl = document.getElementById('editWatchCurrentSeason');
       const curEl = document.getElementById('editWatchCurrent');
-      if (totalSeasonsEl) item.totalSeasons = Math.max(1, Number(totalSeasonsEl.value) || 1);
-      if (epsPerSeasonEl) item.episodesPerSeason = Math.max(0, Number(epsPerSeasonEl.value) || 0);
       if (curSeasonEl) item.currentSeason = Math.max(1, Number(curSeasonEl.value) || 1);
       if (curEl) item.currentEpisode = Math.max(0, Number(curEl.value) || 0);
-      item.totalEpisodes = (item.episodesPerSeason || 0) * (item.totalSeasons || 1);
       item.status = document.getElementById('editWatchStatus').value;
       item.rating = document.getElementById('editWatchRating').value;
       item.posterUrl = document.getElementById('editWatchPoster').value.trim();
@@ -3352,10 +3705,12 @@
         item.originalTitle = _watchEditSelection.originalTitle;
       }
       _watchEditSelection = null;
-      const totalEps = item.totalEpisodes;
-      const watchedTotal = (item.currentSeason - 1) * item.episodesPerSeason + item.currentEpisode;
-      if (totalEps > 0 && watchedTotal >= totalEps) item.status = 'watched';
+      _editPendingSeasons = null;
+
+      const prog = calcWatchProgress(item);
+      if (prog.totalEps > 0 && prog.watchedTotal >= prog.totalEps) item.status = 'watched';
       if (item.currentEpisode > 0 && item.status === 'queued') item.status = 'watching';
+
       playTone(600, 'sine', 0.1);
       saveState();
       closeModal();
@@ -3364,6 +3719,9 @@
     /* ============================================================
        GAME ADD/EDIT
        ============================================================ */
+    let _gameSearchSelection = null;
+    let _gameEditSelection = null;
+
     function openGameModal() {
       openModalWithContent('افزودن بازی', `
         <form onsubmit="handleSaveGame(event)" class="space-y-4">
@@ -3408,7 +3766,6 @@
         </form>`);
     }
 
-    let _gameSearchSelection = null;
     async function doSearchGame() {
       const title = document.getElementById('inputGameTitle').value.trim();
       const results = document.getElementById('gameSearchResults');
@@ -3479,7 +3836,6 @@
       closeModal();
     }
 
-    let _gameEditSelection = null;
     function openGameEditModal(id) {
       const g = (appState.gameList || []).find(x => x.id === id);
       if (!g) return;
@@ -3861,7 +4217,7 @@
       box.innerHTML = list.map(p => `
         <div class="flex items-center justify-between p-2 rounded-xl bg-slate-50 border border-slate-100 gap-2">
           <div class="flex items-center gap-2 min-w-0">
-            <img src="${ICONS_CAL[p.icon] || ICONS_CAL.anniversary}" data-cal-icon="${p.icon || 'anniversary'}" class="w-5 h-5 rounded" alt="" onerror="this.style.display='none'" />
+            <img src="${ICONS_CAL_RESOLVED[p.icon] || ICONS_CAL_RESOLVED.anniversary}" data-cal-icon="${p.icon || 'anniversary'}" class="w-5 h-5 rounded" alt="" onerror="this.style.display='none'" />
             <div class="min-w-0">
               <p class="font-bold text-slate-700 truncate">${escapeHtml(p.title)}</p>
               <p class="text-[10px] text-slate-400">${toFa(p.md)} • از ${toFa(p.year)}</p>
@@ -3907,7 +4263,7 @@
             <div id="pdIconPicker" class="grid grid-cols-3 gap-2">
               ${icons.map(i => `
                 <button type="button" data-icon="${i.key}" onclick="pickPdIcon('${i.key}')" class="pd-icon-btn p-2 rounded-2xl border-2 ${i.key === 'anniversary' ? 'border-rose-400 bg-rose-50' : 'border-slate-200 bg-white'} flex flex-col items-center gap-1">
-                  <img src="${ICONS_CAL[i.key]}" data-cal-icon="${i.key}" class="w-7 h-7 rounded" alt="" onerror="this.style.display='none'" />
+                  <img src="${ICONS_CAL_RESOLVED[i.key]}" data-cal-icon="${i.key}" class="w-7 h-7 rounded" alt="" onerror="this.style.display='none'" />
                   <span class="text-[10px] font-bold text-slate-600">${i.label}</span>
                 </button>`).join('')}
             </div>
@@ -3967,8 +4323,11 @@
           const imported = JSON.parse(e.target.result);
           if (imported && typeof imported === 'object') {
             appState = { ...appState, ...imported };
-            if (!Array.isArray(appState.dateIdeas) || appState.dateIdeas.length < 10) {
+            if (!Array.isArray(appState.dateIdeas) || appState.dateIdeas.length === 0) {
               appState.dateIdeas = [...DEFAULT_DATE_IDEAS];
+            }
+            if (Array.isArray(appState.watchList)) {
+              appState.watchList = appState.watchList.map(normalizeWatchItem).filter(Boolean);
             }
             buildWheelPalette();
             renderWheelToCache();
