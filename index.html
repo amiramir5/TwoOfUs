@@ -992,6 +992,7 @@
       if (!amirBtn || !armitaBtn) return;
       if (p === 'p1') { amirBtn.className = activeCls; armitaBtn.className = idleCls; }
       else { armitaBtn.className = activeCls; amirBtn.className = idleCls; }
+            updateKissLimitUI();
     }
 
     function initBgParticles() {
