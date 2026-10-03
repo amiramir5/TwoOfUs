@@ -1,9 +1,7 @@
 // Service Worker — TwoOfUs PWA
-// این فایل برای اینکه Chrome اندروید اپ رو به عنوان PWA نصب کنه لازمه
+// لازم برای اینکه Chrome اندروید اپ رو به عنوان PWA واقعی نصب کنه
 
-const CACHE_VERSION = 'twoofus-v1';
-
-self.addEventListener('install', (event) => {
+self.addEventListener('install', () => {
   self.skipWaiting();
 });
 
@@ -11,8 +9,9 @@ self.addEventListener('activate', (event) => {
   event.waitUntil(self.clients.claim());
 });
 
-// هندلر fetch — فعلاً فقط passthrough (بعداً می‌تونی کش اضافه کنی)
 self.addEventListener('fetch', (event) => {
-  // به‌طور پیش‌فرض از شبکه استفاده کن
-  event.respondWith(fetch(event.request).catch(() => caches.match(event.request)));
+  // Passthrough — درخواست‌ها از شبکه میان، اگه قطع بود از کش
+  event.respondWith(
+    fetch(event.request).catch(() => caches.match(event.request))
+  );
 });
